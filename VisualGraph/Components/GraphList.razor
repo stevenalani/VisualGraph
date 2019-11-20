@@ -1,0 +1,51 @@
+﻿@using System.Collections
+@using System.IO
+@using Frontenac.Blueprints.Impls.TG
+@using VisualGraph.Data
+@inject GraphService GraphService
+<div class="row">
+    <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
+        <div class="form-group">
+            <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
+                @foreach (var name in graphFilenames)
+                {
+                    <option value="@name">@name</option>
+                }
+            </InputSelect>
+        </div>
+        <button type="submit">Laden</button>
+    </EditForm>
+    <div class="col-12" id="drawingdpace">
+        <Graph DisplayGraph="@model.Graph" />
+    </div>
+</div>
+
+
+
+
+@code {
+    public class SelectGraphModel
+    {
+        public string CurrentGraph { get; set; }
+        public TinkerGrapĥ Graph { get; set; }
+    }
+    SelectGraphModel model = new SelectGraphModel();
+    public string[] graphFilenames { get; set; }
+    private string[] grapfPathes { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var graphFilePathes = grapfPathes = await GraphService.GetGraphFilenames();
+        graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).ToArray();
+        model.CurrentGraph = graphFilenames[0];
+        base.OnInitialized();
+    }
+
+    public async void HandleSelectChange()
+    {
+        var graphPath = grapfPathes.First(x => x.Contains(model.CurrentGraph));
+        var graph = await GraphService.GetGraph(graphPath);
+        model.Graph = graph;
+        StateHasChanged();
+    }
+
+}
