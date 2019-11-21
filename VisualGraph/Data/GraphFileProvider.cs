@@ -103,6 +103,7 @@ namespace VisualGraph.Data
             StreamReader streamReader = new StreamReader(file);
             TinkerGrapĥ g = new TinkerGrapĥ();;
             GraphMlReader.InputGraph(g,streamReader.BaseStream);
+            streamReader.Close();
             return g;
         }
 
