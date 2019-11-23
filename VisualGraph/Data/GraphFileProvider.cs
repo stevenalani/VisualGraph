@@ -1,116 +1,86 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Frontenac.Blueprints;
 using Frontenac.Blueprints.Impls.TG;
 using Frontenac.Blueprints.Util.IO.GraphML;
 using Frontenac.Gremlinq;
 using Microsoft.AspNetCore.Mvc;
+using VisualGraph.Data.Additional.Models;
 
 namespace VisualGraph.Data
 {
-    public class KeyDefinition
+
+    internal static class GraphFileProvider
     {
-        private readonly Type _targetType;
-        private readonly string _keyName;
-        private readonly Type _dataType;
-        private readonly string _defaultValue;
-        public KeyDefinition(Type typeOfTarget, string name, Type dataType,string defaultvalue = null)
-        {
-            _targetType = typeOfTarget;
-            _keyName = name;
-            _dataType = dataType;
-            _defaultValue = defaultvalue;
-        }
 
-        public string GetTargetTypeName()
-        {
-            return _targetType.Name.ToLower();
-        }
-
-        public string GetAttributeName()
-        {
-            return _keyName.ToLower();
-        }
-
-        public string GetDataTypeName()
-        {
-            return _dataType.Name.ToLower();
-        }
-
-        public string GetDefaultKeyValue()
-        {
-            return _defaultValue.ToLower();
-        }
-
-    }
-    public class GraphFileProvider
-    {
         private static string _graphdir = Path.GetFullPath("./Graphs");
+        private static GraphFactory _graphFactory = new GraphFactory();
 
-        /*private Dictionary<string, KeyDefinition> keys = new Dictionary<string, KeyDefinition>()
+        internal static string[] GetGraphFileNames()
         {
-            // Node Attributes
-            {"d0", new KeyDefinition(typeof(Node), "color", typeof(string), "grey")},
-            {"d1", new KeyDefinition(typeof(Node), "title", typeof(string))},
-            {"d2", new KeyDefinition(typeof(Node), "description", typeof(string))},
-            {"d3", new KeyDefinition(typeof(Node), "posx", typeof(double))},
-            {"d4", new KeyDefinition(typeof(Node), "posy", typeof(double))},
-            // Edge Attributes
-            {"d5", new KeyDefinition(typeof(Edge), "weight", typeof(double))},
-            {"d6", new KeyDefinition(typeof(Edge<>), "weight", typeof(double))},
-            {"d7", new KeyDefinition(typeof(Edge), "weight", typeof(double))},
-            {"d8", new KeyDefinition(typeof(Edge), "weight", typeof(double))},
-            
-        };*/
-        public static void EnsureGraphDirExists()
+            return Directory.GetFiles(_graphdir).OrderByDescending( x=>x.ToLower()).ToArray();
+        }
+        internal static void EnsureGraphDirExists()
         {
             if (!Directory.Exists(_graphdir))
             {
                 Directory.CreateDirectory(_graphdir);
             }
         }
-
-        public static string[] GetGraphFileNames()
+        internal static List<BasicGraph> GetBasicGraphs()
         {
-            return Directory.GetFiles(_graphdir);
-        }
-        public static TinkerGrapĥ[] GetGraphs()
-        {
+            List<BasicGraph> graphs = new List<BasicGraph>();
 
-            List<TinkerGrapĥ> graphs = new List<TinkerGrapĥ>();
-
-            foreach (var file in Directory.GetFiles(_graphdir))
+            foreach (var file in GetGraphFileNames())
             {
-                StreamReader streamReader = new StreamReader(file);
-                TinkerGrapĥ g = new TinkerGrapĥ(); ;
-                GraphMlReader.InputGraph(g, streamReader.BaseStream);
-                graphs.Add(g);
+                    var graph = ReadGraphMlToBasicGraph(file);
+                    graphs.Add(graph);
             }
-            return graphs.ToArray();
+            return graphs;
         }
-        public static TinkerGrapĥ GetGraph(string filename)
+        internal static BasicGraph ReadGraphMlToBasicGraph(string filename)
         {
-            if (filename == String.Empty) return null;
-            
-            var file = Directory.GetFiles(_graphdir).FirstOrDefault(x => x.Contains(filename));
-            
-            if (file == String.Empty) return null;
+            if (filename == String.Empty || !GetGraphFileNames().Contains(filename)) return null;            
+            var graph = _graphFactory.ConverToBasicGraph(ReadGraphMl(filename));
+            graph.Path = filename;
+            return graph;   
+        }
+        internal static IGraph ReadGraphMl(string filename)
+        {
+            if (filename == String.Empty || !GetGraphFileNames().Contains(filename)) return null;
 
-            StreamReader streamReader = new StreamReader(file);
-            TinkerGrapĥ g = new TinkerGrapĥ();;
-            GraphMlReader.InputGraph(g,streamReader.BaseStream);
-            streamReader.Close();
-            return g;
+            using (StreamReader streamReader = new StreamReader(Path.Combine(_graphdir, filename)))
+            {
+                TinkerGrapĥ g = new TinkerGrapĥ();
+                GraphMlReader.InputGraph(g, streamReader.BaseStream);
+                return g;
+            }
+            
         }
 
-        public static void WriteGraph(TinkerGrapĥ graph, string name)
+        internal static void WriteToGraphMlFile(BasicGraph graph, string filename)
         {
-            GraphMlWriter writer = new GraphMlWriter(graph);
-            writer.OutputGraph("./Graphs" + name);
+            if (filename == String.Empty)
+                return;
+            
+            TinkerGrapĥ tinkerGraph = new TinkerGrapĥ();
+            foreach(var node in graph.Nodes)
+            {
+                var vertex = tinkerGraph.AddVertex<Node>(node);
+            }
+            foreach (var edge in graph.Edges)
+            {
+                tinkerGraph.AddEdge(edge.Id,tinkerGraph.GetVertex(edge.StartNode.Id),tinkerGraph.GetVertex(edge.EndNode.Id),"")
+                .SetProperty("weight", edge.Weight);
+            }
+            GraphMlWriter writer = new GraphMlWriter(tinkerGraph);
+            writer.OutputGraph(_graphdir + filename);
         }
     }
 }

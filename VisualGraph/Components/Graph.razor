@@ -1,59 +1,26 @@
 ﻿@using Frontenac.Blueprints.Impls.TG
 @using VisualGraph.Components
 
-<h3>@(DisplayGraph?.GetType().FullName)</h3>
+<h3>@DisplayGraph?.Name</h3>
 
-@CustomRender
+    @CustomRender;
+
+
 
 @code {
     [Parameter]
-    public TinkerGrapĥ DisplayGraph { get; set; }
+    public BasicGraph DisplayGraph { get; set; }
 
+    public GraphStyleParameters graphStyle { get; set; } = new GraphStyleParameters();
+    
     private RenderFragment CustomRender { get; set; }
-    private RenderFragment CreateComponent() => builder =>
-    {
-        var sequence = 0;
-        builder.OpenElement(sequence++, "svg");
-        builder.AddAttribute(sequence++, "width", "100%");
-        builder.AddAttribute(sequence++, "height", "100%");
-        builder.AddAttribute(sequence++, "viewBox", "-10 -10 200 200");
-        if(DisplayGraph != null)
-        {
-
-            foreach(var edge in DisplayGraph.GetEdges())
-            {
-                var node1 = edge.GetVertex(Frontenac.Blueprints.Direction.Out);
-                var node2 = edge.GetVertex(Frontenac.Blueprints.Direction.In);
-                var posx1 = Convert.ToSingle(node1.GetProperty("posx"));
-                var posy1 = Convert.ToSingle(node1.GetProperty("posy"));
-                var posx2 = Convert.ToSingle(node2.GetProperty("posx"));
-                var posy2 = Convert.ToSingle(node2.GetProperty("posy"));
-                var halfwayx = (posx1 + posx2) / 2;
-                var halfwayy = (posy1 + posy2) / 2;
-                var weight = Convert.ToSingle(edge.GetProperty("weight"));
-                builder.AddMarkupContent(sequence++, $"<line x1=\"{posx1}\" y1=\"{posy1}\" x2=\"{posx2}\" y2=\"{posy2}\" style=\"stroke:rgb(255,0,0);stroke-width:0.1\" />");
-                builder.AddMarkupContent(sequence++, $"<text x=\"{ halfwayx }\" y=\"{halfwayy}\" fill=\"black\" font-size=\"2\">{weight}</text>");
-            }
-            foreach(var node in DisplayGraph.GetVertices())
-            {
-                var posx = Convert.ToSingle(node.GetProperty("posx"));
-                var posy = Convert.ToSingle(node.GetProperty("posy"));
-                var name = node.GetProperty("name");
-                builder.AddMarkupContent(sequence++, $"<circle cx=\"{posx}\" cy=\"{posy}\" r=\"1\" stroke=\"{"black"}\" stroke-width=\"0.1\" fill=\"{"grey"}\" />");
-                builder.AddMarkupContent(sequence++, $"<text x=\"{ posx}\" y=\"{posx}\" fill=\"black\" font-size=\"2\">{name}</text>");
-            }
-        }
-
-
-        builder.CloseElement();
-    };
     protected override Task OnParametersSetAsync()
     {
-        RenderComponent();
+        CustomRender = (builder) => {
+            DisplayGraph?.AddToRenderTree(builder);
+        };
         return base.OnParametersSetAsync();
     }
-    private void RenderComponent()
-    {
-        CustomRender = CreateComponent();
-    }
+
+
 }
