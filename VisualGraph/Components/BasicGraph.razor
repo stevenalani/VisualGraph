@@ -1,0 +1,100 @@
+﻿@inject IJSRuntime JsRuntime
+<h3>BasicGraph</h3>
+@if (VisualGraph != null)
+{
+<svg id="@(VisualGraph.Name)" viewBox="@($"{(minX - VisualGraph.GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
+    $" {(minY - VisualGraph.GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
+    $" {(50 + maxX - minX).ToString(CultureInfo.InvariantCulture) }," +
+    $" {(maxY - minY + VisualGraph.GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}")" 
+     @onmousemove="@(
+        async (args)=>
+        {
+            if(SVGMatrix == null)
+                SVGMatrix = await JsRuntime.InvokeAsync<GraphDisplayParameters>("getSVGTransformationMatrix", new { id = VisualGraph.Name });
+            if (activenode == null) return;
+            if (args.Buttons == 1)
+            {
+                if (activenode.activeclass != "")
+                {
+                    var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
+                    var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
+
+                    activenode.PosX = deltaX;
+                    activenode.PosY = deltaY;
+                }
+            }
+        })">
+    @CoordinateAxis.GenerateForGraphRange(minX, minY, maxX, maxY);
+    @foreach (var edge in VisualGraph.Edges)
+    {
+        var halfwayx = ((edge.StartNode.PosX + edge.EndNode.PosX) / 2).ToString(CultureInfo.InvariantCulture);
+        var halfwayy = ((edge.StartNode.PosY + edge.EndNode.PosY) / 2).ToString(CultureInfo.InvariantCulture);
+
+
+        <line x1="@edge.StartNode.PosXText" y1="@edge.StartNode.PosYText" x2="@edge.EndNode.PosXText" y2="@edge.EndNode.PosYText" style="@($"stroke:{VisualGraph.GraphStyleParameters.EdgeStrokeColor}; stroke-width:{VisualGraph.GraphStyleParameters.EdgeWidthText}")"></line>
+        @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{@VisualGraph.GraphStyleParameters.TextColor}\" font-size=\"{@VisualGraph.GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)}</text>")
+    }
+    @foreach (var node in VisualGraph.Nodes)
+    {
+        var name = node.Name;
+        @((MarkupString)$"<text x=\"{ (@node.PosX + @VisualGraph.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{( @node.PosY + 2 * @VisualGraph.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{@VisualGraph.GraphStyleParameters.TextColor}\" font-size=\"{@VisualGraph.GraphStyleParameters.TextSizeText}\">{@node.Name}</text>")
+        <circle id="@($"node-{node.Id}")"
+                class="vsnode @node.activeclass draggable"
+                cx="@node.PosXText"
+                cy="@(node.PosYText)"
+                r="@VisualGraph.GraphStyleParameters.NodeRadiusText"
+                stroke="@VisualGraph.GraphStyleParameters.NodeStrokeColor"
+                stroke-width="@VisualGraph.GraphStyleParameters.NodeStrokeWidthText"
+                fill="@VisualGraph.GraphStyleParameters.NodeFill"
+                @onclick="@(
+                (args)=> {
+                    node.activeclass = node.activeclass == "active"?"":"active";
+                    activenode = activenode != node? node:null;
+                })"
+                ></circle>
+    }
+</svg>
+
+}
+@code {
+    public Node activenode;
+    public WindowParameters WindowSize { get; set; }
+    public GraphDisplayParameters SVGMatrix { get; set; }
+    [Parameter]
+    public VisualGraph.Data.Additional.Models.BasicGraph VisualGraph { get; set; }
+    double maxX => VisualGraph.Nodes.Max(x => (int)Math.Ceiling(x.PosX)) + (VisualGraph.GraphStyleParameters.FullPadding);
+    double minX => VisualGraph.Nodes.Min(x => (int)Math.Ceiling(x.PosX)) - (VisualGraph.GraphStyleParameters.FullPadding);
+    double maxY => VisualGraph.Nodes.Max(x => (int)Math.Ceiling(x.PosY)) + (VisualGraph.GraphStyleParameters.FullPadding);
+    double minY => VisualGraph.Nodes.Min(x => (int)Math.Ceiling(x.PosY)) - (VisualGraph.GraphStyleParameters.FullPadding);
+    protected override async void OnParametersSet()
+    {
+        WindowSize = await JsRuntime.InvokeAsync<WindowParameters>("getWindowSize");
+        if(VisualGraph != null) {
+            StateHasChanged();
+        }
+        base.OnParametersSet();
+    }
+
+    public class WindowParameters
+    {
+        public int Width { get; set; }
+        public int Height { get; set; }
+
+        public double[] Transform { get; set; }
+    }
+
+    public class GraphDisplayParameters
+    {
+        public double A { get; set; }
+        public double B { get; set; }
+        public double C { get; set; }
+        public double D { get; set; }
+        public double E { get; set; }
+        public double F { get; set; }
+
+        public override string ToString()
+        {
+            return $"a={A}\r\nb={B}\r\nc={C}\r\nd={D}\r\ne={E}\r\nf={F}";
+        }
+    }
+}

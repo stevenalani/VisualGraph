@@ -61,5 +61,29 @@ namespace VisualGraph.Data
             else
                 return Task.CompletedTask;
         }
+
+        public Task<BasicGraph> GenerateGraph(string filename, int nodecount = 20 ,int fromx = -50, int fromy = -50, int tox = 50, int toy = 50)
+        {
+            if (filename == "") return null;
+            Random rand = new Random();
+            List<Node> nodes = new List<Node>();
+            List<Edge> edges = new List<Edge>();
+            for (var count = 0; count < tox; count++)
+            {
+                var x = rand.NextDouble() + Convert.ToDouble(rand.Next(fromx, tox));
+                var y = rand.NextDouble() + Convert.ToDouble(rand.Next(fromy, toy));
+
+                nodes.Add(new Node { PosX = x, PosY = y, Id = count });
+
+            }
+
+            BasicGraph graph = new BasicGraph()
+            {
+                Nodes = nodes,
+                Edges = edges,
+                Path = filename,
+            };
+            return Task.FromResult(graph);
+        }
     }
 }

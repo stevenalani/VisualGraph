@@ -27,14 +27,15 @@
     public class SelectGraphModel
     {
         public string CurrentGraph { get; set; }
-        public BasicGraph Graph { get; set; }
+        public VisualGraph.Data.Additional.Models.BasicGraph Graph { get; set; }
     }
     SelectGraphModel model = new SelectGraphModel();
     public string[] graphFilenames { get; set; }
-    private string[] grapfPathes { get; set; }
+    private string[] graphPathes { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        var graphFilePathes = grapfPathes = await GraphService.GetGraphFilenames();
+        var graphFilePathes = graphPathes = await GraphService.GetGraphFilenames();
         graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).ToArray();
         model.CurrentGraph = graphFilenames[0];
         base.OnInitialized();
@@ -42,7 +43,7 @@
 
     public async void HandleSelectChange()
     {
-        var graphPath = grapfPathes.First(x => x.Contains(model.CurrentGraph));
+        var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraph));
         var graph = await GraphService.GetGraph(graphPath);
         model.Graph = graph;
         StateHasChanged();

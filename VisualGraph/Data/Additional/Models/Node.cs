@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Globalization;
+using System.Threading.Tasks;
 
 namespace VisualGraph.Data.Additional.Models
 {
@@ -6,14 +8,13 @@ namespace VisualGraph.Data.Additional.Models
     {
         public double PosX { get; internal set; }
         public double PosY { get; internal set; }
+        public string PosXText => PosX.ToString(CultureInfo.InvariantCulture);
+        public string PosYText => PosY.ToString(CultureInfo.InvariantCulture);
+
         public string Name { get; internal set; }
         public int Id { get; internal set; }
 
-        public Task MoveToPosition(double x,double y)
-        {
-            PosX = x;
-            PosY = y;
-            return Task.CompletedTask;
-        }
+        public string activeclass { get; set; } = ""
+            ;
     }
 }

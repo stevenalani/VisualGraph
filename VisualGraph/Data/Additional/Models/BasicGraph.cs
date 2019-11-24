@@ -7,21 +7,26 @@ using System.Linq;
 using VisualGraph.Data.Additional.Interfaces;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Blazor.Components;
+using System.ComponentModel;
+using Microsoft.AspNetCore.Components.Web;
+using System.Threading.Tasks;
+using VisualGraph.Components;
 
 namespace VisualGraph.Data.Additional.Models
 {
-    public class BasicGraph : IRenderable, IGraphFile
+    public class BasicGraph : IGraphFile//,IRenderable
     {
         public bool IsAxisShown { get; set; } = true;
-        private static int sequence = 0;
-        public string Name { get; set; }
+        public static int sequence = 0;
+
+        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
         public List<Node> Nodes { get; set; } = new List<Node>();
         public List<Edge> Edges { get; set; } = new List<Edge>();
         public GraphStyleParameters GraphStyleParameters { get; set; } = new GraphStyleParameters();
         public string Path { get; set; }
 
-
-        public int AddToRenderTree(RenderTreeBuilder builder,int sequence = 0)
+        
+        public int AddToRenderTree(Graph graph,RenderTreeBuilder builder,int sequence = 0)
         {
             double maxX = Nodes.Max(x => (int)Math.Ceiling(x.PosX));
             double minX = Nodes.Min(x => (int)Math.Ceiling(x.PosX));
@@ -38,7 +43,6 @@ namespace VisualGraph.Data.Additional.Models
                 $" {(minY - GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
                 $" {(50 + maxX - minX).ToString(CultureInfo.InvariantCulture) }," +
                 $" {(maxY - minY + GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}");
-
             if (IsAxisShown)
                 CoordinateAxis.AddToRenderTree(builder, sequence, minX, minY, maxX, maxY);
 
@@ -70,20 +74,23 @@ namespace VisualGraph.Data.Additional.Models
             }
             foreach (var node in Nodes)
             {
-                var posx = Convert.ToDouble(node.PosX).ToString(CultureInfo.InvariantCulture);
-                var posy = Convert.ToDouble(node.PosY).ToString(CultureInfo.InvariantCulture);
+                //var posx = Convert.ToDouble(node.PosX).ToString(CultureInfo.InvariantCulture);
+                //var posy = Convert.ToDouble(node.PosY).ToString(CultureInfo.InvariantCulture);
                 var name = node.Name;
                 builder.OpenElement(sequence++, "circle");
-                builder.AddAttribute(sequence++, "cx", posx);
-                builder.AddAttribute(sequence++, "cy", posy);
+                builder.AddAttribute(sequence++,"id", $"node-{node.Id}");
+                builder.AddAttribute(sequence++, "class", "vsnode");
+                builder.AddAttribute(sequence++, "cx", node.PosXText);
+                builder.AddAttribute(sequence++, "cy", node.PosYText);
                 builder.AddAttribute(sequence++, "r", GraphStyleParameters.NodeRadius.ToString(CultureInfo.InvariantCulture));
                 builder.AddAttribute(sequence++, "stroke", GraphStyleParameters.NodeStrokeColor);
                 builder.AddAttribute(sequence++, "stroke-width", GraphStyleParameters.NodeStrokeWidth.ToString(CultureInfo.InvariantCulture));
                 builder.AddAttribute(sequence++, "fill", GraphStyleParameters.NodeFill);
+                //builder.AddAttribute(sequence++, "onclick", $"HandleMouseDown({node.Id})");
                 builder.CloseElement();
                 builder.OpenElement(sequence++, "text");
-                builder.AddAttribute(sequence++, "x", (Convert.ToDouble(posx) + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture));
-                builder.AddAttribute(sequence++, "y", (Convert.ToDouble(posy) + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture));
+                builder.AddAttribute(sequence++, "x", (node.PosX + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture));
+                builder.AddAttribute(sequence++, "y", (node.PosY + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture));
                 builder.AddAttribute(sequence++, "fill", GraphStyleParameters.TextColor);
                 builder.AddAttribute(sequence++, "font-size", GraphStyleParameters.TextSize.ToString(CultureInfo.InvariantCulture));
                 builder.AddContent(sequence++, name);
@@ -93,6 +100,5 @@ namespace VisualGraph.Data.Additional.Models
             builder.CloseElement();
             return sequence;
         }
-
     }
 }
