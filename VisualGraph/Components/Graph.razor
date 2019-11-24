@@ -1,6 +1,5 @@
 ﻿@inject IJSRuntime JSRuntime
 <h3>@DisplayGraph?.Name</h3>
-    @CustomRender
     <BasicGraph VisualGraph="@DisplayGraph"></BasicGraph>
 @code {
     public static double[] mousstate = { 0, 0 };
@@ -8,26 +7,10 @@
     public VisualGraph.Data.Additional.Models.BasicGraph DisplayGraph { get; set; }
 
     internal Node activeNode { get; set; }
-    public EventHandler<MouseEventArgs> MouseHandler { get; set; }
     private RenderFragment CustomRender { get; set; }
 
     protected override Task OnParametersSetAsync()
     {
-
-        CustomRender = (builder) => {
-            int seq = DisplayGraph != null ? DisplayGraph.AddToRenderTree(this,builder) : 0;
-        };
         return base.OnParametersSetAsync();
-    }
-    [JSInvokable]
-    public static Task<int[]> ReturnArrayAsync()
-    {
-        return Task.FromResult(new int[] { 1, 2, 3 });
-    }
-    [JSInvokable]
-    public Task TriggerRerender()
-    {
-        StateHasChanged();
-        return Task.CompletedTask;
     }
 }
