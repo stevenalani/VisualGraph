@@ -4,9 +4,9 @@
 @code {
     public static double[] mousstate = { 0, 0 };
     [Parameter]
-    public VisualGraph.Data.Additional.Models.BasicGraph DisplayGraph { get; set; }
+    public VisualGraph.Data.Additional.Models.BasicGraphModel DisplayGraph { get; set; }
 
-    internal Node activeNode { get; set; }
+    public Node activeNode { get; set; }
     private RenderFragment CustomRender { get; set; }
 
     protected override Task OnParametersSetAsync()

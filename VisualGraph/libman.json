@@ -9,6 +9,17 @@
         "jquery.min.js",
         "jquery.js"
       ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "bootstrap@4.3.1",
+      "destination": "wwwroot/dist/bootstrap/",
+      "files": [ "dist/js/bootstrap.min.js", "dist/css/bootstrap.min.css" ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "popper.js@1.16.0",
+      "destination": "wwwroot/js/popper.js/"
     }
   ]
 }

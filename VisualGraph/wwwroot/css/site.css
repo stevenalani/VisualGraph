@@ -1,5 +1,3 @@
-@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -92,9 +90,18 @@ app {
 }
 
 .content {
-    padding-top: 1.1rem;
+    /*padding-top: 1.1rem;*/
 }
-
+.flex-wrapper {
+    display:flex!important;
+    
+    flex-wrap:wrap;
+}
+.flex-wrapper-title {
+    flex: 0 0 100%;
+    height: 100px;
+    padding:1rem;
+}
 .navbar-toggler {
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -110,13 +117,39 @@ app {
 .validation-message {
     color: red;
 }
-
-svg{
-    z-index:10;
+.left-container {
+    height: calc(100vh - 100px) !important;
+    flex: 1;
+    text-align:center;
+}
+.right-container {
+    /*background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 70%);*/
+    flex: 1;
+}
+.right-flex-container form{
+    padding:1em;
+}
+svg {
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 5px;
+    border-width:1px;
+    z-index: 10;
+    padding:5px;
+}
+svg.responsive.vert{
+    width : auto;
 }
 circle {
     z-index: 100;
 }
+.collapse.width {
+    height: auto;
+    -webkit-transition: width 0.35s ease;
+    -moz-transition: width 0.35s ease;
+    -o-transition: width 0.35s ease;
+    transition: width 0.35s ease;
+}
+
 svg text {
     cursor: default;
     -webkit-user-select: none;
@@ -128,6 +161,21 @@ svg text {
 circle.active{
     fill:rgba(0,79,224,0.7);
 }
+.toggler {
+    height: fit-content;
+    border-radius: 0.5em 0 0 0.5em;
+    border-left: 1px solid;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: rgba(0,0,0,.125);
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+form table {
+    white-space: nowrap;
+}
+
+
 
 @media (max-width: 767.98px) {
     .main .top-row {
@@ -152,10 +200,6 @@ circle.active{
         top: 0;
     }
 
-    .main > div {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
 
     .navbar-toggler {
         display: none;

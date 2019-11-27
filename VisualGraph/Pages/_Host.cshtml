@@ -1,7 +1,6 @@
 ﻿@page "/"
 @namespace VisualGraph.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VisualGraph</title>
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/dist/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/dist/open-iconic/font/css/open-iconic-bootstrap.min.css" rel="stylesheet">
     <link href="css/site.css" rel="stylesheet" />
-    <script src="~/js/jquery/jquery.js"></script>
+    <script src="~/js/jquery/jquery.min.js"></script>
+    <script src="~/js/popper.js/dist/popper.min.js"></script>
+    <script src="~/dist/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="js/graphjs.js"></script>
 </head>
 <body>

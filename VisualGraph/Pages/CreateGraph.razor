@@ -1,0 +1,380 @@
+﻿@page "/CreateGraph"
+@using System.IO
+@inject IGraphService GraphService
+
+    <div class="flex-wrapper">
+        <div class="flex-wrapper-title">
+            <h3>CreateGraph</h3>
+            <hr />
+        </div>
+
+        <div class="left-container">
+            @RenderGraph()
+        </div>
+        <a class="btn toggler" @onclick="@((args) => { collapseClass = collapseClass == "" ? "collapse" : ""; Update(); })"><span class="oi oi-expand-@(collapseClass == ""?"left":"right")"></span><span class="btn-text"> @(collapseClass == "" ? "CLOSE" : "OPEN")</span></a>
+        <div id="#collapseForm" class="right-container @collapseClass">
+
+            <div class="card">
+                <div class="card card-body">
+                    <h5 class="card-title"><span class="oi oi-graph" aria-hidden="true"></span> Edit Graph Data</h5>
+                    <EditForm @onchange="(args)=> { Update(); }" Model="@GraphModel">
+                        <div class="form-group row">
+                            <label for="GraphName" class="col-form-label">File Name:</label>
+                            <div class="col">
+                                <InputText id="GraphName" class="form-control" @bind-Value="@GraphModel.Path"></InputText>
+                            </div>
+                        </div>
+                        <hr />
+                        @if (GraphModel.ActiveNode != null)
+                        {
+                            <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Active node</h5>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Pos X:</td>
+                                        <td>
+                                            <InputNumber id="ActiveNodeX" class="form-control" @bind-Value="@GraphModel.ActiveNode.PosX"></InputNumber>
+                                        </td>
+                                        <td>Pos Y:</td>
+                                        <td>
+                                            <InputNumber id="ActiveNodeY" class="form-control" @bind-Value="@GraphModel.ActiveNode.PosY"></InputNumber>
+                                        </td>
+                                        <td>Name</td>
+                                        <td>
+                                            <InputText id="ActiveNodeY" class="form-control" @bind-Value="@GraphModel.ActiveNode.Name"></InputText>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+
+                        <hr />
+                        <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Edit All Nodes</h5>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Node Id</th>
+                                    <th>Pos X</th>
+                                    <th>Pos Y</th>
+                                    <th>Name</th>
+                                    <th>Deleate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var node in GraphModel.Nodes)
+                                {
+
+                                    var idstring1 = $"NodeX_{node.Id}";
+                                    var idstring2 = $"NodeY_{node.Id}";
+                                    var idstring3 = $"NodeName_{node.Id}";
+                                    <tr>
+                                        <td><span class="form-control">@node.Id:</span></td>
+                                        <td>
+                                            <InputNumber id="@idstring1" class="form-control" @bind-Value="@node.PosX" @onchange="(args)=> { Update(); }"></InputNumber>
+                                        </td>
+                                        <td>
+                                            <InputNumber id="@idstring2" class="form-control" @bind-Value="@node.PosY" @onchange="(args)=> { Update(); }"></InputNumber>
+                                        </td>
+                                        <td>
+                                            <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @onchange="(args)=> { Update(); }"></InputText>
+                                        </td>
+                                        <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphModel.Nodes.Remove(node); Update(); }"></button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Add new Node</button>
+                        <hr />
+                        <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Edit All Edges</h5>
+                        @if (GraphModel.Edges.Count > 0)
+                        {
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Edge Id</th>
+                                        <th>Start Node</th>
+                                        <th>End Node</th>
+                                        <th>Weight</th>
+                                        <th>Distance</th>
+                                        <th>Deleate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var edge in GraphModel.Edges)
+                                    {
+                                        <tr>
+                                            <td><span class="form-control">@edge.Id:</span></td>
+                                            <td>
+
+                                                <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
+                                                    <option default>Select Startnode</option>
+                                                    @foreach (var node in GraphModel.Nodes)
+                                                    {
+                                                        <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control" @onchange="(args) => { ChangedEndEdge(edge, args); }">
+                                                    <option default>Select Endnode</option>
+                                                    @foreach (var node in GraphModel.Nodes)
+                                                    {
+                                                        <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <InputNumber class="form-control" @bind-Value="@edge.Weight"></InputNumber>
+                                            </td>
+                                            <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" /></td>
+                                            <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphModel.Edges.Remove(edge);Update(); }"></button></td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Add new Edge</button>
+                        <hr />
+                        <button type="button" class="btn btn-outline-info" @onclick="@SaveGraph"><span class="oi oi-data-transfer-download"></span> Save Graph </button>
+                        <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Load</button>
+                        <select class="form-control" @onchange="@((args) => { FileToRead = args.Value.ToString(); })">
+                            <option default>Select a Graph</option>
+                            @foreach (var file in Files)
+                                {
+                                    <option value="@file">@file</option>
+                                }
+
+                        </select>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+@code {
+    private string FileToRead { get; set; }
+    private string[] Files { get; set; }
+
+    private string collapseClass = "collapse";
+    BasicGraph basicGraph;
+    GraphDisplayParameters SVGMatrix { get; set; } = null;
+    BasicGraphModel GraphModel { get; set; }
+
+    private Point2 lastMousePos = new Point2();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Files = await GraphService.GetGraphFilenames();
+        //GraphService.RefreshRequested += StateHasChanged;
+        GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
+        {
+            Path = "unnamedGraph",
+
+            Nodes = new List<Node>() {
+                new Node { PosX = -10, PosY = -10, activeclass = "active", Id = 0, },
+                new Node { PosX = 10, PosY = 10, Id = 1},
+            }
+        };
+    }
+
+    RenderFragment RenderGraph()
+    {
+        return new RenderFragment(builder =>
+        {
+            builder.OpenComponent<BasicGraph>(0);
+            builder.AddAttribute(1, "VisualGraph", GraphModel);
+            builder.AddComponentReferenceCapture(2,
+                inst =>
+                {
+                    var basicGraph1 = (BasicGraph)inst;
+                    basicGraph = basicGraph1;
+                });
+
+            builder.CloseComponent();
+        });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Files = await GraphService.GetGraphFilenames();
+        if (firstRender)
+        {
+            basicGraph.SvgClick += async (sender, args) =>
+            {
+                if (GraphModel.ActiveNode != null)
+                {
+                    GraphModel.ActiveNode.activeclass = "";
+                }
+            };
+            basicGraph.SvgMouseWheel += async (sender, args) =>
+            {
+                BasicGraph graph = ((BasicGraph)sender);
+                SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+                if (SVGMatrix != null)
+                {
+
+                    if (args.DeltaY > 0)
+                    {
+                        if (graph.SVGViewRect.ZoomLevel > 1/SvgViewRect.ZoomStep)
+                            graph.SVGViewRect.ZoomLevel -= 1/SvgViewRect.ZoomStep;
+                    }
+                    else
+                    {
+                        graph.SVGViewRect.ZoomLevel += 1/SvgViewRect.ZoomStep;
+                    }
+                    /*
+                 if (args.DeltaY > 0)
+                    {
+                        if (graph.SVGViewRect.ZoomLevel > SvgViewRect.ZoomStep)
+                            graph.SVGViewRect.ZoomLevel -= SvgViewRect.ZoomStep;
+
+                        else
+                            graph.SVGViewRect.ZoomLevel = 0.1;
+                    }
+                    else
+                    {
+                        if (graph.SVGViewRect.ZoomLevel < SvgViewRect.MaxZoomLevel)
+                            graph.SVGViewRect.ZoomLevel += SvgViewRect.ZoomStep;
+                        else
+                            graph.SVGViewRect.ZoomLevel = SvgViewRect.MaxZoomLevel;
+                    }    
+                 */
+                }
+
+            };
+            basicGraph.SvgMouseMove += async (sender, args) =>
+            {
+                if (args.Buttons == 1)
+                {
+                    if (GraphModel.ActiveNode == null) return;
+                    SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+                    if (SVGMatrix != null && GraphModel.ActiveNode.activeclass != "")
+                    {
+                        var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
+                        var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
+
+                        GraphModel.ActiveNode.PosX = deltaX;
+                        GraphModel.ActiveNode.PosY = deltaY;
+                    }
+                }
+                else if (args.Buttons == 2)
+                {
+                    MoveViewPoint(args);
+                }
+            };
+            basicGraph.SvgMouseUp += (sender, args) =>
+            {
+                Update();
+            };
+            basicGraph.NodeClick += (sender, args) =>
+            {
+                Node node = args.Target;
+                if (GraphModel.ActiveNode != null)
+                {
+                    if (GraphModel.ActiveNode.Id == node.Id)
+                    {
+                        node.activeclass = "";
+                    }
+                    else
+                    {
+                        GraphModel.ActiveNode.activeclass = "";
+                        node.activeclass = "active";
+                    }
+                }
+                else
+                {
+                    node.activeclass = "active";
+                }
+                Update();
+            };
+        }
+
+    }
+    private async void OpenFile()
+    {
+        GraphModel = await GraphService.GetGraph(FileToRead);
+        Update();
+    }
+    private void AddNode()
+    {
+        if (GraphModel.ActiveNode != null)
+        {
+            GraphModel.ActiveNode.activeclass = "";
+        }
+        Node activenode = new Node
+        {
+            Id = GraphModel.Nodes.Max(x => x.Id) + 1,
+            PosX = 0,
+            PosY = 0,
+            activeclass = "active",
+        };
+        GraphModel.Nodes.Add(activenode);
+        Update();
+    }
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
+    }
+
+    private void AddEdge()
+    {
+        Edge newEdge = new Edge
+        {
+            Id = GraphModel.Edges.Count > 0 ? GraphModel.Edges.Max(x => x.Id) + 1 : 0,
+            StartNode = new Node() { PosX = 0, PosY = 0, Id = -1 },
+            EndNode = new Node() { PosX = 0, PosY = 0, Id = -1 },
+            Weight = 0,
+        };
+        GraphModel.Edges.Add(newEdge);
+        Update();
+    }
+
+    private void Update()
+    {
+        StateHasChanged();
+    }
+
+    private void SaveGraph()
+    {
+        var wrongEdges = GraphModel.Edges.Where(x => x.StartNode.Id == -1 || x.EndNode.Id == -1).ToList();
+        var wrongNodes = GraphModel.Nodes.Where(x => x.Id == -1).ToList();
+        foreach (var node in wrongNodes)
+        {
+            GraphModel.Nodes.Remove(node);
+        }
+        foreach (var edge in wrongEdges)
+        {
+            GraphModel.Edges.Remove(edge);
+        }
+        GraphService.SaveGraph(GraphModel, GraphModel.Name);
+
+    }
+
+    #region EventHandling
+    private void ChangedEndEdge(Edge edge, ChangeEventArgs args)
+    {
+        edge.EndNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+        Update();
+    }
+    private void ChangedStartEdge(Edge edge, ChangeEventArgs args)
+    {
+        edge.StartNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+        Update();
+    }
+
+    private async void MoveViewPoint(MouseEventArgs args)
+    {
+
+        SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+        if (SVGMatrix != null)
+        {
+            var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
+            var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
+
+            basicGraph.SVGViewRect.Center.X = deltaX;
+            basicGraph.SVGViewRect.Center.Y = deltaY;
+        }
+    }
+    #endregion
+}
+

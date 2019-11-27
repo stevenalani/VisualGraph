@@ -24,7 +24,8 @@ namespace VisualGraph.Data
 
         internal static string[] GetGraphFileNames()
         {
-            return Directory.GetFiles(_graphdir).OrderByDescending( x=>x.ToLower()).ToArray();
+            var filenames = Directory.GetFiles(_graphdir).Select(x => Path.GetFileNameWithoutExtension(x)).OrderByDescending(x => x.ToLower()).ToArray();
+            return filenames;
         }
         internal static void EnsureGraphDirExists()
         {
@@ -33,9 +34,9 @@ namespace VisualGraph.Data
                 Directory.CreateDirectory(_graphdir);
             }
         }
-        internal static List<BasicGraph> GetBasicGraphs()
+        internal static List<BasicGraphModel> GetBasicGraphs()
         {
-            List<BasicGraph> graphs = new List<BasicGraph>();
+            List<BasicGraphModel> graphs = new List<BasicGraphModel>();
 
             foreach (var file in GetGraphFileNames())
             {
@@ -44,18 +45,26 @@ namespace VisualGraph.Data
             }
             return graphs;
         }
-        internal static BasicGraph ReadGraphMlToBasicGraph(string filename)
+        internal static BasicGraphModel ReadGraphMlToBasicGraph(string filepath)
         {
-            if (filename == String.Empty || !GetGraphFileNames().Contains(filename)) return null;            
-            var graph = _graphFactory.ConverToBasicGraph(ReadGraphMl(filename));
-            graph.Path = filename;
+            if (filepath == String.Empty || !GetGraphFileNames().Contains(filepath)) 
+                return null;
+            
+            if (!Path.IsPathFullyQualified(filepath))
+                filepath = Path.Combine(_graphdir, filepath);
+            var extension = Path.GetExtension(filepath);
+            if (extension == string.Empty)
+                filepath += ".xml";
+            var tinkergraph = ReadGraphMl(filepath);
+            var graph = _graphFactory.ConverToBasicGraph(tinkergraph);
+            graph.Path = filepath;
             return graph;   
         }
-        internal static IGraph ReadGraphMl(string filename)
+        internal static IGraph ReadGraphMl(string filepath)
         {
-            if (filename == String.Empty || !GetGraphFileNames().Contains(filename)) return null;
+            if (filepath == String.Empty || !GetGraphFileNames().Any(f => filepath.Contains(f))) return null;
 
-            using (StreamReader streamReader = new StreamReader(Path.Combine(_graphdir, filename)))
+            using (StreamReader streamReader = new StreamReader(filepath))
             {
                 TinkerGrapĥ g = new TinkerGrapĥ();
                 GraphMlReader.InputGraph(g, streamReader.BaseStream);
@@ -64,23 +73,32 @@ namespace VisualGraph.Data
             
         }
 
-        internal static void WriteToGraphMlFile(BasicGraph graph, string filename)
+        internal static void WriteToGraphMlFile(BasicGraphModel graph, string filename)
         {
             if (filename == String.Empty)
                 return;
-            
+            filename = Path.Combine(_graphdir, filename + ".xml");
             TinkerGrapĥ tinkerGraph = new TinkerGrapĥ();
             foreach(var node in graph.Nodes)
             {
-                var vertex = tinkerGraph.AddVertex<Node>(node);
+                var vertex = tinkerGraph.AddVertex(null);
+                vertex.SetProperty("posx", node.PosX);
+                vertex.SetProperty("posy", node.PosY);
+                vertex.SetProperty("name", node.Name);
             }
             foreach (var edge in graph.Edges)
             {
-                tinkerGraph.AddEdge(edge.Id,tinkerGraph.GetVertex(edge.StartNode.Id),tinkerGraph.GetVertex(edge.EndNode.Id),"")
-                .SetProperty("weight", edge.Weight);
+                IVertex start = tinkerGraph.GetVertex(edge.StartNode.Id);
+                IVertex end = tinkerGraph.GetVertex(edge.EndNode.Id);
+                var edge_ = tinkerGraph.AddEdge(edge.Id, start, end , $"{edge.Weight}");
+                edge_.SetProperty("weight", edge.Weight);
             }
             GraphMlWriter writer = new GraphMlWriter(tinkerGraph);
-            writer.OutputGraph(_graphdir + filename);
+            using (var fos = File.Open(filename, FileMode.Create))
+            {
+                writer.OutputGraph(fos);
+            }
+                
         }
     }
 }

@@ -1,0 +1,3 @@
+[submodule "VisualGraph/wwwroot/dist/open-iconic"]
+	path = VisualGraph/wwwroot/dist/open-iconic
+	url = https://github.com/iconic/open-iconic.git

@@ -9,7 +9,7 @@ namespace VisualGraph.Data
 {
     public class GraphFactory
     {
-        public BasicGraph ConverToBasicGraph(IGraph iGraph)
+        public BasicGraphModel ConverToBasicGraph(IGraph iGraph)
         {
             var nodeCnt = 0;
             var posxdefault = 0;
@@ -41,7 +41,7 @@ namespace VisualGraph.Data
                 Weight = Convert.ToDouble(e.GetProperty("weight"))
             }).ToList();
 
-            BasicGraph graph = new BasicGraph()
+            BasicGraphModel graph = new BasicGraphModel()
             {
                 Nodes = nodes,
                 Edges = edges,

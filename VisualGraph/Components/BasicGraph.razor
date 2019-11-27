@@ -1,100 +1,229 @@
-﻿@inject IJSRuntime JsRuntime
-<h3>BasicGraph</h3>
+﻿@inject IJSRuntime JsRuntime 
+@inject IGraphService GraphServeice
 @if (VisualGraph != null)
 {
-<svg id="@(VisualGraph.Name)" viewBox="@($"{(minX - VisualGraph.GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
-    $" {(minY - VisualGraph.GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
-    $" {(50 + maxX - minX).ToString(CultureInfo.InvariantCulture) }," +
-    $" {(maxY - minY + VisualGraph.GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}")" 
-     @onmousemove="@(
-        async (args)=>
+    var activenode = VisualGraph.ActiveNode;
+    //style="@(SVGMatrix != null && isSvgLandscape?"height":"width"):100%"
+    <svg id="@(VisualGraph.Name)" style="max-width:@getSvgWidthAttribute(); max-height:@getSvgHeightAttribute()" class="vssvg" viewBox="@(SVGViewRect.ViewBox)"
+            @onclick="@OnSvgClick"
+            @onmousemove="@OnSvgMouseMove"
+            @onmouseover="@((args) => { GraphServeice.StartParameterRefresh(); })"
+            @onmouseout="@((args) => { GraphServeice.StopParameterRefresh(); })"
+            @onmouseup="@OnSvgMouseUp"
+            @onmousedown="@OnSvgMouseDown"
+            @onmousewheel="@OnSvgMouseWheel">
+        @SVGViewRect.GetDisplayInformationMarkupString(GraphStyleParameters)
+        @CoordinateAxis.GenerateForGraphRange(VisualGraph.ConvexHull[0].X, VisualGraph.ConvexHull[0].Y, VisualGraph.ConvexHull[1].X, VisualGraph.ConvexHull[1].Y);
+        @if (activenode != null)
         {
-            if(SVGMatrix == null)
-                SVGMatrix = await JsRuntime.InvokeAsync<GraphDisplayParameters>("getSVGTransformationMatrix", new { id = VisualGraph.Name });
-            if (activenode == null) return;
-            if (args.Buttons == 1)
+            <line x1="@activenode.PosXText" y1="@activenode.PosYText" x2="0" y2="@activenode.PosYText" style="@($"stroke:rgba(0,0,0,0.5); stroke-width:0.1")"></line>
+            <line x1="@activenode.PosXText" y1="@activenode.PosYText" x2="@activenode.PosXText" y2="0" style="@($"stroke:rgba(0,0,0,0.5); stroke-width:0.1")"></line>
+        }
+        @foreach (var edge in VisualGraph.Edges)
+        {
+            if (edge.StartNode != null && edge.EndNode != null)
             {
-                if (activenode.activeclass != "")
-                {
-                    var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
-                    var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
-
-                    activenode.PosX = deltaX;
-                    activenode.PosY = deltaY;
-                }
+                var halfwayx = ((edge.StartNode.PosX + edge.EndNode.PosX) / 2).ToString(CultureInfo.InvariantCulture);
+                var halfwayy = ((edge.StartNode.PosY + edge.EndNode.PosY) / 2).ToString(CultureInfo.InvariantCulture);
+                <line x1="@edge.StartNode.PosXText" y1="@edge.StartNode.PosYText" x2="@edge.EndNode.PosXText" y2="@edge.EndNode.PosYText" style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"></line>
+                @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</text>")
             }
-        })">
-    @CoordinateAxis.GenerateForGraphRange(minX, minY, maxX, maxY);
-    @foreach (var edge in VisualGraph.Edges)
-    {
-        var halfwayx = ((edge.StartNode.PosX + edge.EndNode.PosX) / 2).ToString(CultureInfo.InvariantCulture);
-        var halfwayy = ((edge.StartNode.PosY + edge.EndNode.PosY) / 2).ToString(CultureInfo.InvariantCulture);
-
-
-        <line x1="@edge.StartNode.PosXText" y1="@edge.StartNode.PosYText" x2="@edge.EndNode.PosXText" y2="@edge.EndNode.PosYText" style="@($"stroke:{VisualGraph.GraphStyleParameters.EdgeStrokeColor}; stroke-width:{VisualGraph.GraphStyleParameters.EdgeWidthText}")"></line>
-        @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{@VisualGraph.GraphStyleParameters.TextColor}\" font-size=\"{@VisualGraph.GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)}</text>")
-    }
-    @foreach (var node in VisualGraph.Nodes)
-    {
-        var name = node.Name;
-        @((MarkupString)$"<text x=\"{ (@node.PosX + @VisualGraph.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{( @node.PosY + 2 * @VisualGraph.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{@VisualGraph.GraphStyleParameters.TextColor}\" font-size=\"{@VisualGraph.GraphStyleParameters.TextSizeText}\">{@node.Name}</text>")
-        <circle id="@($"node-{node.Id}")"
-                class="vsnode @node.activeclass draggable"
-                cx="@node.PosXText"
-                cy="@(node.PosYText)"
-                r="@VisualGraph.GraphStyleParameters.NodeRadiusText"
-                stroke="@VisualGraph.GraphStyleParameters.NodeStrokeColor"
-                stroke-width="@VisualGraph.GraphStyleParameters.NodeStrokeWidthText"
-                fill="@VisualGraph.GraphStyleParameters.NodeFill"
-                @onclick="@(
-                (args)=> {
-                    node.activeclass = node.activeclass == "active"?"":"active";
-                    activenode = activenode != node? node:null;
-                })"
-                ></circle>
-    }
-</svg>
-
+        }
+        @foreach (var node in VisualGraph.Nodes)
+        {
+            var name = node.Name;
+            @((MarkupString)$"<text x=\"{ (@node.PosX + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.PosY + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
+            if (node.activeclass != "")
+                @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.PosX).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.PosY + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.PosX, @node.PosY)}</text>");
+                <circle id="@($"node -{ node.Id}")"
+                        class="vsnode @node.activeclass draggable"
+                        cx="@node.PosXText"
+                        cy="@(node.PosYText)"
+                        r="@GraphStyleParameters.NodeRadiusText"
+                        stroke="@GraphStyleParameters.NodeStrokeColor"
+                        stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
+                        fill="@GraphStyleParameters.NodeFill"
+                        @onclick="(args) => { OnNodeClick(args, node); }">
+                </circle>
+        }
+    </svg>
 }
+
+
+
 @code {
-    public Node activenode;
-    public WindowParameters WindowSize { get; set; }
-    public GraphDisplayParameters SVGMatrix { get; set; }
+    public bool HasViewPoint = true;
+    public GraphDisplayParameters SVGMatrix;
+    public GraphStyleParameters GraphStyleParameters = new GraphStyleParameters();
+    public SvgViewRect SVGViewRect = new SvgViewRect {
+        Width = 800,
+        Height = 450,
+    };
+    private bool isSvgLandscape => SVGMatrix.Parentwidth > SVGMatrix.Parentheight;
+    //private bool isSvgLandscape => SVGMatrix.Width > SVGMatrix.Height;
     [Parameter]
-    public VisualGraph.Data.Additional.Models.BasicGraph VisualGraph { get; set; }
-    double maxX => VisualGraph.Nodes.Max(x => (int)Math.Ceiling(x.PosX)) + (VisualGraph.GraphStyleParameters.FullPadding);
-    double minX => VisualGraph.Nodes.Min(x => (int)Math.Ceiling(x.PosX)) - (VisualGraph.GraphStyleParameters.FullPadding);
-    double maxY => VisualGraph.Nodes.Max(x => (int)Math.Ceiling(x.PosY)) + (VisualGraph.GraphStyleParameters.FullPadding);
-    double minY => VisualGraph.Nodes.Min(x => (int)Math.Ceiling(x.PosY)) - (VisualGraph.GraphStyleParameters.FullPadding);
-    protected override async void OnParametersSet()
+    public VisualGraph.Data.Additional.Models.BasicGraphModel VisualGraph { get; set; }
+
+    
+    private string getSvgWidthAttribute()
     {
-        WindowSize = await JsRuntime.InvokeAsync<WindowParameters>("getWindowSize");
-        if(VisualGraph != null) {
+        if (SVGMatrix == null)
+        {
+            return "auto";
+        }
+        if (isSvgLandscape)
+        {
+            return "auto";
+        }
+        else
+        {
+            return SVGMatrix.Parentwidth.ToString(CultureInfo.InvariantCulture)+"px";
+        }
+    }
+
+    private string getSvgHeightAttribute()
+    {
+        if (SVGMatrix == null)
+        {
+            return "100%";
+        }
+        if (isSvgLandscape)
+        {
+            return SVGMatrix.Parentheight.ToString(CultureInfo.InvariantCulture)+"px";
+        }
+        else
+        {
+            return "auto";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (VisualGraph != null) {
+            //GraphServeice.RefreshRequested += UpdateTask;
+
             StateHasChanged();
         }
-        base.OnParametersSet();
     }
 
-    public class WindowParameters
+    protected override async Task OnAfterRenderAsync(bool firstrender)
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
-
-        public double[] Transform { get; set; }
+        SVGMatrix = await GraphServeice.InitialGetGraphDisplayParameters(VisualGraph.Name);
+        SVGViewRect.Width = SVGMatrix.Parentwidth;
+        SVGViewRect.Height = SVGMatrix.Height;
     }
 
-    public class GraphDisplayParameters
-    {
-        public double A { get; set; }
-        public double B { get; set; }
-        public double C { get; set; }
-        public double D { get; set; }
-        public double E { get; set; }
-        public double F { get; set; }
+    private string ViewBox => HasViewPoint ? SVGViewRect.ViewBox :
+                $"{(VisualGraph.ConvexHull[0].X - GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
+                $" {(VisualGraph.ConvexHull[0].Y - GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
+                $" {SVGViewRect.Width.ToString(CultureInfo.InvariantCulture) }," +
+                $" {SVGViewRect.Height.ToString(CultureInfo.InvariantCulture) }";
 
-        public override string ToString()
+    #region EventHandling
+    public event EventHandler Update;
+    public event EventHandler<MouseEventArgs> SvgClick;
+    public event EventHandler<MouseEventArgs> SvgMouseDown;
+    public event EventHandler<MouseEventArgs> SvgMouseUp;
+    public event EventHandler<MouseEventArgs> SvgMouseMove;
+    public event EventHandler<WheelEventArgs> SvgMouseWheel;
+
+    public event EventHandler<GraphMouseEventArgs<Node>> NodeClick;
+    public event EventHandler<MouseEventArgs> NodeMouseDown;
+    public event EventHandler<MouseEventArgs> NodeMouseUp;
+    public event EventHandler<MouseEventArgs> NodeMouseMove;
+    public event EventHandler<MouseEventArgs> NodeMouseWheel;
+    DateTime NodeClickTriggerdTime;
+    DateTime SvgClickTriggerdTime;
+    public virtual void UpdateTask()
+    {
+        StateHasChanged();
+    }
+
+    protected virtual void OnSvgClick(MouseEventArgs e)
+    {
+
+        EventHandler<MouseEventArgs> handler = SvgClick;
+        if (handler != null && NodeClick == null)
         {
-            return $"a={A}\r\nb={B}\r\nc={C}\r\nd={D}\r\ne={E}\r\nf={F}";
+            handler(this, e);
+        }else if (NodeClick != null && NodeClickTriggerdTime < DateTime.Now.AddMilliseconds(-100))
+        {
+            handler(this, e);
         }
     }
+    protected virtual void OnSvgMouseDown(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = SvgMouseDown;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    protected virtual void OnSvgMouseUp(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = SvgMouseUp;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    protected virtual void OnSvgMouseMove(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = SvgMouseMove;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    protected virtual void OnSvgMouseWheel(WheelEventArgs e)
+    {
+        EventHandler<WheelEventArgs> handler = SvgMouseWheel;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+
+    protected virtual void OnNodeClick(MouseEventArgs e,Node node)
+    {
+        EventHandler<GraphMouseEventArgs<Node>> handler = NodeClick;
+        if (handler != null)
+        {
+            NodeClickTriggerdTime = DateTime.Now;
+            handler(this, new GraphMouseEventArgs<Node>(node,e));
+        }
+    }
+    protected virtual void OnNodeMouseDown(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = NodeMouseDown;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    protected virtual void OnNodeMouseUp(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = NodeMouseUp;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    protected virtual void OnNodeMouseMove(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = NodeMouseMove;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    protected virtual void OnNodeMouseWheel(MouseEventArgs e)
+    {
+        EventHandler<MouseEventArgs> handler = NodeMouseWheel;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+    #endregion
 }

@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/VisualGraph/Graphs
+/VisualGraph/openiconic
+/VisualGraph/wwwroot/js/popper.js
+/VisualGraph/wwwroot/dist/bootstrap/dist

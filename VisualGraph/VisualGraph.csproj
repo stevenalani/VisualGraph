@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\css\bootstrap\**" />
+    <Content Remove="wwwroot\css\bootstrap\**" />
+    <EmbeddedResource Remove="wwwroot\css\bootstrap\**" />
+    <None Remove="wwwroot\css\bootstrap\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Frontenac.Blueprints" Version="2.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="0.7.0" />
   </ItemGroup>

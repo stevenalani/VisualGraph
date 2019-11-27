@@ -15,7 +15,14 @@ namespace VisualGraph.Data.Additional.Models
         public static double CoordinateAxisMarkerHeight { get; set; } = 0.5;
         public static double CoordinateAxisFontSize { get; set; } = 1;
 
-        public static MarkupString GenerateForGraphRange(double minX, double minY, double maxX, double maxY){
+        public static MarkupString GenerateForGraphRange(double minX = 0, double minY = 0, double maxX = 0,  double maxY = 0)
+        {
+            
+ 
+            minX = minX > 0 ? -5.0 : minX;
+            minY = minY > 0 ? -5 : minY;
+            
+
             string markup = "";
             markup += "<line ";
             markup += $"x1=\"{minX.ToString(CultureInfo.InvariantCulture)}\" ";
