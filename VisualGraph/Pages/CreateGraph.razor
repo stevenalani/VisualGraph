@@ -4,7 +4,7 @@
 
     <div class="flex-wrapper">
         <div class="flex-wrapper-title">
-            <h3>CreateGraph</h3>
+            <h3>Edit or Create new Graph</h3>
             <hr />
         </div>
 
@@ -347,7 +347,6 @@
 
     private async void MoveViewPoint(MouseEventArgs args)
     {
-        //todo: Fix Positioning the Viewpoint
         SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
         if (SVGMatrix != null)
         {

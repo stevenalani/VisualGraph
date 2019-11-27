@@ -1,18 +1,25 @@
 ﻿@page "/graphview"
 @using System.IO
 @inject IGraphService GraphService
-<div class="row">
-    <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
-        <div class="form-group">
-            <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
-                @foreach (var name in graphFilenames)
-                {
-                    <option value="@name">@name</option>
-                }
-            </InputSelect>
-        </div>
-        <button type="submit">Laden</button>
-    </EditForm>
+<div class="flex-wrapper">
+    <div class="flex-wrapper-title">
+        <h3>Edit or Create new Graph</h3>
+        <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
+            <div class="form-group">
+                <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
+                    @foreach (var name in graphFilenames)
+                    {
+                        <option value="@name">@name</option>
+                    }
+                </InputSelect>
+            </div>
+            <button type="submit">Laden</button>
+        </EditForm>
+        <hr />
+    </div>
+    <div class="left-container">
+        <BasicGraph VisualGraph="model.Graph" />
+    </div>
 </div>
 
 @code {

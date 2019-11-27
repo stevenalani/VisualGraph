@@ -36,8 +36,8 @@ window.getAllSVGTransformationMatrices = function () {
             f: ctm.f,
             width: element.innerWidth,
             height: element.innerWidth,
-            parentheight: element.parentElement.clientHeight,
-            parentwidth: element.parentElement.clientWidth
+            parentheight: element.parentElement.innerHeight,
+            parentwidth: element.parentElement.innerWidth
         };
         cout.push(obj);
     });
