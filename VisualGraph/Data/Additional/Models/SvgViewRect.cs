@@ -19,17 +19,17 @@ namespace VisualGraph.Data.Additional.Models
         public Point2 Center { get; set; } = new Point2();
         public double ZoomLevel { get; set; } = 1.0;
 
-        public Point2 UpperLeft => new Point2(Center.X - (Width / ZoomLevel) / 2, Center.Y - (Height / ZoomLevel) / 2);
-        public string ViewBox => $"{(UpperLeft.X).ToString(CultureInfo.InvariantCulture)}," +
-                $" {(UpperLeft.Y).ToString(CultureInfo.InvariantCulture)}," +
+        public Point2 UpperLeft => new Point2(Center.X - (Width/ 2) , Center.Y - (Height/ 2) );
+        public string ViewBox => $"{(UpperLeft.X / ZoomLevel).ToString(CultureInfo.InvariantCulture)}," +
+                $" {(UpperLeft.Y / ZoomLevel).ToString(CultureInfo.InvariantCulture)}," +
                 $" {(Width / ZoomLevel).ToString(CultureInfo.InvariantCulture) }," +
                 $" {(Height / ZoomLevel).ToString(CultureInfo.InvariantCulture) }";
        public MarkupString GetDisplayInformationMarkupString(GraphStyleParameters graphStyleParameters)
         {
-            var mstring = $"<text x=\"{UpperLeft.X.ToString(CultureInfo.InvariantCulture)}\" y=\"{(UpperLeft.Y+1/ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" fill=\"{graphStyleParameters.TextColor}\" font-size=\"{(10/ ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" dy=\"0\">"+
-                    $"<tspan x=\"{UpperLeft.X.ToString(CultureInfo.InvariantCulture)}\" dy=\".6em\">{String.Format("Window Width: {0,0:0.00}, Height {1,0:0.00}", Width,Height)}</tspan>"+
-                    $"<tspan x=\"{UpperLeft.X.ToString(CultureInfo.InvariantCulture)}\" dy=\"1.2em\">{String.Format("Zoom: {0:0.00}", ZoomLevel)} Zoom step: {ZoomStep}</tspan>" +
-                    $"<tspan x=\"{UpperLeft.X.ToString(CultureInfo.InvariantCulture)}\" dy=\"1.2em\">Center: {{{Center.X.ToString(CultureInfo.InvariantCulture)};{Center.X.ToString(CultureInfo.InvariantCulture)}}}</tspan></text>";
+            var mstring = $"<text x=\"{(UpperLeft.X / ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" y=\"{(UpperLeft.Y / ZoomLevel + 1/ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" fill=\"{graphStyleParameters.TextColor}\" font-size=\"{(10/ ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" dy=\"0\">"+
+                    $"<tspan x=\"{(UpperLeft.X / ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" dy=\".6em\">{String.Format("Window Width: {0,0:0.00}, Height {1,0:0.00}", Width,Height)}</tspan>"+
+                    $"<tspan x=\"{(UpperLeft.X / ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" dy=\"1.2em\">{String.Format("Zoom: {0:0.00}", ZoomLevel)} Zoom step: {ZoomStep}</tspan>" +
+                    $"<tspan x=\"{(UpperLeft.X / ZoomLevel).ToString(CultureInfo.InvariantCulture)}\" dy=\"1.2em\">Center: {{{Center.X.ToString(CultureInfo.InvariantCulture)};{Center.X.ToString(CultureInfo.InvariantCulture)}}}</tspan></text>";
             return new MarkupString(mstring);
         }
     }

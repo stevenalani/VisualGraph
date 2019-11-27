@@ -222,23 +222,6 @@
                     {
                         graph.SVGViewRect.ZoomLevel += 1/SvgViewRect.ZoomStep;
                     }
-                    /*
-                 if (args.DeltaY > 0)
-                    {
-                        if (graph.SVGViewRect.ZoomLevel > SvgViewRect.ZoomStep)
-                            graph.SVGViewRect.ZoomLevel -= SvgViewRect.ZoomStep;
-
-                        else
-                            graph.SVGViewRect.ZoomLevel = 0.1;
-                    }
-                    else
-                    {
-                        if (graph.SVGViewRect.ZoomLevel < SvgViewRect.MaxZoomLevel)
-                            graph.SVGViewRect.ZoomLevel += SvgViewRect.ZoomStep;
-                        else
-                            graph.SVGViewRect.ZoomLevel = SvgViewRect.MaxZoomLevel;
-                    }    
-                 */
                 }
 
             };
@@ -364,8 +347,8 @@
 
     private async void MoveViewPoint(MouseEventArgs args)
     {
-
-        SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+        //todo: Fix Positioning the Viewpoint
+        SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
         if (SVGMatrix != null)
         {
             var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;

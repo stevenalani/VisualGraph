@@ -4,7 +4,8 @@
 {
     var activenode = VisualGraph.ActiveNode;
     //style="@(SVGMatrix != null && isSvgLandscape?"height":"width"):100%"
-    <svg id="@(VisualGraph.Name)" style="max-width:@getSvgWidthAttribute(); max-height:@getSvgHeightAttribute()" class="vssvg" viewBox="@(SVGViewRect.ViewBox)"
+    //style="max-width:@getSvgWidthAttribute(); max-height:@getSvgHeightAttribute()"
+    <svg id="@(VisualGraph.Name)"  class="vssvg" viewBox="@(SVGViewRect.ViewBox)"
             @onclick="@OnSvgClick"
             @onmousemove="@OnSvgMouseMove"
             @onmouseover="@((args) => { GraphServeice.StartParameterRefresh(); })"
@@ -52,20 +53,19 @@
 
 
 @code {
-    public bool HasViewPoint = true;
     public GraphDisplayParameters SVGMatrix;
     public GraphStyleParameters GraphStyleParameters = new GraphStyleParameters();
     public SvgViewRect SVGViewRect = new SvgViewRect {
         Width = 800,
         Height = 450,
     };
-    private bool isSvgLandscape => SVGMatrix.Parentwidth > SVGMatrix.Parentheight;
+    //private bool isSvgLandscape => SVGMatrix.Parentwidth > SVGMatrix.Parentheight;
     //private bool isSvgLandscape => SVGMatrix.Width > SVGMatrix.Height;
     [Parameter]
     public VisualGraph.Data.Additional.Models.BasicGraphModel VisualGraph { get; set; }
 
     
-    private string getSvgWidthAttribute()
+   /* private string getSvgWidthAttribute()
     {
         if (SVGMatrix == null)
         {
@@ -95,7 +95,7 @@
         {
             return "auto";
         }
-    }
+    }*/
 
     protected override async Task OnParametersSetAsync()
     {
@@ -110,14 +110,8 @@
     {
         SVGMatrix = await GraphServeice.InitialGetGraphDisplayParameters(VisualGraph.Name);
         SVGViewRect.Width = SVGMatrix.Parentwidth;
-        SVGViewRect.Height = SVGMatrix.Height;
+        SVGViewRect.Height = SVGMatrix.Parentheight;
     }
-
-    private string ViewBox => HasViewPoint ? SVGViewRect.ViewBox :
-                $"{(VisualGraph.ConvexHull[0].X - GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
-                $" {(VisualGraph.ConvexHull[0].Y - GraphStyleParameters.Padding).ToString(CultureInfo.InvariantCulture)}," +
-                $" {SVGViewRect.Width.ToString(CultureInfo.InvariantCulture) }," +
-                $" {SVGViewRect.Height.ToString(CultureInfo.InvariantCulture) }";
 
     #region EventHandling
     public event EventHandler Update;

@@ -15,13 +15,14 @@ namespace VisualGraph.Data.Additional.Models
         public static double CoordinateAxisMarkerHeight { get; set; } = 0.5;
         public static double CoordinateAxisFontSize { get; set; } = 1;
 
-        public static MarkupString GenerateForGraphRange(double minX = 0, double minY = 0, double maxX = 0,  double maxY = 0)
+        public static MarkupString GenerateForGraphRange(double minX = 0, double minY = 0, double maxX = 0,  double maxY = 0, double padding = 10.5)
         {
             
  
-            minX = minX > 0 ? -5.0 : minX;
-            minY = minY > 0 ? -5 : minY;
-            
+            minX = minX > 0 ? -padding : minX - padding;
+            minY = minY > 0 ? -padding : minY - padding;
+            maxX = maxX + padding;
+            maxY = maxY + padding;
 
             string markup = "";
             markup += "<line ";
