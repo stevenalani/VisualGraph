@@ -11,6 +11,7 @@ using System.ComponentModel;
 using Microsoft.AspNetCore.Components.Web;
 using System.Threading.Tasks;
 using VisualGraph.Components;
+using System.Numerics;
 
 namespace VisualGraph.Data.Additional.Models
 {
@@ -25,10 +26,10 @@ namespace VisualGraph.Data.Additional.Models
         public string Path { get; set; }
         public Node ActiveNode => Nodes.FirstOrDefault(x => x.activeclass != "");
 
-        double maxX => Nodes.Max(x => (int)Math.Ceiling(x.PosX));
-        double minX => Nodes.Min(x => (int)Math.Ceiling(x.PosX));
-        double maxY => Nodes.Max(x => (int)Math.Ceiling(x.PosY));
-        double minY => Nodes.Min(x => (int)Math.Ceiling(x.PosY));
+        float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X ));
+        float minX => Nodes.Min(x => (int)Math.Ceiling(x.Pos.X ));
+        float maxY => Nodes.Max(x => (int)Math.Ceiling(x.Pos.Y));
+        float minY => Nodes.Min(x => (int)Math.Ceiling(x.Pos.Y));
         public Point2[] ConvexHull => new[] { new Point2(minX, minY), new Point2(maxX, maxY) };
 
     }

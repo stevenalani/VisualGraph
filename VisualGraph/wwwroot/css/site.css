@@ -123,6 +123,7 @@ app {
     height: calc(100vh - 100px) !important;
     flex: 1;
     text-align: center;
+    display:flex;
 }
 .right-container {
     /*background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 70%);
@@ -138,6 +139,7 @@ svg {
     border-radius: 5px;
     border-width: 1px;
     z-index: 10;
+    flex:1;
 }
 svg.responsive.vert{
     width : auto;

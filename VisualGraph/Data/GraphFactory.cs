@@ -27,15 +27,14 @@ namespace VisualGraph.Data
                 {
                     Id = Convert.ToInt32(v.Id),
                     Name = nameProp.ToString(),
-                    PosX = Convert.ToDouble(posxProp.ToString()),
-                    PosY = Convert.ToDouble(posyProp.ToString())
+                    Pos = new Point2(Convert.ToDouble(posxProp.ToString()), Convert.ToDouble(posyProp.ToString()))
                 };
 
             }).ToList();
 
             var edges = iGraph.GetEdges().Select(e => new Edge
             {
-                Id = Convert.ToDouble(e.Id),
+                Id = Convert.ToInt32(e.Id),
                 StartNode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.Out).Id) == n.Id),
                 EndNode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.In).Id) == n.Id),
                 Weight = Convert.ToDouble(e.GetProperty("weight"))

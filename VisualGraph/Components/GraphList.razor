@@ -1,5 +1,9 @@
 ﻿@page "/graphview"
 @using System.IO
+@using Microsoft.Msagl.Core.Layout;
+@using Microsoft.Msagl.Miscellaneous;
+@using Microsoft.Msagl.Routing;
+@using Microsoft.Msagl.Core.Geometry.Curves;
 @inject IGraphService GraphService
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
@@ -12,13 +16,25 @@
                         <option value="@name">@name</option>
                     }
                 </InputSelect>
+                <button type="submit">Laden</button>
             </div>
-            <button type="submit">Laden</button>
+            @if (basicGraph != null)
+            {
+                <div class="form-group">
+                    <button type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                </div>
+                <div class="form-group">
+                    <button type="button" @onclick="@Crop">Crop View to Graph</button>
+                </div>
+            }
+
+
         </EditForm>
-        <hr />
+
     </div>
     <div class="left-container">
-        <BasicGraph VisualGraph="model.Graph" />
+        <hr />
+        @RenderGraph()
     </div>
 </div>
 
@@ -28,6 +44,109 @@
         public string CurrentGraph { get; set; }
         public VisualGraph.Data.Additional.Models.BasicGraphModel Graph { get; set; }
     }
+    BasicGraph basicGraph;
+    RenderFragment RenderGraph()
+    {
+        return new RenderFragment(builder =>
+        {
+            if (model.Graph != null)
+            {
+                builder.OpenComponent<BasicGraph>(0);
+                builder.AddAttribute(1, "GraphModel", model.Graph);
+                builder.AddComponentReferenceCapture(2,
+                    inst =>
+                    {
+                        var basicGraph1 = (BasicGraph)inst;
+                        basicGraph = basicGraph1;
+                        basicGraph.SvgClick += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            if (graph.GraphModel.ActiveNode != null)
+                            {
+                                graph.GraphModel.ActiveNode.activeclass = "";
+                            }
+                        };
+                        basicGraph.SvgMouseWheel += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
+                            if (graph.SVGMatrix != null)
+                            {
+
+                                if (args.DeltaY > 0)
+                                {
+                                    graph.SVGViewRect.ZoomOut();
+                                }
+                                else
+                                {
+                                    graph.SVGViewRect.ZoomIn();
+                                }
+                                var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
+                                var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
+
+                                basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
+
+                            }
+
+                        };
+                        basicGraph.SvgMouseMove += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            if (args.Buttons == 2)
+                            {
+                                graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
+                                if (graph.SVGMatrix != null)
+                                {
+                                    var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
+                                    var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
+
+                                    basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
+                                }
+                            }
+                            StateHasChanged();
+                        };
+                        /*basicGraph.SvgMouseUp += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
+                            if (graph.SVGMatrix != null)
+                            {
+                                var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
+                                var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
+
+                                basicGraph.SVGViewRect.Center.X = deltaX;
+                                basicGraph.SVGViewRect.Center.Y = deltaY;
+                            }
+                        };*/
+
+                        basicGraph.NodeClick += (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            Data.Additional.Models.Node node = args.Target;
+                            if (graph.GraphModel.ActiveNode != null)
+                            {
+                                if (graph.GraphModel.ActiveNode.Id == node.Id)
+                                {
+                                    node.activeclass = "";
+                                }
+                                else
+                                {
+                                    graph.GraphModel.ActiveNode.activeclass = "";
+                                    node.activeclass = "active";
+                                }
+                            }
+                            else
+                            {
+                                node.activeclass = "active";
+                            }
+                            StateHasChanged();
+                        };
+                    });
+
+                builder.CloseComponent();
+            }
+        });
+    }
     SelectGraphModel model = new SelectGraphModel();
     public string[] graphFilenames { get; set; }
     private string[] graphPathes { get; set; }
@@ -35,7 +154,7 @@
     protected override async Task OnInitializedAsync()
     {
         var graphFilePathes = graphPathes = await GraphService.GetGraphFilenames();
-        graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).ToArray();
+        graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).OrderBy(x => Path.GetFileNameWithoutExtension(x)).ToArray();
         model.CurrentGraph = graphFilenames[0];
         base.OnInitialized();
     }
@@ -43,10 +162,17 @@
     public async void HandleSelectChange()
     {
         var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraph));
-        var graph = await GraphService.GetGraph(graphPath);
-        model.Graph = graph;
+        var graphmodel = await GraphService.GetGraph(graphPath);
+        model.Graph = graphmodel;
         StateHasChanged();
     }
+    private async Task LayoutGraph()
+    {
+        var resultGraph = GraphService.LayoutGraph(model.Graph);
+    }
+    private async Task Crop()
+    {
+        basicGraph.SVGViewRect.CropRect(basicGraph.GraphModel.ConvexHull[0].X, basicGraph.GraphModel.ConvexHull[0].Y, basicGraph.GraphModel.ConvexHull[1].X, basicGraph.GraphModel.ConvexHull[1].Y);
+    }
 
-    
 }

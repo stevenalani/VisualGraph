@@ -82,8 +82,8 @@ namespace VisualGraph.Data
             foreach(var node in graph.Nodes)
             {
                 var vertex = tinkerGraph.AddVertex(null);
-                vertex.SetProperty("posx", node.PosX);
-                vertex.SetProperty("posy", node.PosY);
+                vertex.SetProperty("posx", node.Pos.X);
+                vertex.SetProperty("posy", node.Pos.Y);
                 vertex.SetProperty("name", node.Name);
             }
             foreach (var edge in graph.Edges)

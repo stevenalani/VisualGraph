@@ -25,8 +25,8 @@
         {
             if (edge.StartNode != null && edge.EndNode != null)
             {
-                var halfwayx = ((edge.StartNode.PosX + edge.EndNode.PosX) / 2).ToString(CultureInfo.InvariantCulture);
-                var halfwayy = ((edge.StartNode.PosY + edge.EndNode.PosY) / 2).ToString(CultureInfo.InvariantCulture);
+                var halfwayx = ((edge.StartNode.Pos.X+ edge.EndNode.Pos.X) / 2).ToString(CultureInfo.InvariantCulture);
+                var halfwayy = ((edge.StartNode.Pos.Y + edge.EndNode.Pos.Y) / 2).ToString(CultureInfo.InvariantCulture);
                 <line x1="@edge.StartNode.PosXText" y1="@edge.StartNode.PosYText" x2="@edge.EndNode.PosXText" y2="@edge.EndNode.PosYText" style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"></line>
                 @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</text>")
             }
@@ -34,9 +34,9 @@
         @foreach (var node in GraphModel.Nodes)
         {
             var name = node.Name;
-            @((MarkupString)$"<text x=\"{ (@node.PosX + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.PosY + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
+            @((MarkupString)$"<text x=\"{ (@node.Pos.X+ GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
             if (node.activeclass != "")
-                @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.PosX).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.PosY + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.PosX, @node.PosY)}</text>");
+                @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>");
                 <circle id="@($"node -{ node.Id}")"
                         class="vsnode @node.activeclass draggable"
                         cx="@node.PosXText"
@@ -56,11 +56,7 @@
 @code {
     public GraphDisplayParameters SVGMatrix;
     public GraphStyleParameters GraphStyleParameters = new GraphStyleParameters();
-    public SvgViewRect SVGViewRect = new SvgViewRect
-    {
-        Width = 800,
-        Height = 450,
-    };
+    public SvgViewRect SVGViewRect = new SvgViewRect();
     //private bool isSvgLandscape => SVGMatrix.Parentwidth > SVGMatrix.Parentheight;
     //private bool isSvgLandscape => SVGMatrix.Width > SVGMatrix.Height;
     [Parameter]
@@ -68,12 +64,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (GraphModel != null)
-        {
-            //GraphServeice.RefreshRequested += UpdateTask;
-
-            StateHasChanged();
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstrender)
@@ -95,15 +85,19 @@
         if (GraphModel != null)
         {
             SVGMatrix = await GraphServeice.InitialGetGraphDisplayParameters(GraphModel.Name);
-            SVGViewRect.Width = SVGMatrix.Width;
-            SVGViewRect.Height = SVGMatrix.Height;
+            SVGViewRect.SetWidth(SVGMatrix.Width);
+            SVGViewRect.SetHeight(SVGMatrix.Height);
         }
     }
     public async Task ChangedState()
     {
         StateHasChanged();
     }
+
+
+
     #region EventHandling
+
     public event EventHandler Update;
     public event EventHandler<MouseEventArgs> SvgClick;
     public event EventHandler<MouseEventArgs> SvgMouseDown;
@@ -221,8 +215,8 @@
         }
     }
     #endregion
-    #region DefaultCallbacks
-    public static async Task ActivateNode(BasicGraph sender, MouseEventArgs args)
+
+    public static void ActivateNode(BasicGraph sender, MouseEventArgs args)
     {
         var GraphModel = (BasicGraph)sender;
         if (GraphModel.GraphModel.ActiveNode != null)
@@ -238,12 +232,11 @@
 
             if (args.DeltaY > 0)
             {
-                if (sender.SVGViewRect.ZoomLevel > 1/SvgViewRect.ZoomStep)
-                    sender.SVGViewRect.ZoomLevel -= 1/SvgViewRect.ZoomStep;
+                sender.SVGViewRect.ZoomOut();
             }
             else
             {
-                sender.SVGViewRect.ZoomLevel += 1/SvgViewRect.ZoomStep;
+                sender.SVGViewRect.ZoomIn();
             }
         }
     }
@@ -258,8 +251,8 @@
                 var deltaX = (args.ClientX - sender.SVGMatrix.E) / sender.SVGMatrix.A;
                 var deltaY = (args.ClientY - sender.SVGMatrix.F) / sender.SVGMatrix.D;
 
-                sender.GraphModel.ActiveNode.PosX = deltaX;
-                sender.GraphModel.ActiveNode.PosY = deltaY;
+                sender.GraphModel.ActiveNode.Pos.X = deltaX;
+                sender.GraphModel.ActiveNode.Pos.Y = deltaY;
             }
         }
     }
@@ -275,8 +268,7 @@
                 var deltaX = (args.ClientX - sender.SVGMatrix.E) / sender.SVGMatrix.A;
                 var deltaY = (args.ClientY - sender.SVGMatrix.F) / sender.SVGMatrix.D;
 
-                sender.SVGViewRect.Center.X = deltaX;
-                sender.SVGViewRect.Center.Y = deltaY;
+                sender.SVGViewRect.SetCenter(deltaX, deltaY);
             }
         }
 
@@ -290,6 +282,7 @@
         Node node = args.Target;
         if (sender.GraphModel.ActiveNode != null)
         {
+
             if (sender.GraphModel.ActiveNode.Id == node.Id)
             {
                 node.activeclass = "";

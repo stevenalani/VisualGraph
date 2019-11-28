@@ -9,7 +9,7 @@ namespace VisualGraph.Data.Additional.Models
         public Node EndNode { get; set; }
         public double Weight { get; set; }
         public double AutoWeight => (EndNode - StartNode).Distance;
-        public double Id { get; internal set; }
+        public int Id { get; internal set; }
 
         
     }

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Frontenac.Blueprints.Impls.TG;
@@ -10,8 +11,13 @@ using Frontenac.Blueprints.Util.IO.GraphML;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using Microsoft.Msagl.Core.Geometry.Curves;
+using Microsoft.Msagl.Core.Layout;
+using Microsoft.Msagl.Miscellaneous;
 using VisualGraph.Data.Additional.Interfaces;
 using VisualGraph.Data.Additional.Models;
+using Edge = VisualGraph.Data.Additional.Models.Edge;
+using Node = VisualGraph.Data.Additional.Models.Node;
 
 namespace VisualGraph.Data
 {
@@ -85,7 +91,7 @@ namespace VisualGraph.Data
                 var x = rand.NextDouble() + Convert.ToDouble(rand.Next(fromx, tox));
                 var y = rand.NextDouble() + Convert.ToDouble(rand.Next(fromy, toy));
 
-                nodes.Add(new Node { PosX = x, PosY = y, Id = count });
+                nodes.Add(new Node { Pos = new Point2(x,y), Id = count });
 
             }
 
@@ -152,6 +158,40 @@ namespace VisualGraph.Data
                 GraphParameterThread?.Join();
             }
 
+        }
+
+        public async Task<BasicGraphModel> LayoutGraph(BasicGraphModel GraphModel)
+        {
+            try
+            {
+                StopParameterRefresh();
+                GeometryGraph geometryGraph = new GeometryGraph();
+
+                var nodes = GraphModel.Edges.Where(x => x.StartNode != null || x.EndNode != null).SelectMany(x => {
+                    if (x.StartNode != null && x.EndNode != null) return new[] { x.StartNode, x.EndNode };
+                    else if (x.StartNode != null) return new[] { x.StartNode };
+                    else return new[] { x.EndNode };
+                }).ToList();
+
+
+                nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(CurveFactory.CreateCircle(1, new Microsoft.Msagl.Core.Geometry.Point()), x.Id)));
+                GraphModel.Edges.ForEach(x => {
+                    var node1 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.StartNode.Id);
+                    var node2 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.EndNode.Id);
+                    geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2) { Length = x.Weight, UserData = x.Id });
+                });
+
+                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
+                LayoutHelpers.CalculateLayout(geometryGraph, settings, null);
+                nodes.ForEach(x =>
+                {
+                    var node = geometryGraph.FindNodeByUserData(x.Id);
+                    x.Pos.X = node.Center.X;
+                    x.Pos.Y = node.Center.Y;
+                });
+            }
+            catch { }
+            return GraphModel;
         }
     }
 }

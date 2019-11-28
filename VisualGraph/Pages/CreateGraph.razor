@@ -33,11 +33,11 @@
                                     <tr>
                                         <td>Pos X:</td>
                                         <td>
-                                            <InputNumber id="ActiveNodeX" class="form-control" @bind-Value="@GraphModel.ActiveNode.PosX"></InputNumber>
+                                            <InputNumber id="ActiveNodeX" class="form-control" @bind-Value="@GraphModel.ActiveNode.Pos.X"></InputNumber>
                                         </td>
                                         <td>Pos Y:</td>
                                         <td>
-                                            <InputNumber id="ActiveNodeY" class="form-control" @bind-Value="@GraphModel.ActiveNode.PosY"></InputNumber>
+                                            <InputNumber id="ActiveNodeY" class="form-control" @bind-Value="@GraphModel.ActiveNode.Pos.Y"></InputNumber>
                                         </td>
                                         <td>Name</td>
                                         <td>
@@ -70,10 +70,10 @@
                                     <tr>
                                         <td><span class="form-control">@node.Id:</span></td>
                                         <td>
-                                            <InputNumber id="@idstring1" class="form-control" @bind-Value="@node.PosX" @onchange="(args)=> { Update(); }"></InputNumber>
+                                            <InputNumber id="@idstring1" class="form-control" @bind-Value="@node.Pos.X" @onchange="(args)=> { Update(); }"></InputNumber>
                                         </td>
                                         <td>
-                                            <InputNumber id="@idstring2" class="form-control" @bind-Value="@node.PosY" @onchange="(args)=> { Update(); }"></InputNumber>
+                                            <InputNumber id="@idstring2" class="form-control" @bind-Value="@node.Pos.Y" @onchange="(args)=> { Update(); }"></InputNumber>
                                         </td>
                                         <td>
                                             <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @onchange="(args)=> { Update(); }"></InputText>
@@ -107,19 +107,43 @@
                                             <td>
 
                                                 <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
-                                                    <option default>Select Startnode</option>
+
+                                                    @if (edge.StartNode == null)
+                                                    {
+                                                        <option default selected="selected">Select Startnode</option>
+                                                    }
                                                     @foreach (var node in GraphModel.Nodes)
                                                     {
-                                                        <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
-                                                    }
+                                                        if (node == edge.EndNode) continue;
+                                                        if (edge.StartNode == node)
+                                                        {
+                                                            <option value="@node.Id" selected="selected">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        }
+                                                }
                                                 </select>
                                             </td>
                                             <td>
                                                 <select class="form-control" @onchange="(args) => { ChangedEndEdge(edge, args); }">
                                                     <option default>Select Endnode</option>
+                                                    @if (edge.EndNode == null)
+                                                    {
+                                                        <option default selected="selected">Select Startnode</option>
+                                                    }
                                                     @foreach (var node in GraphModel.Nodes)
                                                     {
-                                                        <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        if (node == edge.StartNode) continue;
+                                                        if (edge.EndNode == node)
+                                                        {
+                                                            <option value="@node.Id" selected="selected">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        }
                                                     }
                                                 </select>
                                             </td>
@@ -152,144 +176,142 @@
         </div>
     </div>
 @code {
-    private string FileToRead { get; set; }
-    private string[] Files { get; set; }
+        private string FileToRead { get; set; }
+        private string[] Files { get; set; }
 
-    private string collapseClass = "collapse";
-    BasicGraph basicGraph;
-    GraphDisplayParameters SVGMatrix { get; set; } = null;
-    BasicGraphModel GraphModel { get; set; }
+        private string collapseClass = "collapse";
+        BasicGraph basicGraph;
+        GraphDisplayParameters SVGMatrix { get; set; } = null;
+        BasicGraphModel GraphModel { get; set; }
 
-    private Point2 lastMousePos = new Point2();
+        private Point2 lastMousePos = new Point2();
 
-    protected override async Task OnInitializedAsync()
-    {
-        Files = await GraphService.GetGraphFilenames();
-        //GraphService.RefreshRequested += StateHasChanged;
-        GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
+        protected override async Task OnInitializedAsync()
         {
-            Path = "unnamedGraph",
+            Files = await GraphService.GetGraphFilenames();
+            //GraphService.RefreshRequested += StateHasChanged;
+            GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
+            {
+                Path = "unnamedGraph",
 
-            Nodes = new List<Node>() {
-                new Node { PosX = -10, PosY = -10, activeclass = "active", Id = 0, },
-                new Node { PosX = 10, PosY = 10, Id = 1},
+                Nodes = new List<Node>() {
+                new Node { Pos = new Point2(-10), activeclass = "active", Id = 0, },
+                new Node { Pos = new Point2(10), Id = 1},
             }
-        };
-    }
+            };
+        }
 
-    RenderFragment RenderGraph()
-    {
-        return new RenderFragment(builder =>
+        RenderFragment RenderGraph()
         {
-            builder.OpenComponent<BasicGraph>(0);
-            builder.AddAttribute(1, "VisualGraph", GraphModel);
-            builder.AddComponentReferenceCapture(2,
-                inst =>
-                {
-                    var basicGraph1 = (BasicGraph)inst;
-                    basicGraph = basicGraph1;
-                });
+            return new RenderFragment(builder =>
+            {
+                builder.OpenComponent<BasicGraph>(0);
+                builder.AddAttribute(1, "GraphModel", GraphModel);
+                builder.AddComponentReferenceCapture(2,
+                    inst =>
+                    {
+                        var basicGraph1 = (BasicGraph)inst;
+                        basicGraph = basicGraph1;
+                    });
 
-            builder.CloseComponent();
-        });
-    }
+                builder.CloseComponent();
+            });
+        }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        Files = await GraphService.GetGraphFilenames();
-        if (firstRender)
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            basicGraph.SvgClick += async (sender, args) =>
+            Files = await GraphService.GetGraphFilenames();
+            if (firstRender)
             {
-                if (GraphModel.ActiveNode != null)
+                basicGraph.SvgClick += async (sender, args) =>
                 {
-                    GraphModel.ActiveNode.activeclass = "";
-                }
-            };
-            basicGraph.SvgMouseWheel += async (sender, args) =>
-            {
-                BasicGraph graph = ((BasicGraph)sender);
-                SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                if (SVGMatrix != null)
-                {
-
-                    if (args.DeltaY > 0)
-                    {
-                        if (graph.SVGViewRect.ZoomLevel > 1/SvgViewRect.ZoomStep)
-                            graph.SVGViewRect.ZoomLevel -= 1/SvgViewRect.ZoomStep;
-                    }
-                    else
-                    {
-                        graph.SVGViewRect.ZoomLevel += 1/SvgViewRect.ZoomStep;
-                    }
-                }
-
-            };
-            basicGraph.SvgMouseMove += async (sender, args) =>
-            {
-                if (args.Buttons == 1)
-                {
-                    if (GraphModel.ActiveNode == null) return;
-                    SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                    if (SVGMatrix != null && GraphModel.ActiveNode.activeclass != "")
-                    {
-                        var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
-                        var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
-
-                        GraphModel.ActiveNode.PosX = deltaX;
-                        GraphModel.ActiveNode.PosY = deltaY;
-                    }
-                }
-                else if (args.Buttons == 2)
-                {
-                    MoveViewPoint(args);
-                }
-            };
-            basicGraph.SvgMouseUp += (sender, args) =>
-            {
-                Update();
-            };
-            basicGraph.NodeClick += (sender, args) =>
-            {
-                Node node = args.Target;
-                if (GraphModel.ActiveNode != null)
-                {
-                    if (GraphModel.ActiveNode.Id == node.Id)
-                    {
-                        node.activeclass = "";
-                    }
-                    else
+                    if (GraphModel.ActiveNode != null)
                     {
                         GraphModel.ActiveNode.activeclass = "";
+                    }
+                };
+                basicGraph.SvgMouseWheel += async (sender, args) =>
+                {
+                    BasicGraph graph = ((BasicGraph)sender);
+                    SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+                    if (SVGMatrix != null)
+                    {
+
+                        if (args.DeltaY > 0)
+                        {
+
+                            graph.SVGViewRect.ZoomOut();
+                        }
+                        else
+                        {
+                            graph.SVGViewRect.ZoomIn();
+                        }
+                    }
+
+                };
+                basicGraph.SvgMouseMove += async (sender, args) =>
+                {
+                    if (args.Buttons == 1)
+                    {
+                        if (GraphModel.ActiveNode == null) return;
+                        SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+                        if (SVGMatrix != null && GraphModel.ActiveNode.activeclass != "")
+                        {
+                            var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
+                            var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
+
+                            GraphModel.ActiveNode.Pos = new Point2(deltaX, deltaY);
+                        }
+                    }
+                    else if (args.Buttons == 2)
+                    {
+                        MoveViewPoint(args);
+                    }
+                };
+                basicGraph.SvgMouseUp += (sender, args) =>
+                {
+                    Update();
+                };
+                basicGraph.NodeClick += (sender, args) =>
+                {
+                    Node node = args.Target;
+                    if (GraphModel.ActiveNode != null)
+                    {
+                        if (GraphModel.ActiveNode.Id == node.Id)
+                        {
+                            node.activeclass = "";
+                        }
+                        else
+                        {
+                            GraphModel.ActiveNode.activeclass = "";
+                            node.activeclass = "active";
+                        }
+                    }
+                    else
+                    {
                         node.activeclass = "active";
                     }
-                }
-                else
-                {
-                    node.activeclass = "active";
-                }
-                Update();
-            };
-        }
+                    Update();
+                };
+            }
 
-    }
-    private async void OpenFile()
-    {
-        GraphModel = await GraphService.GetGraph(FileToRead);
-        Update();
-    }
-    private void AddNode()
-    {
-        if (GraphModel.ActiveNode != null)
-        {
-            GraphModel.ActiveNode.activeclass = "";
         }
-        Node activenode = new Node
+        private async void OpenFile()
         {
-            Id = GraphModel.Nodes.Max(x => x.Id) + 1,
-            PosX = 0,
-            PosY = 0,
-            activeclass = "active",
+            GraphModel = await GraphService.GetGraph(FileToRead);
+            Update();
+        }
+        private void AddNode()
+        {
+            if (GraphModel.ActiveNode != null)
+            {
+                GraphModel.ActiveNode.activeclass = "";
+            }
+            Node activenode = new Node
+            {
+                Id = GraphModel.Nodes.Max(x => x.Id) + 1,
+                Pos = new Point2(),
+                activeclass = "active",
         };
         GraphModel.Nodes.Add(activenode);
         Update();
@@ -304,8 +326,8 @@
         Edge newEdge = new Edge
         {
             Id = GraphModel.Edges.Count > 0 ? GraphModel.Edges.Max(x => x.Id) + 1 : 0,
-            StartNode = new Node() { PosX = 0, PosY = 0, Id = -1 },
-            EndNode = new Node() { PosX = 0, PosY = 0, Id = -1 },
+            StartNode = new Node() { Pos = new Point2(), Id = -1 },
+            EndNode = new Node() { Pos = new Point2(), Id = -1 },
             Weight = 0,
         };
         GraphModel.Edges.Add(newEdge);
@@ -347,14 +369,13 @@
 
     private async void MoveViewPoint(MouseEventArgs args)
     {
-        SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
-        if (SVGMatrix != null)
+        basicGraph.SVGMatrix = await GraphService.GetGraphDisplayParameters(basicGraph.GraphModel.Name);
+        if (basicGraph.SVGMatrix != null)
         {
-            var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
-            var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
 
-            basicGraph.SVGViewRect.Center.X = deltaX;
-            basicGraph.SVGViewRect.Center.Y = deltaY;
+            var deltaX = (args.ClientX - basicGraph.SVGMatrix.E) / basicGraph.SVGMatrix.A;
+            var deltaY = (args.ClientY - basicGraph.SVGMatrix.F) / basicGraph.SVGMatrix.D;
+            basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
         }
     }
     #endregion

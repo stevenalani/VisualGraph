@@ -6,10 +6,10 @@ namespace VisualGraph.Data.Additional.Models
 {
     public class Node
     {
-        public double PosX { get; internal set; }
-        public double PosY { get; internal set; }
-        public string PosXText => PosX.ToString(CultureInfo.InvariantCulture);
-        public string PosYText => PosY.ToString(CultureInfo.InvariantCulture);
+        public Point2 Pos { get; set; } = new Point2();
+
+        public string PosXText => Pos.X.ToString(CultureInfo.InvariantCulture);
+        public string PosYText => Pos.Y.ToString(CultureInfo.InvariantCulture);
 
         public string Name { get; internal set; }
         public int Id { get; internal set; }
@@ -18,26 +18,24 @@ namespace VisualGraph.Data.Additional.Models
         public static Node operator +(Node a,Node b) => new Node { 
             Id = -1,
             Name = "valueonly",
-            PosX = a.PosX + b.PosX,
-            PosY = a.PosY+ b.PosY,
+            Pos = a.Pos + b.Pos,
         };
         public static Node operator -(Node a, Node b){
             if(a == null){
-                a = new Node{PosX = 0, PosY = 0};
+                a = new Node { Pos = new Point2() };
             }
             if (b == null)
             {
-                b = new Node { PosX = 0, PosY = 0 };
+                b = new Node { Pos = new Point2() };
             }
             return new Node
             {
                 Id = -1,
                 Name = "valueonly",
-                PosX = a.PosX - b.PosX,
-                PosY = a.PosY - b.PosY,
+                Pos = a.Pos - b.Pos,
             };
         }
         
-        public double Distance => Math.Sqrt(PosX * PosX + PosY * PosY);
+        public double Distance => Math.Sqrt((Pos.X * Pos.X ) + (Pos.Y * Pos.Y));
     }
 }

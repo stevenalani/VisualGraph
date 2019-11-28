@@ -18,5 +18,6 @@ namespace VisualGraph.Data.Additional.Interfaces
 
         public Task<GraphDisplayParameters> GetGraphDisplayParameters(string graphid);
         public Task<GraphDisplayParameters> InitialGetGraphDisplayParameters(string graphid);
+        public Task<BasicGraphModel> LayoutGraph(BasicGraphModel graphModel);
     }
 }
