@@ -63,7 +63,7 @@
                             BasicGraph graph = ((BasicGraph)sender);
                             if (graph.GraphModel.ActiveNode != null)
                             {
-                                graph.GraphModel.ActiveNode.activeclass = "";
+                                graph.GraphModel.ActiveNode.IsActive = false;
                             }
                         };
                         basicGraph.SvgMouseWheel += async (sender, args) =>
@@ -103,7 +103,6 @@
                                     basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
                                 }
                             }
-                            StateHasChanged();
                         };
                         /*basicGraph.SvgMouseUp += async (sender, args) =>
                         {
@@ -127,17 +126,17 @@
                             {
                                 if (graph.GraphModel.ActiveNode.Id == node.Id)
                                 {
-                                    node.activeclass = "";
+                                    node.IsActive = false;
                                 }
                                 else
                                 {
-                                    graph.GraphModel.ActiveNode.activeclass = "";
-                                    node.activeclass = "active";
+                                    graph.GraphModel.ActiveNode.IsActive= false;
+                                    node.IsActive = true;
                                 }
                             }
                             else
                             {
-                                node.activeclass = "active";
+                                node.IsActive = true;
                             }
                             StateHasChanged();
                         };

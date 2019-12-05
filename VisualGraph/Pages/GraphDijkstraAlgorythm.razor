@@ -1,0 +1,245 @@
+﻿@page "/dijkstra"
+@using System.IO
+@using VisualGraph.Data
+@using Node = VisualGraph.Data.Additional.Models.Node
+@inject IGraphService GraphService
+<div class="flex-wrapper">
+    <div class="flex-wrapper-title">
+        <h3>Run Dijkstra Algorithm</h3>
+        <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
+            <div class="form-group">
+                <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraphPath">
+                    @foreach (var name in graphFilenames)
+                    {
+                        <option value="@name">@name</option>
+                    }
+                </InputSelect>
+                <button type="submit">Laden</button>
+            </div>
+            @if (basicGraph != null)
+            {
+                <div class="form-group">
+                    <button type="button" @onclick="@Crop">Crop View to Graph</button>
+                    <button type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                </div>
+                <div class="form-group ml-1">
+                    <button type="button" @onclick="@DikstraStep">Perform Step in Dikstra</button>
+                </div>
+            }
+        </EditForm>
+        
+    </div>
+    <hr />
+    <div class="left-container">
+        @RenderGraph()
+    </div>
+    <div class="right-container">
+        <div class="card">
+            <div class="card-body">
+                
+                @if(DikstraAlgorithmRunner?.Results != null)
+                {
+                    var headerEntries = DikstraAlgorithmRunner?.Results[0];
+                    <h5>Result Table</h5>
+                    <h4>Startnode: ID=@(headerEntries.StartNode.Id); Name=@(headerEntries.StartNode.Name)</h4>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Iteration</th>
+                                <th></th>
+                                <th>ID: @headerEntries.StartNode.Id Name:@headerEntries.StartNode.Name</th>
+                                @foreach (var resultEntries in headerEntries.Previous)
+                                {
+                                    <th>ID: @resultEntries.Key.Id, Name:@resultEntries.Key.Name</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var resultEntries in DikstraAlgorithmRunner?.Results)
+                            {
+                                <tr>
+                                    <td>@DikstraAlgorithmRunner?.StepCount</td>
+                                    <td>Cost</td>
+                                    <td>0</td>
+                                    @foreach (var result in resultEntries.Previous)
+                                    {
+                                        
+                                        if (resultEntries.Distances[result.Key] != double.PositiveInfinity)
+                                        {
+                                            <!--<td>String.Format("{0,0:0.00}", result.Value.Edges.First(x => x.StartNode == result.Key || x.EndNode == result.Key).Weight))</td>-->
+                                            <td>@(String.Format("{0,0:0.00}", resultEntries.Distances[result.Key]))</td>
+                                        }
+                                        else
+                                        {
+                                            <td> &infin;</td>
+                                        }
+                                    }
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Previous Node</td>
+                                    <td>-</td>
+                                    @foreach (var result in resultEntries.Previous)
+                                    {
+                                        if (result.Value != null)
+                                        {
+                                            <td>@result.Value.Name, @result.Value.Id</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                    }
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+            }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public class SelectGraphModel
+    {
+        public string CurrentGraphPath { get; set; }
+        public VisualGraph.Data.Additional.Models.BasicGraphModel Graph { get; set; }
+    }
+    DijkstraAlgorithm DikstraAlgorithmRunner;
+
+    SelectGraphModel model = new SelectGraphModel();
+    public string[] graphFilenames { get; set; }
+    private string[] graphPathes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var graphFilePathes = graphPathes = await GraphService.GetGraphFilenames();
+        graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).OrderBy(x => Path.GetFileNameWithoutExtension(x)).ToArray();
+        model.CurrentGraphPath = graphFilenames[0];
+        base.OnInitialized();
+    }
+
+    public async void HandleSelectChange()
+    {
+        var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraphPath));
+        var graphmodel = await GraphService.GetGraph(graphPath);
+        model.Graph = graphmodel;
+        DikstraAlgorithmRunner = null;
+
+        StateHasChanged();
+    }
+    private async Task LayoutGraph()
+    {
+        var resultGraph = GraphService.LayoutGraph(model.Graph);
+    }
+    private async Task Crop()
+    {
+        basicGraph.SVGViewRect.CropRect(basicGraph.GraphModel.ConvexHull[0].X, basicGraph.GraphModel.ConvexHull[0].Y, basicGraph.GraphModel.ConvexHull[1].X, basicGraph.GraphModel.ConvexHull[1].Y);
+    }
+
+    private async Task DikstraStep()
+    {
+        if (this.DikstraAlgorithmRunner == null)
+        {
+            if (model.Graph.ActiveNode != null)
+            {
+                DikstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, model.Graph.ActiveNode.Id);
+            }
+            else
+            {
+                DikstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph);
+            }
+        }
+        DikstraAlgorithmRunner.Step();
+    }
+    BasicGraph basicGraph;
+    RenderFragment RenderGraph()
+    {
+        return new RenderFragment(builder =>
+        {
+            if (model.Graph != null)
+            {
+                builder.OpenComponent<BasicGraph>(0);
+                builder.AddAttribute(1, "GraphModel", model.Graph);
+                builder.AddComponentReferenceCapture(2,
+                    inst =>
+                    {
+                        var basicGraph1 = (BasicGraph)inst;
+                        basicGraph = basicGraph1;
+                        basicGraph.SvgClick += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            if (graph.GraphModel.ActiveNode != null)
+                            {
+                                graph.GraphModel.ActiveNode.IsActive = false;
+                            }
+                        };
+                        //basicGraph.NodeClick += async (sender, args) =>
+                        //{};
+                        basicGraph.SvgMouseWheel += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
+                            if (graph.SVGMatrix != null)
+                            {
+
+                                if (args.DeltaY > 0)
+                                {
+                                    graph.SVGViewRect.ZoomOut();
+                                }
+                                else
+                                {
+                                    graph.SVGViewRect.ZoomIn();
+                                }
+                                var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
+                                var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
+                                basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
+                            }
+                        };
+                        basicGraph.SvgMouseMove += async (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            if (args.Buttons == 2)
+                            {
+                                graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
+                                if (graph.SVGMatrix != null)
+                                {
+                                    var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
+                                    var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
+                                    basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
+                                }
+                            }
+                        };
+                        basicGraph.NodeClick += (sender, args) =>
+                        {
+                            BasicGraph graph = ((BasicGraph)sender);
+                            Data.Additional.Models.Node node = args.Target;
+                            if (graph.GraphModel.ActiveNode != null)
+                            {
+                                if (graph.GraphModel.ActiveNode.Id == node.Id)
+                                {
+                                    node.IsActive = false;
+                                }
+                                else
+                                {
+                                    graph.GraphModel.ActiveNode.IsActive = false;
+                                    node.IsActive = true;
+                                }
+                            }
+                            else
+                            {
+                                node.IsActive = true;
+                            }
+                            StateHasChanged();
+                        };
+                    });
+
+                builder.CloseComponent();
+            }
+        });
+    }
+
+}

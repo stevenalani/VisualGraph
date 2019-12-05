@@ -15,7 +15,7 @@
         <div id="#collapseForm" class="right-container @collapseClass">
 
             <div class="card">
-                <div class="card card-body">
+                <div class="card-body">
                     <h5 class="card-title"><span class="oi oi-graph" aria-hidden="true"></span> Edit Graph Data</h5>
                     <EditForm @onchange="(args)=> { Update(); }" Model="@GraphModel">
                         <div class="form-group row">
@@ -78,7 +78,7 @@
                                         <td>
                                             <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @onchange="(args)=> { Update(); }"></InputText>
                                         </td>
-                                        <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphModel.Nodes.Remove(node); Update(); }"></button></td>
+                                        <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphModel.Edges.RemoveAll( x=> node.Edges.Contains(x)); GraphModel.Nodes.Remove(node); Update(); }"></button></td>
                                     </tr>
                                 }
                             </tbody>
@@ -176,142 +176,142 @@
         </div>
     </div>
 @code {
-        private string FileToRead { get; set; }
-        private string[] Files { get; set; }
+    private string FileToRead { get; set; }
+    private string[] Files { get; set; }
 
-        private string collapseClass = "collapse";
-        BasicGraph basicGraph;
-        GraphDisplayParameters SVGMatrix { get; set; } = null;
-        BasicGraphModel GraphModel { get; set; }
+    private string collapseClass = "collapse";
+    BasicGraph basicGraph;
+    GraphDisplayParameters SVGMatrix { get; set; } = null;
+    BasicGraphModel GraphModel { get; set; }
 
-        private Point2 lastMousePos = new Point2();
+    private Point2 lastMousePos = new Point2();
 
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        Files = await GraphService.GetGraphFilenames();
+        //GraphService.RefreshRequested += StateHasChanged;
+        GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
         {
-            Files = await GraphService.GetGraphFilenames();
-            //GraphService.RefreshRequested += StateHasChanged;
-            GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
-            {
-                Path = "unnamedGraph",
+            Path = "unnamedGraph",
 
-                Nodes = new List<Node>() {
-                new Node { Pos = new Point2(-10), activeclass = "active", Id = 0, },
+            Nodes = new List<Node>() {
+                new Node { Pos = new Point2(-10), IsActive = true, Id = 0, },
                 new Node { Pos = new Point2(10), Id = 1},
             }
+        };
+    }
+
+    RenderFragment RenderGraph()
+    {
+        return new RenderFragment(builder =>
+        {
+            builder.OpenComponent<BasicGraph>(0);
+            builder.AddAttribute(1, "GraphModel", GraphModel);
+            builder.AddComponentReferenceCapture(2,
+                inst =>
+                {
+                    var basicGraph1 = (BasicGraph)inst;
+                    basicGraph = basicGraph1;
+                });
+
+            builder.CloseComponent();
+        });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Files = await GraphService.GetGraphFilenames();
+        if (firstRender)
+        {
+            basicGraph.SvgClick += async (sender, args) =>
+            {
+                if (GraphModel.ActiveNode != null)
+                {
+                    GraphModel.ActiveNode.IsActive = false;
+                }
             };
-        }
-
-        RenderFragment RenderGraph()
-        {
-            return new RenderFragment(builder =>
+            basicGraph.SvgMouseWheel += async (sender, args) =>
             {
-                builder.OpenComponent<BasicGraph>(0);
-                builder.AddAttribute(1, "GraphModel", GraphModel);
-                builder.AddComponentReferenceCapture(2,
-                    inst =>
-                    {
-                        var basicGraph1 = (BasicGraph)inst;
-                        basicGraph = basicGraph1;
-                    });
-
-                builder.CloseComponent();
-            });
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            Files = await GraphService.GetGraphFilenames();
-            if (firstRender)
-            {
-                basicGraph.SvgClick += async (sender, args) =>
+                BasicGraph graph = ((BasicGraph)sender);
+                SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+                if (SVGMatrix != null)
                 {
-                    if (GraphModel.ActiveNode != null)
-                    {
-                        GraphModel.ActiveNode.activeclass = "";
-                    }
-                };
-                basicGraph.SvgMouseWheel += async (sender, args) =>
-                {
-                    BasicGraph graph = ((BasicGraph)sender);
-                    SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                    if (SVGMatrix != null)
+
+                    if (args.DeltaY > 0)
                     {
 
-                        if (args.DeltaY > 0)
-                        {
-
-                            graph.SVGViewRect.ZoomOut();
-                        }
-                        else
-                        {
-                            graph.SVGViewRect.ZoomIn();
-                        }
-                    }
-
-                };
-                basicGraph.SvgMouseMove += async (sender, args) =>
-                {
-                    if (args.Buttons == 1)
-                    {
-                        if (GraphModel.ActiveNode == null) return;
-                        SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                        if (SVGMatrix != null && GraphModel.ActiveNode.activeclass != "")
-                        {
-                            var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
-                            var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
-
-                            GraphModel.ActiveNode.Pos = new Point2(deltaX, deltaY);
-                        }
-                    }
-                    else if (args.Buttons == 2)
-                    {
-                        MoveViewPoint(args);
-                    }
-                };
-                basicGraph.SvgMouseUp += (sender, args) =>
-                {
-                    Update();
-                };
-                basicGraph.NodeClick += (sender, args) =>
-                {
-                    Node node = args.Target;
-                    if (GraphModel.ActiveNode != null)
-                    {
-                        if (GraphModel.ActiveNode.Id == node.Id)
-                        {
-                            node.activeclass = "";
-                        }
-                        else
-                        {
-                            GraphModel.ActiveNode.activeclass = "";
-                            node.activeclass = "active";
-                        }
+                        graph.SVGViewRect.ZoomOut();
                     }
                     else
                     {
-                        node.activeclass = "active";
+                        graph.SVGViewRect.ZoomIn();
                     }
-                    Update();
-                };
-            }
+                }
 
-        }
-        private async void OpenFile()
-        {
-            GraphModel = await GraphService.GetGraph(FileToRead);
-            Update();
-        }
-        private void AddNode()
-        {
-            if (GraphModel.ActiveNode != null)
+            };
+            basicGraph.SvgMouseMove += async (sender, args) =>
             {
-                GraphModel.ActiveNode.activeclass = "";
-            }
-            Node activenode = new Node
+                if (args.Buttons == 1)
+                {
+                    if (GraphModel.ActiveNode == null) return;
+                    SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
+                    if (SVGMatrix != null && GraphModel.ActiveNode.activeclass != "")
+                    {
+                        var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
+                        var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
+
+                        GraphModel.ActiveNode.Pos = new Point2(deltaX, deltaY);
+                    }
+                }
+                else if (args.Buttons == 2)
+                {
+                    MoveViewPoint(args);
+                }
+            };
+            basicGraph.SvgMouseUp += (sender, args) =>
             {
-                Id = GraphModel.Nodes.Max(x => x.Id) + 1,
-                Pos = new Point2(),
-                activeclass = "active",
+                Update();
+            };
+            basicGraph.NodeClick += (sender, args) =>
+            {
+                Node node = args.Target;
+                if (GraphModel.ActiveNode != null)
+                {
+                    if (GraphModel.ActiveNode.Id == node.Id)
+                    {
+                        node.IsActive = false;
+                    }
+                    else
+                    {
+                        GraphModel.ActiveNode.IsActive = false;
+                        node.IsActive = true;
+                    }
+                }
+                else
+                {
+                    node.IsActive = true;
+                }
+                //Update();
+            };
+        }
+
+    }
+    private async void OpenFile()
+    {
+        GraphModel = await GraphService.GetGraph(FileToRead);
+        Update();
+    }
+    private void AddNode()
+    {
+        if (GraphModel.ActiveNode != null)
+        {
+            GraphModel.ActiveNode.IsActive = false;
+        }
+        Node activenode = new Node
+        {
+            Id = GraphModel.Nodes.Max(x => x.Id) + 1,
+            Pos = new Point2(),
+            IsActive = true,
         };
         GraphModel.Nodes.Add(activenode);
         Update();
@@ -330,6 +330,8 @@
             EndNode = new Node() { Pos = new Point2(), Id = -1 },
             Weight = 0,
         };
+        newEdge.StartNode.Edges.Add(newEdge);
+        newEdge.EndNode.Edges.Add(newEdge);
         GraphModel.Edges.Add(newEdge);
         Update();
     }

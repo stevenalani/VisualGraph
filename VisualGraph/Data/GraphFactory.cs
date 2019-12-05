@@ -32,12 +32,19 @@ namespace VisualGraph.Data
 
             }).ToList();
 
-            var edges = iGraph.GetEdges().Select(e => new Edge
-            {
-                Id = Convert.ToInt32(e.Id),
-                StartNode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.Out).Id) == n.Id),
-                EndNode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.In).Id) == n.Id),
-                Weight = Convert.ToDouble(e.GetProperty("weight"))
+            var edges = iGraph.GetEdges().Select(e => {
+                var startnode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.Out).Id) == n.Id);
+                var endnode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.In).Id) == n.Id);
+                var edge = new Edge
+                {
+                    Id = Convert.ToInt32(e.Id),
+                    StartNode = startnode,
+                    EndNode = endnode,
+                    Weight = Convert.ToDouble(e.GetProperty("weight"))
+                };
+                startnode.Edges.Add(edge);
+                endnode.Edges.Add(edge);
+                return edge;
             }).ToList();
 
             BasicGraphModel graph = new BasicGraphModel()
