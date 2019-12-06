@@ -255,7 +255,7 @@
                 {
                     if (GraphModel.ActiveNode == null) return;
                     SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                    if (SVGMatrix != null && GraphModel.ActiveNode.activeclass != "")
+                    if (SVGMatrix != null && GraphModel.ActiveNode.Activeclass != "")
                     {
                         var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
                         var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;

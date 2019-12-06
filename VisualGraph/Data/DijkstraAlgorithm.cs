@@ -10,7 +10,8 @@ namespace VisualGraph.Data
     {
         List<Node> Q; 
         Node currentNode;
-        public Node StartNode;
+        public Node StartNode { get; private set; }
+        public Node EndNode { get; set; }
         Dictionary<Node, double> distances = new Dictionary<Node, double>();
         Dictionary<Node, Node> Previous = new Dictionary<Node, Node>();
         
@@ -68,5 +69,19 @@ namespace VisualGraph.Data
             }
             return Q.Count;
         }
+        public List<Node> GetShortestRoute()
+        {
+            List<Node> route = new List<Node>();
+            var currentNode = EndNode;
+            if(EndNode != null)
+            {
+                while(Previous[currentNode] != null)
+                {
+                    currentNode = Previous[currentNode];
+                    route.Prepend(Previous[currentNode]);
+                }
+            }
+            return route;
+        }        
     }
 }

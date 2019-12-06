@@ -19,8 +19,9 @@ namespace VisualGraph.Data.Additional.Models
 
         public string Name { get; internal set; }
         public int Id { get; internal set; }
-        
-        public string activeclass => IsActive? "active":"";
+
+        public string Classes = "";
+        public string Activeclass => IsActive? "active":"";
         public static Node operator +(Node a,Node b) => new Node { 
             Id = -1,
             Name = "valueonly",

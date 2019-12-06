@@ -24,6 +24,7 @@
                 </div>
                 <div class="form-group ml-1">
                     <button type="button" @onclick="@DikstraStep">Perform Step in Dikstra</button>
+                    <button type="button" @onclick="@DijkstraCheapestRoute" class="@(DijkstraAlgorithmRunner?.RemainingSteps < 1 ? "" : "hide")">Get the cheapest route</button>
                 </div>
             }
         </EditForm>
@@ -37,9 +38,9 @@
         <div class="card">
             <div class="card-body">
                 
-                @if(DikstraAlgorithmRunner?.Results != null)
+                @if(DijkstraAlgorithmRunner?.Results != null)
                 {
-                    var headerEntries = DikstraAlgorithmRunner?.Results[0];
+                    var headerEntries = DijkstraAlgorithmRunner?.Results[0];
                     <h5>Result Table</h5>
                     <h4>Startnode: ID=@(headerEntries.StartNode.Id); Name=@(headerEntries.StartNode.Name)</h4>
                     <table class="table table-bordered">
@@ -55,11 +56,11 @@
                             </tr>
                         </thead>
                         <tbody>
-
-                            @foreach (var resultEntries in DikstraAlgorithmRunner?.Results)
+                            @{ int StepCount = 1; }
+                            @foreach (var resultEntries in DijkstraAlgorithmRunner?.Results)
                             {
                                 <tr>
-                                    <td>@DikstraAlgorithmRunner?.StepCount</td>
+                                    <td>@(StepCount++)</td>
                                     <td>Cost</td>
                                     <td>0</td>
                                     @foreach (var result in resultEntries.Previous)
@@ -96,6 +97,30 @@
 
                         </tbody>
                     </table>
+                    <div>
+                        @if (ShortestRouteToEndnode != null)
+                        {
+                        <h5>The Shortest Route from @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) to @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
+                                    {
+                                        <th>Node @i</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    @foreach (var node in ShortestRouteToEndnode)
+                                    {
+                                        <td>@node.Id @node.Name</td>
+                                    }
+                                </tr>
+                            </tbody>
+                        </table>
+                        }
+                    </div>
             }
             </div>
         </div>
@@ -108,7 +133,8 @@
         public string CurrentGraphPath { get; set; }
         public VisualGraph.Data.Additional.Models.BasicGraphModel Graph { get; set; }
     }
-    DijkstraAlgorithm DikstraAlgorithmRunner;
+    DijkstraAlgorithm DijkstraAlgorithmRunner;
+    List<Node> ShortestRouteToEndnode;
 
     SelectGraphModel model = new SelectGraphModel();
     public string[] graphFilenames { get; set; }
@@ -127,7 +153,7 @@
         var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraphPath));
         var graphmodel = await GraphService.GetGraph(graphPath);
         model.Graph = graphmodel;
-        DikstraAlgorithmRunner = null;
+        DijkstraAlgorithmRunner = null;
 
         StateHasChanged();
     }
@@ -142,18 +168,27 @@
 
     private async Task DikstraStep()
     {
-        if (this.DikstraAlgorithmRunner == null)
+        if (this.DijkstraAlgorithmRunner == null)
         {
             if (model.Graph.ActiveNode != null)
             {
-                DikstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, model.Graph.ActiveNode.Id);
+                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, model.Graph.ActiveNode.Id);
             }
             else
             {
-                DikstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph);
+                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph);
             }
         }
-        DikstraAlgorithmRunner.Step();
+        DijkstraAlgorithmRunner.Step();
+    }
+
+    private async Task DijkstraCheapestRoute()
+    {
+        var endnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"));
+        if (endnode == null) return;
+        DijkstraAlgorithmRunner.EndNode = endnode;
+        ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute();
+        StateHasChanged();
     }
     BasicGraph basicGraph;
     RenderFragment RenderGraph()
@@ -169,6 +204,15 @@
                     {
                         var basicGraph1 = (BasicGraph)inst;
                         basicGraph = basicGraph1;
+                        basicGraph.NodeMouseDown += async (sender, args) =>
+                        {
+                            if(args.MouseEventArgs.Buttons == 2)
+                            {
+                                var currentEndnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"));
+                                currentEndnode?.Classes.Replace("endnode", "");
+                                args.Target.Classes = args.Target.Classes.Contains("endnode") ? args.Target.Classes.Replace("endnode","") : "endnode";
+                            }
+                        };
                         basicGraph.SvgClick += async (sender, args) =>
                         {
                             BasicGraph graph = ((BasicGraph)sender);
@@ -235,6 +279,8 @@
                             }
                             StateHasChanged();
                         };
+
+
                     });
 
                 builder.CloseComponent();
