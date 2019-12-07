@@ -6,21 +6,25 @@ using System.Threading.Tasks;
 
 namespace VisualGraph.Data.Additional.Models
 {
-    public class Node
+    public class Node : ICSSProperties
     {
+        public Node()
+        {
+            Classes = new List<string>(); 
+        }
         public Point2 Pos { get; set; } = new Point2();
         public List<Edge> Edges = new List<Edge>();
         public bool IsActive;
 
-        internal List<Node> Neighbours => Edges.SelectMany( x => new[]{ x.StartNode, x.EndNode }).Where(x => x != this).ToList();
+        internal List<Node> Neighbours => Edges.SelectMany(x => new[] { x.StartNode, x.EndNode }).Where(x => x != this).ToList();
 
         public string PosXText => Pos.X.ToString(CultureInfo.InvariantCulture);
         public string PosYText => Pos.Y.ToString(CultureInfo.InvariantCulture);
 
         public string Name { get; internal set; }
-        public int Id { get; internal set; }
+        public int Id { get; set; }
 
-        public string Classes = "";
+        public List<string> Classes { get; set; }
         public string Activeclass => IsActive? "active":"";
         public static Node operator +(Node a,Node b) => new Node { 
             Id = -1,
@@ -44,5 +48,6 @@ namespace VisualGraph.Data.Additional.Models
         }
         
         public double Distance => Math.Sqrt((Pos.X * Pos.X ) + (Pos.Y * Pos.Y));
+
     }
 }

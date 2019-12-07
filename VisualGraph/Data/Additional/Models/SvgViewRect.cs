@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace VisualGraph.Data.Additional.Models
 {
     public class SvgViewRect
-    {   public static double ZoomStep { get; set; } = 1.5;
+    {   public static double ZoomStep { get; set; } = 0.5;
         public static double MaxZoomLevel { get; set; } = 200;
         private double Width { get; set; }
         private double Height { get; set; }

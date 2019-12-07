@@ -50,13 +50,14 @@ namespace VisualGraph.Data
                 Previous[neighbour] = currentNode;
             }
         }
-        public int Step()
+        public int Iterate(bool auto = false)
         {
-            if(Q.Count > 0)
+            
+            while (Q.Count > 0)
             {
                 StepCount++;
                 var minval = distances.Where( d=> Q.Contains(d.Key)).Min(d => d.Value);
-                currentNode = Q.First(x => x == distances.First(d => d.Value == minval).Key);
+                currentNode = Q.First(x => x == distances.FirstOrDefault(d => d.Value == minval && d.Key == x).Key);
                 Q.Remove(currentNode);
                 foreach(var neighbour in currentNode.Neighbours)
                 {
@@ -66,19 +67,24 @@ namespace VisualGraph.Data
                     }
                 }
                 Results.Add(new DijkstraResultTuple(StartNode, new Dictionary<Node,Node>(Previous), new Dictionary<Node,double>(distances)));
+                if (!auto)
+                    break;
             }
             return Q.Count;
         }
         public List<Node> GetShortestRoute()
         {
             List<Node> route = new List<Node>();
-            var currentNode = EndNode;
+            
             if(EndNode != null)
             {
-                while(Previous[currentNode] != null)
+                Node currentNode = EndNode;
+                while(currentNode != null)
                 {
-                    currentNode = Previous[currentNode];
-                    route.Prepend(Previous[currentNode]);
+                        route.Insert(0, currentNode);
+                    if (currentNode == StartNode)
+                        break;
+                    Previous.TryGetValue(currentNode,out currentNode);
                 }
             }
             return route;

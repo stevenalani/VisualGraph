@@ -128,6 +128,7 @@ app {
 .right-container {
     /*background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 70%);
     flex: 1;*/
+    max-width:50%;
     height: calc(100vh - 100px) !important;
     overflow: hidden scroll
 }
@@ -162,6 +163,9 @@ svg text {
     -ms-user-select: none;
     user-select: none;
     pointer-events: none;
+}
+.hide{
+    display:none;
 }
 circle.active{
     fill:rgba(0,79,224,0.7);
