@@ -1,0 +1,51 @@
+﻿@using VisualGraph.Data
+<div class="GraphConsole w-100">
+    <p>@introMessage</p>
+    <textarea rows="7" class="w-100" disabled>
+        @foreach(string s in OutputText)
+        {
+            @(s + "\n");
+        }
+    </textarea>
+    <EditForm Model="@Inputline" OnSubmit="@executeCommand">
+        <InputText @bind-Value="@Inputline" @onkeydown="@clearCommand" class="w-100" />
+    </EditForm>
+    
+
+</div>
+@code {
+        static string introMessage = "Commands: add [ node ( name:string ) | edge ( startNodeId:int endNodeId:int weight:double ) ] \r\n"
+            +"example: add edge 0, 1, 13.50";
+
+    [Parameter]
+    public BasicGraphModel Graph { get; set; }
+
+    string Inputline { get; set; } = "";
+    List<string> OutputText = new List<string>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        GraphCommandProcessor.model = Graph;
+        Clear();
+    }
+
+    private void Clear() {
+        if (Graph != null)
+            OutputText = new List<string>() { $"Working on graph {Graph.Name}\n" };
+        else
+            OutputText = new List<string>() { $"You're currently not working on a graph!\n" };
+        StateHasChanged();
+    }
+    private void clearCommand(KeyboardEventArgs args)
+    {
+        if(args.AltKey && args.Key == "c")
+        {
+            Clear();
+        }
+    }
+    private void executeCommand()
+    {
+        GraphCommandProcessor.Process(Inputline);
+        StateHasChanged();
+    }
+}

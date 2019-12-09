@@ -6,7 +6,7 @@ using VisualGraph.Data.Additional.Models;
 
 namespace VisualGraph.Data
 {
-    public class DijkstraAlgorithm
+    public class DijkstraAlgorithm : IGraphAlgorithm
     {
         List<Node> Q; 
         Node currentNode;
@@ -18,7 +18,9 @@ namespace VisualGraph.Data
         public int StepCount;
         public List<DijkstraResultTuple> Results = new List<DijkstraResultTuple>();
         public int RemainingSteps => Q.Count;
-        
+
+        public string Name => "Dijkstra Algorithm";
+
         public DijkstraAlgorithm( BasicGraphModel model,int startNodeId = -1)
         {
             StepCount = 0;
@@ -89,5 +91,12 @@ namespace VisualGraph.Data
             }
             return route;
         }        
+    }
+
+    public interface IGraphAlgorithm
+    {
+        public List<Node> GetShortestRoute();
+        public int Iterate(bool auto = false);
+        public string Name { get; }
     }
 }
