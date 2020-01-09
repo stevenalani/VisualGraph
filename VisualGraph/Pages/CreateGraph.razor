@@ -1,6 +1,8 @@
 ﻿@page "/CreateGraph"
 @using System.IO
+@using VisualGraph.Components.Additional.Interfaces
 @inject IGraphService GraphService
+@implements IRefreshableParent
 
     <div class="flex-wrapper">
         <div class="flex-wrapper-title">
@@ -174,7 +176,7 @@
                 </div>
             </div>
         </div>
-        <GraphConsole Graph="@GraphModel"></GraphConsole>
+        <GraphConsole Graph="@GraphModel" Parent="@this"></GraphConsole>
     </div>
 @code {
     private string FileToRead { get; set; }
@@ -224,6 +226,17 @@
         Files = await GraphService.GetGraphFilenames();
         if (firstRender)
         {
+            basicGraph.SvgKeyDown += async (sender, args) =>
+            {
+                if (args.CtrlKey && args.Key == "+")
+                {
+                    ((BasicGraph)sender).SVGViewRect.ZoomIn();
+                }
+                if (args.CtrlKey && args.Key == "-")
+                {
+                    ((BasicGraph)sender).SVGViewRect.ZoomOut();
+                }
+            };
             basicGraph.SvgClick += async (sender, args) =>
             {
                 if (GraphModel.ActiveNode != null)
@@ -297,6 +310,7 @@
         }
 
     }
+
     private async void OpenFile()
     {
         GraphModel = await GraphService.GetGraph(FileToRead);
@@ -337,9 +351,10 @@
         Update();
     }
 
-    private void Update()
+    private async void Update()
     {
         StateHasChanged();
+        await basicGraph.ChangedState();
     }
 
     private void SaveGraph()
@@ -356,6 +371,11 @@
         }
         GraphService.SaveGraph(GraphModel, GraphModel.Name);
 
+    }
+
+    public void Refresh()
+    {
+        StateHasChanged();
     }
 
     #region EventHandling

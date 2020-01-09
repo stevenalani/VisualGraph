@@ -1,5 +1,6 @@
 ﻿@using VisualGraph.Data
-<div class="GraphConsole w-100">
+@using VisualGraph.Components.Additional.Interfaces
+<div class="graphconsole w-100">
     <p>@introMessage</p>
     <textarea rows="7" class="w-100" disabled>
         @foreach(string s in OutputText)
@@ -14,11 +15,14 @@
 
 </div>
 @code {
-        static string introMessage = "Commands: add [ node ( name:string ) | edge ( startNodeId:int endNodeId:int weight:double ) ] \r\n"
-            +"example: add edge 0, 1, 13.50";
+    static string introMessage = "Commands: add [ node ( name:string ) | edge ( startNodeId:int endNodeId:int weight:double ) ] \r\n"
+        +"example: add edge 0, 1, 13.50";
 
     [Parameter]
     public BasicGraphModel Graph { get; set; }
+
+    [Parameter]
+    public IRefreshableParent Parent { get; set; }
 
     string Inputline { get; set; } = "";
     List<string> OutputText = new List<string>();
@@ -45,7 +49,9 @@
     }
     private void executeCommand()
     {
-        GraphCommandProcessor.Process(Inputline);
+        var result = GraphCommandProcessor.Process(Inputline);
+        OutputText.Add(result);
+        Parent.Refresh();
         StateHasChanged();
     }
 }

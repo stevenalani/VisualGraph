@@ -44,5 +44,10 @@ window.getAllSVGTransformationMatrices = function () {
     return cout;
 };
 $(document).ready(() => {
-    $(document).on("contextmenu", (e) => { e.preventDefault(); return false });
+    $(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
+    $("svg").on("keydown", (e) => {
+        if (e.ctrlKey && (e.key == "+" || e.key == "-")) {
+            e.preventDefault();
+        }
+    });
 });

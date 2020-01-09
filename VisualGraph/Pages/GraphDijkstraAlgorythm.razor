@@ -219,6 +219,7 @@
 
     private async Task DijkstraCheapestRoute()
     {
+        PathCost = 0;
         string vgpathclass = " vgpath";
         var endnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"));
         if (endnode == null) return;

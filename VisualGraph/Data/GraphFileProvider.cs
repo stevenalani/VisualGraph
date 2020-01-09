@@ -56,7 +56,7 @@ namespace VisualGraph.Data
             if (extension == string.Empty)
                 filepath += ".xml";
             var tinkergraph = ReadGraphMl(filepath);
-            var graph = _graphFactory.ConverToBasicGraph(tinkergraph);
+            var graph = _graphFactory.ConvertToBasicGraph(tinkergraph);
             graph.Path = filepath;
             return graph;   
         }

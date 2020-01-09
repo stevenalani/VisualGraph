@@ -11,7 +11,7 @@
          @onmouseup="@OnSvgMouseUp"
          @onmousedown="@OnSvgMouseDown"
          @onmousewheel="@OnSvgMouseWheel"
-         @onkeypress="@OnSvgKeyDown">
+         @onkeydown="@OnSvgKeyDown">
         @SVGViewRect.GetDisplayInformationMarkupString(GraphStyleParameters)
         @CoordinateAxis.GenerateForGraphRange(GraphModel.ConvexHull[0].X, GraphModel.ConvexHull[0].Y, GraphModel.ConvexHull[1].X, GraphModel.ConvexHull[1].Y);
         @if (activenode != null)
@@ -61,10 +61,6 @@
     [Parameter]
     public VisualGraph.Data.Additional.Models.BasicGraphModel GraphModel { get; set; }
 
-    protected override async Task OnParametersSetAsync()
-    {
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstrender)
     {
         if (firstrender)
@@ -74,10 +70,12 @@
                 if (args.CtrlKey && args.Key == "+")
                 {
                     SVGViewRect.TextSize += 0.1;
+                    SVGViewRect.ZoomIn();
                 }
                 if (args.CtrlKey && args.Key == "-")
                 {
                     SVGViewRect.TextSize -= 0.1;
+                    SVGViewRect.ZoomOut();
                 }
             };
             SVGMatrix = await GraphServeice.InitialGetGraphDisplayParameters(GraphModel.Name);

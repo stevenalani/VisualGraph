@@ -13,11 +13,18 @@ namespace VisualGraph.Data
         public static BasicGraphModel model { get; set; }
         public static string Process(string input)
         {
-            var command = GraphCommandInterpreter.InterpretCommand(input);
-            if (command == null) return "command was not found";
-            GraphCommandInterpreter.InterpretAndSetCommandParameters(command, input);   
-            command.Invoke(model);
-            return "done CHANGE THIS RETURN";
+            try
+            {
+                var command = GraphCommandInterpreter.InterpretCommand(input);
+                if (command == null) return $"No command was not found in {input}";
+                GraphCommandInterpreter.InterpretAndSetCommandParameters(command, input);
+                command.Invoke(model);
+                return "Done: "+input;
+            }
+            catch(Exception e)
+            {
+                return $"there went something wrong! please check your input: {input}";
+            }
         }
     }
     public static class GraphCommandInterpreter

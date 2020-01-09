@@ -9,7 +9,7 @@ namespace VisualGraph.Data
 {
     public class GraphFactory
     {
-        public BasicGraphModel ConverToBasicGraph(IGraph iGraph)
+        public BasicGraphModel ConvertToBasicGraph(IGraph iGraph)
         {
             var nodeCnt = 0;
             var posxdefault = 0;
