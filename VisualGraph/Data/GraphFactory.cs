@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using VisualGraph.Data.Additional.Models;
 
@@ -27,7 +28,7 @@ namespace VisualGraph.Data
                 {
                     Id = Convert.ToInt32(v.Id),
                     Name = nameProp.ToString(),
-                    Pos = new Point2(Convert.ToDouble(posxProp.ToString()), Convert.ToDouble(posyProp.ToString()))
+                    Pos = new Vector2(Convert.ToSingle(posxProp.ToString()), Convert.ToSingle(posyProp.ToString()))
                 };
 
             }).ToList();

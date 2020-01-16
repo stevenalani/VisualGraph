@@ -30,7 +30,7 @@ namespace VisualGraph.Data.Additional.Models
         float minX => Nodes.Min(x => (int)Math.Ceiling(x.Pos.X ));
         float maxY => Nodes.Max(x => (int)Math.Ceiling(x.Pos.Y));
         float minY => Nodes.Min(x => (int)Math.Ceiling(x.Pos.Y));
-        public Point2[] ConvexHull => new[] { new Point2(minX, minY), new Point2(maxX, maxY) };
+        public Vector2[] ConvexHull => new[] { new Vector2(minX, minY), new Vector2(maxX, maxY) };
 
     }
 }

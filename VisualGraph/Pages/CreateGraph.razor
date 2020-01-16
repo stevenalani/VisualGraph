@@ -1,6 +1,5 @@
 ﻿@page "/CreateGraph"
 @using System.IO
-@using VisualGraph.Components.Additional.Interfaces
 @inject IGraphService GraphService
 @implements IRefreshableParent
 
@@ -13,200 +12,24 @@
         <div class="left-container">
             @RenderGraph()
         </div>
-        <a class="btn toggler" @onclick="@((args) => { collapseClass = collapseClass == "" ? "collapse" : ""; Update(); })"><span class="oi oi-expand-@(collapseClass == ""?"left":"right")"></span><span class="btn-text"> @(collapseClass == "" ? "CLOSE" : "OPEN")</span></a>
-        <div id="#collapseForm" class="right-container @collapseClass">
-
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title"><span class="oi oi-graph" aria-hidden="true"></span> Edit Graph Data</h5>
-                    <EditForm @onchange="(args)=> { Update(); }" Model="@GraphModel">
-                        <div class="form-group row">
-                            <label for="GraphName" class="col-form-label">File Name:</label>
-                            <div class="col">
-                                <InputText id="GraphName" class="form-control" @bind-Value="@GraphModel.Path"></InputText>
-                            </div>
-                        </div>
-                        <hr />
-                        @if (GraphModel.ActiveNode != null)
-                        {
-                            <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Active node</h5>
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td>Pos X:</td>
-                                        <td>
-                                            <InputNumber id="ActiveNodeX" class="form-control" @bind-Value="@GraphModel.ActiveNode.Pos.X"></InputNumber>
-                                        </td>
-                                        <td>Pos Y:</td>
-                                        <td>
-                                            <InputNumber id="ActiveNodeY" class="form-control" @bind-Value="@GraphModel.ActiveNode.Pos.Y"></InputNumber>
-                                        </td>
-                                        <td>Name</td>
-                                        <td>
-                                            <InputText id="ActiveNodeName" class="form-control" @bind-Value="@GraphModel.ActiveNode.Name"></InputText>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        }
-
-                        <hr />
-                        <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Edit All Nodes</h5>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Node Id</th>
-                                    <th>Pos X</th>
-                                    <th>Pos Y</th>
-                                    <th>Name</th>
-                                    <th>Deleate</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var node in GraphModel.Nodes)
-                                {
-
-                                    var idstring1 = $"NodeX_{node.Id}";
-                                    var idstring2 = $"NodeY_{node.Id}";
-                                    var idstring3 = $"NodeName_{node.Id}";
-                                    <tr>
-                                        <td><span class="form-control">@node.Id:</span></td>
-                                        <td>
-                                            <InputNumber id="@idstring1" class="form-control" @bind-Value="@node.Pos.X" @onchange="(args)=> { Update(); }"></InputNumber>
-                                        </td>
-                                        <td>
-                                            <InputNumber id="@idstring2" class="form-control" @bind-Value="@node.Pos.Y" @onchange="(args)=> { Update(); }"></InputNumber>
-                                        </td>
-                                        <td>
-                                            <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @onchange="(args)=> { Update(); }"></InputText>
-                                        </td>
-                                        <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphModel.Edges.RemoveAll( x=> node.Edges.Contains(x)); GraphModel.Nodes.Remove(node); Update(); }"></button></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Add new Node</button>
-                        <hr />
-                        <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Edit All Edges</h5>
-                        @if (GraphModel.Edges.Count > 0)
-                        {
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Edge Id</th>
-                                        <th>Start Node</th>
-                                        <th>End Node</th>
-                                        <th>Weight</th>
-                                        <th>Distance</th>
-                                        <th>Deleate</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var edge in GraphModel.Edges)
-                                    {
-                                        <tr>
-                                            <td><span class="form-control">@edge.Id:</span></td>
-                                            <td>
-
-                                                <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
-                                                    @if (edge.StartNode == null)
-                                                    {
-                                                        <option default selected="selected">Select Startnode</option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option default>Select Startnode</option>
-                                                    }
-                                                    @foreach (var node in GraphModel.Nodes)
-                                                    {
-                                                        if (node == edge.EndNode) continue;
-                                                        if (edge.StartNode == node)
-                                                        {
-                                                            <option value="@node.Id" selected="selected">@($"id:{node.Id}; name:{node.Name}")</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
-                                                        }
-                                                    }
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select class="form-control" @onchange="(args) => { ChangedEndEdge(edge, args); }">
-                                                    
-                                                    @if (edge.EndNode == null)
-                                                    {
-                                                        <option default selected="selected">Select Endnode</option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option default>Select Endnode</option>
-                                                    }
-                                                    @foreach (var node in GraphModel.Nodes)
-                                                    {
-                                                        if (node == edge.StartNode) continue;
-                                                        if (edge.EndNode == node)
-                                                        {
-                                                            <option value="@node.Id" selected="selected">@($"id:{node.Id}; name:{node.Name}")</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
-                                                        }
-                                                    }
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <InputNumber class="form-control" @bind-Value="@edge.Weight"></InputNumber>
-                                            </td>
-                                            <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" /></td>
-                                            <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphModel.Edges.Remove(edge);Update(); }"></button></td>
-
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                        <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Add new Edge</button>
-                        <hr />
-                        <button type="button" class="btn btn-outline-info" @onclick="@SaveGraph"><span class="oi oi-data-transfer-download"></span> Save Graph </button>
-                        <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Load</button>
-                        <select class="form-control" @onchange="@((args) => { FileToRead = args.Value.ToString(); })">
-                            <option default>Select a Graph</option>
-                            @foreach (var file in Files)
-                                {
-                                    <option value="@file">@file</option>
-                                }
-
-                        </select>
-                    </EditForm>
-                </div>
-            </div>
-        </div>
-        <GraphConsole Graph="@GraphModel" Parent="@this"></GraphConsole>
+        <GraphEditForm GraphModel="@GraphModel" Parent="@this" />       
+        <GraphConsole Graph="@GraphModel" Parent="@this" />
     </div>
 @code {
-    private string FileToRead { get; set; }
-    private string[] Files { get; set; }
-
-    private string collapseClass = "collapse";
     BasicGraph basicGraph;
-    GraphDisplayParameters SVGMatrix { get; set; } = null;
     BasicGraphModel GraphModel { get; set; }
 
-    private Point2 lastMousePos = new Point2();
 
     protected override async Task OnInitializedAsync()
     {
-        Files = await GraphService.GetGraphFilenames();
         //GraphService.RefreshRequested += StateHasChanged;
         GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
         {
             Path = "unnamedGraph",
 
             Nodes = new List<Node>() {
-                new Node { Pos = new Point2(-10), IsActive = true, Id = 0, },
-                new Node { Pos = new Point2(10), Id = 1},
+                new Node { Pos = new Vector2(-10), IsActive = true, Id = 0, },
+                new Node { Pos = new Vector2(10), Id = 1},
             }
         };
     }
@@ -230,7 +53,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Files = await GraphService.GetGraphFilenames();
+        //Files = await GraphService.GetGraphFilenames();
         if (firstRender)
         {
             basicGraph.SvgClick += async (sender, args) =>
@@ -258,15 +81,18 @@
             {
                 if (GraphModel.ActiveNode != null && basicGraph.NodeDragStarted)
                 {
-
-                    Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
-                    GraphModel.ActiveNode.Pos = new Point2(coords.X, coords.Y);
+                    try
+                    {
+                        Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
+                        GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
+                        GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
+                    }
+                    catch { }
                 }
             };
             basicGraph.SvgMouseUp += (sender, args) =>
             {
-
-                Update();
+                Refresh();
             };
             basicGraph.NodeClick += (sender, args) =>
             {
@@ -289,112 +115,18 @@
                 }
             };
         }
-
     }
 
-    private async void OpenFile()
-    {
-        GraphModel = await GraphService.GetGraph(FileToRead);
-        Update();
-    }
-    private void AddNode()
-    {
-        if (GraphModel.ActiveNode != null)
-        {
-            GraphModel.ActiveNode.IsActive = false;
-        }
-        Node activenode = new Node
-        {
-            Id = GraphModel.Nodes.Max(x => x.Id) + 1,
-            Pos = new Point2(),
-            IsActive = true,
-        };
-        GraphModel.Nodes.Add(activenode);
-        Update();
-    }
-    protected override async void OnAfterRender(bool firstRender)
-    {
-        SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
-    }
-
-    private void AddEdge()
-    {
-        Edge newEdge = new Edge
-        {
-            Id = GraphModel.Edges.Count > 0 ? GraphModel.Edges.Max(x => x.Id) + 1 : 0,
-            StartNode = null,
-            EndNode = null,
-            Weight = 0,
-        };
-        GraphModel.Edges.Add(newEdge);
-        Update();
-    }
-
-    private async void Update()
+    public async void Refresh()
     {
         StateHasChanged();
         await basicGraph.ChangedState();
     }
-
-    private void SaveGraph()
+    public async void Refresh(BasicGraphModel graph)
     {
-        var wrongEdges = GraphModel.Edges.Where(x => x.StartNode.Id == -1 || x.EndNode.Id == -1).ToList();
-        var wrongNodes = GraphModel.Nodes.Where(x => x.Id == -1).ToList();
-        foreach (var node in wrongNodes)
-        {
-            GraphModel.Nodes.Remove(node);
-        }
-        foreach (var edge in wrongEdges)
-        {
-            GraphModel.Edges.Remove(edge);
-        }
-        GraphService.SaveGraph(GraphModel, GraphModel.Name);
-
-    }
-
-    public void Refresh()
-    {
+        this.GraphModel = graph;
         StateHasChanged();
+        await basicGraph.ChangedState();
     }
-
-    #region EventHandling
-    private void ChangedEndEdge(Edge edge, ChangeEventArgs args)
-    {
-        try
-        {
-            edge.EndNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
-        }
-        catch
-        {
-            edge.EndNode = null;
-        }
-
-        Update();
-    }
-    private void ChangedStartEdge(Edge edge, ChangeEventArgs args)
-    {
-        try
-        {
-            edge.StartNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
-        }
-        catch
-        {
-            edge.StartNode = null;
-        }
-        Update();
-    }
-
-    private async void MoveViewPoint(MouseEventArgs args)
-    {
-        basicGraph.SVGMatrix = await GraphService.GetGraphDisplayParameters(basicGraph.GraphModel.Name);
-        if (basicGraph.SVGMatrix != null)
-        {
-
-            var deltaX = (args.ClientX - basicGraph.SVGMatrix.E) / basicGraph.SVGMatrix.A;
-            var deltaY = (args.ClientY - basicGraph.SVGMatrix.F) / basicGraph.SVGMatrix.D;
-            basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
-        }
-    }
-    #endregion
 }
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace VisualGraph.Data.Additional.Models
@@ -14,11 +15,11 @@ namespace VisualGraph.Data.Additional.Models
         private double Height { get; set; }
         public double ZoomedWidth => Width / ZoomLevel;
         public double ZoomedHeight => Height / ZoomLevel;
-        public Point2 Center { get; set; } = new Point2();
+        public Vector2 Center;
         private double ZoomLevel { get; set; } = 1.0;
         public double TextSize { get; set; } = 10;
         public bool HideInformation { get; set; } = false;
-        private Point2 UpperLeft => new Point2(Center.X - (ZoomedWidth/ 2) , Center.Y - (ZoomedHeight/ 2) );
+        private Vector2 UpperLeft => new Vector2((float)(Center.X - (ZoomedWidth/ 2)) , (float)(Center.Y - (ZoomedHeight/ 2) ));
        
         public void CropRect(double minX, double minY, double maxX,double maxY)
         {
@@ -28,7 +29,7 @@ namespace VisualGraph.Data.Additional.Models
                 ZoomLevel = Width / width;
             else
                 ZoomLevel = Height / height;
-            Center = new Point2(width / 2, height / 2);
+            Center = new Vector2((float)width / 2, (float)height / 2);
         }
         public void SetHeight(double height)
         {
@@ -44,11 +45,11 @@ namespace VisualGraph.Data.Additional.Models
             var upperlefty = UpperLeft.Y;
             if (x > upperleftx && x < upperleftx + ZoomedWidth)
             {
-                Center.X = x;
+                Center.X = (float)x;
             }
             if (y > upperlefty && y < upperlefty + ZoomedHeight)
             {
-                Center.Y = y;
+                Center.Y = (float)y;
             }
         }
         public string ViewBox => $"{(UpperLeft.X).ToString(CultureInfo.InvariantCulture)}," +

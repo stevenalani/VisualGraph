@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace VisualGraph.Data.Additional.Models
@@ -12,7 +13,7 @@ namespace VisualGraph.Data.Additional.Models
         {
             Classes = new List<string>(); 
         }
-        public Point2 Pos { get; set; } = new Point2();
+        public Vector2 Pos = new Vector2();
         public List<Edge> Edges = new List<Edge>();
         public bool IsActive;
 
@@ -33,11 +34,11 @@ namespace VisualGraph.Data.Additional.Models
         };
         public static Node operator -(Node a, Node b){
             if(a == null){
-                a = new Node { Pos = new Point2() };
+                a = new Node { Pos = new Vector2() };
             }
             if (b == null)
             {
-                b = new Node { Pos = new Point2() };
+                b = new Node { Pos = new Vector2() };
             }
             return new Node
             {

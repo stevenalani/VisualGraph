@@ -91,7 +91,7 @@ namespace VisualGraph.Data
                 var x = rand.NextDouble() + Convert.ToDouble(rand.Next(fromx, tox));
                 var y = rand.NextDouble() + Convert.ToDouble(rand.Next(fromy, toy));
 
-                nodes.Add(new Node { Pos = new Point2(x,y), Id = count });
+                nodes.Add(new Node { Pos = new Vector2((float)x, (float)y), Id = count });
 
             }
 
@@ -185,8 +185,8 @@ namespace VisualGraph.Data
                 nodes.ForEach(x =>
                 {
                     var node = geometryGraph.FindNodeByUserData(x.Id);
-                    x.Pos.X = node.Center.X;
-                    x.Pos.Y = node.Center.Y;
+                    x.Pos.X = (float)node.Center.X;
+                    x.Pos.Y = (float)node.Center.Y;
                 });
             }
             catch { }

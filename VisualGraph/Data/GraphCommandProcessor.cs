@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -129,7 +130,7 @@ namespace VisualGraph.Data
             Node newnode = new Node
             {
                 Name = n,
-                Pos = new Point2(x, y),
+                Pos = new Vector2((float)x, (float)y),
                 Id = g.Nodes.Count > 0 ? g.Nodes.Max(nn => nn.Id) + 1 : 0,
             };
             g.Nodes.Add(newnode);

@@ -66,57 +66,6 @@
                                 graph.GraphModel.ActiveNode.IsActive = false;
                             }
                         };
-                        basicGraph.SvgMouseWheel += async (sender, args) =>
-                        {
-                            /*BasicGraph graph = ((BasicGraph)sender);
-                            graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
-                            if (graph.SVGMatrix != null)
-                            {
-
-                                if (args.DeltaY > 0)
-                                {
-                                    graph.SVGViewRect.ZoomOut();
-                                }
-                                else
-                                {
-                                    graph.SVGViewRect.ZoomIn();
-                                }
-                                var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
-                                var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
-
-                                basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
-
-                            }
-                            */
-                        };
-                        basicGraph.SvgMouseMove += async (sender, args) =>
-                        {
-                            /*BasicGraph graph = ((BasicGraph)sender);
-                            if (args.Buttons == 2)
-                            {
-                                graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
-                                if (graph.SVGMatrix != null)
-                                {
-                                    var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
-                                    var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
-                                    basicGraph.SVGViewRect.SetCenter(deltaX, deltaY);
-                                }
-                            }*/
-                        };
-                        /*basicGraph.SvgMouseUp += async (sender, args) =>
-                        {
-                            BasicGraph graph = ((BasicGraph)sender);
-                            graph.SVGMatrix = await GraphService.GetGraphDisplayParameters(graph.GraphModel.Name);
-                            if (graph.SVGMatrix != null)
-                            {
-                                var deltaX = (args.ClientX - graph.SVGMatrix.E) / graph.SVGMatrix.A;
-                                var deltaY = (args.ClientY - graph.SVGMatrix.F) / graph.SVGMatrix.D;
-
-                                basicGraph.SVGViewRect.Center.X = deltaX;
-                                basicGraph.SVGViewRect.Center.Y = deltaY;
-                            }
-                        };*/
-
                         basicGraph.NodeClick += (sender, args) =>
                         {
                             BasicGraph graph = ((BasicGraph)sender);
