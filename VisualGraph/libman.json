@@ -19,7 +19,12 @@
     {
       "provider": "unpkg",
       "library": "popper.js@1.16.0",
-      "destination": "wwwroot/js/popper.js/"
+      "destination": "wwwroot/js/popper/"
+    },
+    {
+      "provider": "unpkg",
+      "library": "svg-pan-zoom@3.6.1",
+      "destination": "wwwroot/js/svgpanzoom/"
     }
   ]
 }

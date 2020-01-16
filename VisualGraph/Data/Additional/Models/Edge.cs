@@ -17,6 +17,8 @@ namespace VisualGraph.Data.Additional.Models
         public double AutoWeight => (EndNode - StartNode).Distance;
         public int Id { get; set; }
         public List<string> Classes { get; set; } = new List<string>();
+
+        public double Angle => Math.Acos((StartNode.Pos.X + EndNode.Pos.X) * (StartNode.Pos.Y + EndNode.Pos.Y) / Math.Sqrt((StartNode.Pos.X * StartNode.Pos.X) + (StartNode.Pos.Y * StartNode.Pos.Y)) * Math.Sqrt((EndNode.Pos.X * EndNode.Pos.X) + (EndNode.Pos.Y * EndNode.Pos.Y)));
     }
 
     public interface ICSSProperties

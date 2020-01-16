@@ -15,9 +15,15 @@ namespace VisualGraph.Data.Additional.Interfaces
         public void CallRequestRefresh();
         public void StartParameterRefresh();
         public void StopParameterRefresh();
-
+        public Task InitZoomPan(string graphid);
+        public Task DestroyZoomPan();
+        public Task DisablePan();
+        public Task EnablePan();
         public Task<GraphDisplayParameters> GetGraphDisplayParameters(string graphid);
         public Task<GraphDisplayParameters> InitialGetGraphDisplayParameters(string graphid);
+        public Task<SvgInformation> GetSvgInformation(string graphname); 
+        public Task<Point2> GetTranslatedMousePos(string graphname, double x, double y);
         public Task<BasicGraphModel> LayoutGraph(BasicGraphModel graphModel);
+
     }
 }

@@ -1,18 +1,23 @@
 ﻿@inject IJSRuntime JsRuntime
-@inject IGraphService GraphServeice
+@inject IGraphService GraphService
 @if (GraphModel != null)
 {
     var activenode = GraphModel.ActiveNode;
+    @SVGViewRect.GetDisplayInformationMarkupString(GraphStyleParameters)
     <svg id="@(GraphModel.Name)" class="vssvg" viewBox="@(SVGViewRect.ViewBox)"
          @onclick="@OnSvgClick"
          @onmousemove="@OnSvgMouseMove"
-         @onmouseover="@((args) => { GraphServeice.StartParameterRefresh(); })"
-         @onmouseout="@((args) => { GraphServeice.StopParameterRefresh(); })"
          @onmouseup="@OnSvgMouseUp"
          @onmousedown="@OnSvgMouseDown"
          @onmousewheel="@OnSvgMouseWheel"
          @onkeydown="@OnSvgKeyDown">
-        @SVGViewRect.GetDisplayInformationMarkupString(GraphStyleParameters)
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+                    markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+            </marker>
+        </defs>
         @CoordinateAxis.GenerateForGraphRange(GraphModel.ConvexHull[0].X, GraphModel.ConvexHull[0].Y, GraphModel.ConvexHull[1].X, GraphModel.ConvexHull[1].Y);
         @if (activenode != null)
         {
@@ -23,9 +28,15 @@
         {
             if (edge.StartNode != null && edge.EndNode != null)
             {
-                var halfwayx = ((edge.StartNode.Pos.X+ edge.EndNode.Pos.X) / 2).ToString(CultureInfo.InvariantCulture);
+                var halfwayx = ((edge.StartNode.Pos.X + edge.EndNode.Pos.X) / 2).ToString(CultureInfo.InvariantCulture);
                 var halfwayy = ((edge.StartNode.Pos.Y + edge.EndNode.Pos.Y) / 2).ToString(CultureInfo.InvariantCulture);
-                <line class=" @(((ICSSProperties)edge).ClassesProppertie)" x1="@edge.StartNode.PosXText" y1="@edge.StartNode.PosYText" x2="@edge.EndNode.PosXText" y2="@edge.EndNode.PosYText" style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"></line>
+                <line class="@(((ICSSProperties)edge).ClassesProppertie)"
+                      x1="@((edge.StartNode.Pos.X).ToString(CultureInfo.InvariantCulture))" 
+                      y1="@((edge.StartNode.Pos.Y).ToString(CultureInfo.InvariantCulture))" 
+                      x2="@((edge.EndNode.Pos.X).ToString(CultureInfo.InvariantCulture))" 
+                      y2="@((edge.EndNode.Pos.Y).ToString(CultureInfo.InvariantCulture))" 
+                      style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")" 
+                      marker-end="url(#arrow)" />
                 @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
             }
         }
@@ -34,19 +45,19 @@
             var name = node.Name;
             @((MarkupString)$"<text x=\"{ (@node.Pos.X+ GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
             if (node.IsActive)
-                @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>");
-    <circle id="@($"node -{ node.Id}")"
-            class="vsnode @node.Activeclass draggable @(((ICSSProperties)node).ClassesProppertie)"
-            cx="@node.PosXText"
-            cy="@(node.PosYText)"
-            r="@GraphStyleParameters.NodeRadiusText"
-            stroke="@GraphStyleParameters.NodeStrokeColor"
-            stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
-            fill="@GraphStyleParameters.NodeFill"
-            @onclick="(args) => { OnNodeClick(args, node); }"
-            @onmousedown="(args) => { OnNodeMouseDown(args, node); }"
-            @onmouseup="(args) => { OnNodeMouseUp(args, node); }">
-    </circle>
+                @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
+                <circle id="@($"node-{ node.Id}")"
+                        class="vsnode @node.Activeclass draggable @(((ICSSProperties)node).ClassesProppertie)"
+                        cx="@node.PosXText"
+                        cy="@(node.PosYText)"
+                        r="@GraphStyleParameters.NodeRadiusText"
+                        stroke="@GraphStyleParameters.NodeStrokeColor"
+                        stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
+                        fill="@GraphStyleParameters.NodeFill"
+                        @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
+                        @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
+                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation>test
+                </circle>
             }
     </svg>
 }
@@ -65,25 +76,13 @@
     {
         if (firstrender)
         {
-            SvgKeyDown += (sender, args) =>
-            {
-                if (args.CtrlKey && args.Key == "+")
-                {
-                    SVGViewRect.TextSize += 0.1;
-                    SVGViewRect.ZoomIn();
-                }
-                if (args.CtrlKey && args.Key == "-")
-                {
-                    SVGViewRect.TextSize -= 0.1;
-                    SVGViewRect.ZoomOut();
-                }
-            };
-            SVGMatrix = await GraphServeice.InitialGetGraphDisplayParameters(GraphModel.Name);
-            SVGViewRect.SetWidth(SVGMatrix.Width);
-            SVGViewRect.SetHeight(SVGMatrix.Height);
+            var SvgElement = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
+            SVGViewRect.SetWidth(SvgElement.Width);
+            SVGViewRect.SetHeight(SvgElement.Height);
             StateHasChanged();
+            GraphService.InitZoomPan("svg#" + GraphModel.Name);
         }
-        
+
     }
     public async Task ChangedState()
     {
@@ -93,6 +92,9 @@
 
 
     #region EventHandling
+    DateTime NodeClickTriggerdTime;
+    DateTime SvgClickTriggerdTime;
+    public bool NodeDragStarted = false;
 
     public event EventHandler Update;
     public event EventHandler<MouseEventArgs> SvgClick;
@@ -106,13 +108,12 @@
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseDown;
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseUp;
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseMove;
+
     public event EventHandler<WheelEventArgs> NodeMouseWheel;
-    DateTime NodeClickTriggerdTime;
-    DateTime SvgClickTriggerdTime;
 
     public async Task UpdateSvgTransformationMatrix()
     {
-        SVGMatrix = await GraphServeice.InitialGetGraphDisplayParameters(GraphModel.Name);
+        SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
     }
 
     protected virtual void OnSvgClick(MouseEventArgs e)
@@ -211,89 +212,5 @@
         }
     }
     #endregion
-
-    public static void ActivateNode(BasicGraph sender, MouseEventArgs args)
-    {
-        var GraphModel = (BasicGraph)sender;
-        if (GraphModel.GraphModel.ActiveNode != null)
-        {
-            GraphModel.GraphModel.ActiveNode.IsActive = false;
-        }
-    }
-    public static async Task Zoom(BasicGraph sender, WheelEventArgs args)
-    {
-        await sender.UpdateSvgTransformationMatrix();
-        if (sender.SVGMatrix != null)
-        {
-
-            if (args.DeltaY > 0)
-            {
-                sender.SVGViewRect.ZoomOut();
-            }
-            else
-            {
-                sender.SVGViewRect.ZoomIn();
-            }
-        }
-    }
-
-    public static async Task MoveNode(BasicGraph sender, MouseEventArgs args) {
-        if (args.Buttons == 1)
-        {
-            if (sender.GraphModel.ActiveNode == null) return;
-            await sender.UpdateSvgTransformationMatrix();
-            if (sender.SVGMatrix != null && sender.GraphModel.ActiveNode != null)
-            {
-                var deltaX = (args.ClientX - sender.SVGMatrix.E) / sender.SVGMatrix.A;
-                var deltaY = (args.ClientY - sender.SVGMatrix.F) / sender.SVGMatrix.D;
-
-                sender.GraphModel.ActiveNode.Pos.X = deltaX;
-                sender.GraphModel.ActiveNode.Pos.Y = deltaY;
-            }
-        }
-    }
-
-    public static async Task MoveViewPoint(BasicGraph sender, MouseEventArgs args)
-    {
-        if (args.Buttons == 2)
-        {
-            //todo: Fix Positioning the Viewpoint
-            await sender.UpdateSvgTransformationMatrix();
-            if (sender.SVGMatrix != null)
-            {
-                var deltaX = (args.ClientX - sender.SVGMatrix.E) / sender.SVGMatrix.A;
-                var deltaY = (args.ClientY - sender.SVGMatrix.F) / sender.SVGMatrix.D;
-
-                sender.SVGViewRect.SetCenter(deltaX, deltaY);
-            }
-        }
-
-    }
-    public static async Task UpdateGraph(BasicGraph sender, MouseEventArgs args)
-    {
-        sender.StateHasChanged();
-    }
-    public static async Task MoveNode(BasicGraph sender, GraphMouseEventArgs<Node> args)
-    {
-        Node node = args.Target;
-        if (sender.GraphModel.ActiveNode != null)
-        {
-
-            if (sender.GraphModel.ActiveNode.Id == node.Id)
-            {
-                node.IsActive = false;
-            }
-            else
-            {
-                sender.GraphModel.ActiveNode.IsActive = false;
-                node.IsActive = true;
-            }
-        }
-        else
-        {
-            node.IsActive = true;
-        }
-        sender.StateHasChanged();
-    }
 }
 

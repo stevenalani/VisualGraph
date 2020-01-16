@@ -1,3 +1,6 @@
 [submodule "VisualGraph/wwwroot/dist/open-iconic"]
 	path = VisualGraph/wwwroot/dist/open-iconic
 	url = https://github.com/iconic/open-iconic.git
+[submodule "svg-pan-zoom"]
+	path = svg-pan-zoom
+	url = https://github.com/ariutta/svg-pan-zoom.git

@@ -43,7 +43,7 @@
                                         </td>
                                         <td>Name</td>
                                         <td>
-                                            <InputText id="ActiveNodeY" class="form-control" @bind-Value="@GraphModel.ActiveNode.Name"></InputText>
+                                            <InputText id="ActiveNodeName" class="form-control" @bind-Value="@GraphModel.ActiveNode.Name"></InputText>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -226,64 +226,39 @@
         Files = await GraphService.GetGraphFilenames();
         if (firstRender)
         {
-            basicGraph.SvgKeyDown += async (sender, args) =>
-            {
-                if (args.CtrlKey && args.Key == "+")
-                {
-                    ((BasicGraph)sender).SVGViewRect.ZoomIn();
-                }
-                if (args.CtrlKey && args.Key == "-")
-                {
-                    ((BasicGraph)sender).SVGViewRect.ZoomOut();
-                }
-            };
             basicGraph.SvgClick += async (sender, args) =>
             {
                 if (GraphModel.ActiveNode != null)
                 {
                     GraphModel.ActiveNode.IsActive = false;
+                    basicGraph.NodeDragStarted = false;
                 }
             };
-            basicGraph.SvgMouseWheel += async (sender, args) =>
+            basicGraph.NodeMouseDown += async (sender, args) =>
             {
-                BasicGraph graph = ((BasicGraph)sender);
-                SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                if (SVGMatrix != null)
+                if (GraphModel.ActiveNode != null)
                 {
-
-                    if (args.DeltaY > 0)
-                    {
-
-                        graph.SVGViewRect.ZoomOut();
-                    }
-                    else
-                    {
-                        graph.SVGViewRect.ZoomIn();
-                    }
+                    basicGraph.NodeDragStarted = true;
+                    await GraphService.DisablePan();
                 }
-
+            };
+            basicGraph.NodeMouseUp += async (sender, args) =>
+            {
+                basicGraph.NodeDragStarted = false;
+                await GraphService.EnablePan();
             };
             basicGraph.SvgMouseMove += async (sender, args) =>
             {
-                if (args.Buttons == 1)
+                if (GraphModel.ActiveNode != null && basicGraph.NodeDragStarted)
                 {
-                    if (GraphModel.ActiveNode == null) return;
-                    SVGMatrix = await GraphService.GetGraphDisplayParameters(GraphModel.Name);
-                    if (SVGMatrix != null && GraphModel.ActiveNode.Activeclass != "")
-                    {
-                        var deltaX = (args.ClientX - SVGMatrix.E) / SVGMatrix.A;
-                        var deltaY = (args.ClientY - SVGMatrix.F) / SVGMatrix.D;
-
-                        GraphModel.ActiveNode.Pos = new Point2(deltaX, deltaY);
-                    }
-                }
-                else if (args.Buttons == 2)
-                {
-                    MoveViewPoint(args);
+                    
+                    Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
+                    GraphModel.ActiveNode.Pos = new Point2(coords.X, coords.Y);
                 }
             };
             basicGraph.SvgMouseUp += (sender, args) =>
             {
+
                 Update();
             };
             basicGraph.NodeClick += (sender, args) =>
@@ -305,7 +280,6 @@
                 {
                     node.IsActive = true;
                 }
-                //Update();
             };
         }
 

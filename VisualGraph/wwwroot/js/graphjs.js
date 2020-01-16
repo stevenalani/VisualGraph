@@ -1,4 +1,5 @@
-﻿window.getWindowSize = function () {
+﻿window.VSSVG = null;
+window.getWindowSize = function () {
     return {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -43,8 +44,56 @@ window.getAllSVGTransformationMatrices = function () {
     });
     return cout;
 };
+window.InitPanZoom = function (svgid) {
+    window.VSSVG = svgPanZoom(svgid);
+}
+window.DestroyPanZoom = function (svgid) {
+    window.VSSVG.destroy();
+}
+window.DisablePan = function () {
+    window.VSSVG.disablePan();
+}
+window.EnablePan = function () {
+    window.VSSVG.enablePan();
+}
+window.GetPanZoomValues = function (svgid) {
+    var svgelement = jQuery(`#${svgid}`);
+    var offsetLeft = svgelement.offset().left;
+    var offsetTop = svgelement.offset().top;
+    var pan = window.VSSVG.getPan();
+    var zoom = window.VSSVG.getSizes().realZoom;
+    var panZoomHeight = VSSVG.getSizes().height;
+    var viewboxHeight = VSSVG.getSizes().viewBox.height;
+    var panZoomWidth = VSSVG.getSizes().width;
+    var viewboxWidth = VSSVG.getSizes().viewBox.width;
+    var obj = {
+        OffsetLeft: offsetLeft,
+        OffsetTop: offsetTop,
+        PanX: pan.x,
+        PanY: pan.y,
+        Zoom: zoom,
+        PanZoomHeight: panZoomHeight,
+        PanZoomWidth: panZoomWidth,
+        ViewBoxHeight: viewboxHeight,
+        ViewBoxWidth: viewboxWidth
+    }
+    return obj;
+}
+window.GetTranslatedMousePos = function (args) {
+    var x = args.x;
+    var y = args.y;
+    var svgDropPoint = document.getElementById(args.id).createSVGPoint();
+
+    svgDropPoint.x = x;
+    svgDropPoint.y = y;
+    svgDropPoint = svgDropPoint.matrixTransform(jQuery(".svg-pan-zoom_viewport")[0].getCTM().inverse());
+    return {
+        X: svgDropPoint.x,
+        Y: svgDropPoint.y,
+    };
+}
 $(document).ready(() => {
-    $(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
+    //$(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
     $("svg").on("keydown", (e) => {
         if (e.ctrlKey && (e.key == "+" || e.key == "-")) {
             e.preventDefault();

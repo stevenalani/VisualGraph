@@ -181,6 +181,10 @@ circle.active{
 circle.endnode {
     fill: rgba(79,0,224,0.7);
 }
+
+#ViewInformation{
+    position:absolute;
+}
 .toggler {
     height: fit-content;
     border-radius: 0.5em 0 0 0.5em;

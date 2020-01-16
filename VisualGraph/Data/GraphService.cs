@@ -157,7 +157,6 @@ namespace VisualGraph.Data
                 GraphParameterThreadShouldRun = false;
                 GraphParameterThread?.Join();
             }
-
         }
 
         public async Task<BasicGraphModel> LayoutGraph(BasicGraphModel GraphModel)
@@ -192,6 +191,35 @@ namespace VisualGraph.Data
             }
             catch { }
             return GraphModel;
+        }
+        public async Task InitZoomPan(string graphid)
+        {
+            await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] { graphid });
+        }
+        public async Task DestroyZoomPan()
+        {
+            await JSRuntime.InvokeVoidAsync("DestroyPanZoom");
+        }
+        public async Task DisablePan()
+        {
+            await JSRuntime.InvokeVoidAsync("DisablePan");
+        }
+        public async Task EnablePan()
+        {
+            await JSRuntime.InvokeVoidAsync("EnablePan");
+        }
+
+        public async Task<SvgInformation> GetSvgInformation(string graphname)
+        {
+            var svginfo = await JSRuntime.InvokeAsync<SvgInformation>("GetPanZoomValues", new object[] { graphname });
+            return svginfo;
+        }
+
+        public async Task<Point2> GetTranslatedMousePos(string graphname, double x, double y)
+        {
+            var svgInfo = await GetSvgInformation(graphname);
+            var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = graphname, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } }  );
+            return mousePos;
         }
     }
 }

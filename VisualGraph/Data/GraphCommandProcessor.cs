@@ -153,25 +153,22 @@ namespace VisualGraph.Data
     }
     internal class RemoveEdgeCommand : GraphCommand
     {
-        public new Action<Node, Node, BasicGraphModel, double> Action = new Action<Node, Node, BasicGraphModel, double>((n0, n1, g, w) => {
-            var edge = new Edge
-            {
-                StartNode = n0,
-                EndNode = n1,
-                Id = g.Edges.Max(e => e.Id) + 1,
-                Weight = w,
-            };
-            n0.Edges.Add(edge);
-            n1.Edges.Add(edge);
-            g.Edges.Add(edge);
+        public new Action<Node, Node, BasicGraphModel> Action = new Action<Node, Node, BasicGraphModel>((n0, n1, g) => {
+            Edge edge = n0.Edges.First(x => x.EndNode == n1 || x.StartNode == n1);
+            g.Edges.Remove(edge);
         });
         public RemoveEdgeCommand()
         {
-
+            Parameters = new Dictionary<Type, object[]>
+            {
+                { typeof(int), new object[2] }
+            };
         }
         public override void Invoke(BasicGraphModel g)
         {
-            throw new NotImplementedException();
+            Node node0 = g.Nodes.First(n => n.Id == (int)Parameters[typeof(int)][0]);
+            Node node1 = g.Nodes.First(n => n.Id == (int)Parameters[typeof(int)][1]);
+            Action.Invoke(node0, node1, g);
         }
     }
     internal class RemoveNodeCommand : GraphCommand
