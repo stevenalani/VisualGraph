@@ -109,10 +109,13 @@
                                             <td>
 
                                                 <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
-
                                                     @if (edge.StartNode == null)
                                                     {
                                                         <option default selected="selected">Select Startnode</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option default>Select Startnode</option>
                                                     }
                                                     @foreach (var node in GraphModel.Nodes)
                                                     {
@@ -125,15 +128,19 @@
                                                         {
                                                             <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
                                                         }
-                                                }
+                                                    }
                                                 </select>
                                             </td>
                                             <td>
                                                 <select class="form-control" @onchange="(args) => { ChangedEndEdge(edge, args); }">
-                                                    <option default>Select Endnode</option>
+                                                    
                                                     @if (edge.EndNode == null)
                                                     {
-                                                        <option default selected="selected">Select Startnode</option>
+                                                        <option default selected="selected">Select Endnode</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option default>Select Endnode</option>
                                                     }
                                                     @foreach (var node in GraphModel.Nodes)
                                                     {
@@ -251,7 +258,7 @@
             {
                 if (GraphModel.ActiveNode != null && basicGraph.NodeDragStarted)
                 {
-                    
+
                     Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
                     GraphModel.ActiveNode.Pos = new Point2(coords.X, coords.Y);
                 }
@@ -315,12 +322,10 @@
         Edge newEdge = new Edge
         {
             Id = GraphModel.Edges.Count > 0 ? GraphModel.Edges.Max(x => x.Id) + 1 : 0,
-            StartNode = new Node() { Pos = new Point2(), Id = -1 },
-            EndNode = new Node() { Pos = new Point2(), Id = -1 },
+            StartNode = null,
+            EndNode = null,
             Weight = 0,
         };
-        newEdge.StartNode.Edges.Add(newEdge);
-        newEdge.EndNode.Edges.Add(newEdge);
         GraphModel.Edges.Add(newEdge);
         Update();
     }
@@ -355,12 +360,27 @@
     #region EventHandling
     private void ChangedEndEdge(Edge edge, ChangeEventArgs args)
     {
-        edge.EndNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+        try
+        {
+            edge.EndNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+        }
+        catch
+        {
+            edge.EndNode = null;
+        }
+
         Update();
     }
     private void ChangedStartEdge(Edge edge, ChangeEventArgs args)
     {
-        edge.StartNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+        try
+        {
+            edge.StartNode = GraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+        }
+        catch
+        {
+            edge.StartNode = null;
+        }
         Update();
     }
 

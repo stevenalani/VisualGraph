@@ -28,16 +28,31 @@
         {
             if (edge.StartNode != null && edge.EndNode != null)
             {
+                var reverseEdge = GraphModel.Edges.FirstOrDefault(x => x.StartNode == edge.EndNode && x.EndNode == edge.StartNode);
                 var halfwayx = ((edge.StartNode.Pos.X + edge.EndNode.Pos.X) / 2).ToString(CultureInfo.InvariantCulture);
                 var halfwayy = ((edge.StartNode.Pos.Y + edge.EndNode.Pos.Y) / 2).ToString(CultureInfo.InvariantCulture);
-                <line class="@(((ICSSProperties)edge).ClassesProppertie)"
-                      x1="@((edge.StartNode.Pos.X).ToString(CultureInfo.InvariantCulture))" 
-                      y1="@((edge.StartNode.Pos.Y).ToString(CultureInfo.InvariantCulture))" 
-                      x2="@((edge.EndNode.Pos.X).ToString(CultureInfo.InvariantCulture))" 
-                      y2="@((edge.EndNode.Pos.Y).ToString(CultureInfo.InvariantCulture))" 
-                      style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")" 
-                      marker-end="url(#arrow)" />
-                @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                if (reverseEdge == null)
+                {
+                    <line class="@(((ICSSProperties)edge).ClassesProppertie)"
+                          x1="@((edge.StartNode.Pos.X).ToString(CultureInfo.InvariantCulture))"
+                          y1="@((edge.StartNode.Pos.Y).ToString(CultureInfo.InvariantCulture))"
+                          x2="@((edge.EndNode.Pos.X).ToString(CultureInfo.InvariantCulture))"
+                          y2="@((edge.EndNode.Pos.Y).ToString(CultureInfo.InvariantCulture))"
+                          style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"
+                          marker-end="url(#arrow)" />
+                    @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                }
+                else
+                {
+                    var lefttoright = edge.StartNode.Pos.X < edge.EndNode.Pos.X;
+                    var toptobottom = edge.StartNode.Pos.Y < edge.EndNode.Pos.Y;
+                    if (lefttoright)
+                    {
+                        var posx = Math.Atan(2/(edge.EndNode.Pos.X - edge.StartNode.Pos.X)); 
+                    }
+
+                }
+
             }
         }
         @foreach (var node in GraphModel.Nodes)
@@ -56,7 +71,8 @@
                         fill="@GraphStyleParameters.NodeFill"
                         @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
                         @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
-                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation>test
+                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation>
+                    test
                 </circle>
             }
     </svg>
