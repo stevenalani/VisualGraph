@@ -52,8 +52,8 @@
                     var curvepoint = startPos + dir * ((endPos - startPos).Length() / 2);
                     var rotatedDir = Vector2.Transform(dir, Matrix3x2.CreateRotation(MathF.PI / 2));
                     var lengthofVector = rotatedDir * (curvepoint - startPos).Length();
-                    var disiredPoint = lengthofVector * 0.4f + curvepoint;
-                    var testpos = lengthofVector * 0.2f + curvepoint;
+                    var disiredPoint = lengthofVector * 0.2f + curvepoint;
+                    var testpos = lengthofVector * 0.1f + curvepoint;
                     <path class="@(((ICSSProperties)edge).ClassesProppertie)"
                           d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
                           stroke="@GraphStyleParameters.EdgeStrokeColor"
