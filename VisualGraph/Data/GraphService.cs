@@ -39,13 +39,13 @@ namespace VisualGraph.Data
             GraphFileProvider.EnsureGraphDirExists();
             GraphParameterThreadArgs = new ThreadStart(QueryGraphSVGs);
         }
-        public Task<BasicGraphModel[]> GetAllGraphs()
+        public async Task<BasicGraphModel[]> GetAllGraphs()
         {
-            return Task.FromResult(GraphFileProvider.GetBasicGraphs().ToArray());
+            return (await GraphFileProvider.GetBasicGraphs()).ToArray();
         }
-        public Task<BasicGraphModel> GetGraph(string filename)
+        public async Task<BasicGraphModel> GetGraph(string filename)
         {
-            return Task.FromResult(GraphFileProvider.GetBasicGraphs().ToArray().First(x=>x.Path.Contains(filename)));
+            return (await GraphFileProvider.GetBasicGraphs()).ToArray().First(x=>x.Path.Contains(filename));
         }
 
         public Task<string[]> GetGraphFilenames()
@@ -69,15 +69,9 @@ namespace VisualGraph.Data
                 _logger.LogError(e.Message);
             }
         }
-        private Task WriteGraph(BasicGraphModel graph,string filename)
+        private async Task WriteGraph(BasicGraphModel graph,string filename)
         {
             GraphFileProvider.WriteToGraphMlFile(graph, filename);
-            var wrotegraph = GraphFileProvider.ReadGraphMlToBasicGraph(filename);
-
-            if (wrotegraph != null || !wrotegraph.Path.Contains(filename))
-                return Task.FromException(new Exception("There was an error"));
-            else
-                return Task.CompletedTask;
         }
 
         public Task<BasicGraphModel> GenerateGraph(string filename, int nodecount = 20 ,int fromx = -50, int fromy = -50, int tox = 50, int toy = 50)

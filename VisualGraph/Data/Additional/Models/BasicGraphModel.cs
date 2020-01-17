@@ -26,11 +26,13 @@ namespace VisualGraph.Data.Additional.Models
         public string Path { get; set; }
         public Node ActiveNode => Nodes.FirstOrDefault(x => x.Activeclass != "");
 
-        float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X ));
-        float minX => Nodes.Min(x => (int)Math.Ceiling(x.Pos.X ));
+        float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X));
+        float minX => Nodes.Min(x => (int)Math.Ceiling(x.Pos.X));
         float maxY => Nodes.Max(x => (int)Math.Ceiling(x.Pos.Y));
         float minY => Nodes.Min(x => (int)Math.Ceiling(x.Pos.Y));
         public Vector2[] ConvexHull => new[] { new Vector2(minX, minY), new Vector2(maxX, maxY) };
 
+        public bool IsDirectional { get; set; } = true;
+        public bool IsBidirectional => IsDirectional && Edges.Count(x => Edges.FirstOrDefault(y => y.EndNode == x.StartNode)?.StartNode == x.EndNode) > 0;
     }
 }

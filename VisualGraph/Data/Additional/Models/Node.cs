@@ -17,7 +17,7 @@ namespace VisualGraph.Data.Additional.Models
         public List<Edge> Edges = new List<Edge>();
         public bool IsActive;
 
-        internal List<Node> Neighbours => Edges.SelectMany(x => new[] { x.StartNode, x.EndNode }).Where(x => x != this).ToList();
+        internal List<Node> Neighbours(bool isDirectional) => isDirectional? Edges.Select(x => x.EndNode).Where( x => x != this ).ToList(): Edges.SelectMany(x => new[] { x.StartNode, x.EndNode }).Where(x => x != this).ToList();
 
         public string PosXText => Pos.X.ToString(CultureInfo.InvariantCulture);
         public string PosYText => Pos.Y.ToString(CultureInfo.InvariantCulture);

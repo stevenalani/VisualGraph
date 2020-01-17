@@ -11,9 +11,10 @@
 
         <div class="left-container">
             @RenderGraph()
+            
         </div>
-        <GraphEditForm GraphModel="@GraphModel" Parent="@this" />       
-        <GraphConsole Graph="@GraphModel" Parent="@this" />
+        
+        <GraphEditForm GraphModel="@GraphModel" Parent="@this" />
     </div>
 @code {
     BasicGraph basicGraph;

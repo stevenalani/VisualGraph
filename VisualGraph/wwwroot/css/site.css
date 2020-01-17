@@ -130,7 +130,7 @@ app {
     flex: 1;*/
     max-width:50%;
     height: calc(100vh - 100px) !important;
-    overflow: hidden scroll
+    overflow: hidden auto;
 }
 .right-flex-container form{
     padding:1em;
@@ -143,11 +143,12 @@ svg {
     flex:1;
 }
 .graphconsole{
-    position:fixed;
+    /*position:sticky;
+    align-self:flex-end;*/
     bottom:0;
     z-index:20;
 }
-line.vgpath{
+path.vgpath, line.vgpath{
     stroke:lime !important;
 }
 svg.responsive.vert{

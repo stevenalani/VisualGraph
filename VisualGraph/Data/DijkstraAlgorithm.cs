@@ -8,6 +8,7 @@ namespace VisualGraph.Data
 {
     public class DijkstraAlgorithm : IGraphAlgorithm
     {
+        BasicGraphModel Model;
         List<Node> Q; 
         Node currentNode;
         public Node StartNode { get; private set; }
@@ -23,6 +24,7 @@ namespace VisualGraph.Data
 
         public DijkstraAlgorithm( BasicGraphModel model,int startNodeId = -1)
         {
+            this.Model = model;
             StepCount = 0;
             Q = model.Nodes.OrderBy(x => x.Id).ToList();
             Init(startNodeId);
@@ -44,6 +46,7 @@ namespace VisualGraph.Data
         {
             var distanceCurrent = distances[currentNode];
             var edgeWeight = neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
+            //var edgeWeight = neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
             var alt = distanceCurrent + edgeWeight;
             
             if(alt < distances[neighbour])
@@ -61,7 +64,7 @@ namespace VisualGraph.Data
                 var minval = distances.Where( d=> Q.Contains(d.Key)).Min(d => d.Value);
                 currentNode = Q.First(x => x == distances.FirstOrDefault(d => d.Value == minval && d.Key == x).Key);
                 Q.Remove(currentNode);
-                foreach(var neighbour in currentNode.Neighbours)
+                foreach(var neighbour in currentNode.Neighbours(Model.IsDirectional))
                 {
                     if (Q.Contains(neighbour))
                     {

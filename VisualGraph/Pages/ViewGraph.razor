@@ -7,30 +7,35 @@
 @inject IGraphService GraphService
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
-        <h3>Edit or Create new Graph</h3>
-        <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
-            <div class="form-group">
-                <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
-                    @foreach (var name in graphFilenames)
-                    {
-                        <option value="@name">@name</option>
-                    }
-                </InputSelect>
-                <button type="submit">Laden</button>
-            </div>
-            @if (basicGraph != null)
-            {
+        <h3>View Graph</h3>
+        @if (graphFilenames.Length > 0)
+        {
+            <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
                 <div class="form-group">
-                    <button type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                    <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
+                        @foreach (var name in graphFilenames)
+                            {
+                            <option value="@name">@name</option>
+                            }
+                        /**/
+                    </InputSelect>
+                    <button type="submit">Laden</button>
                 </div>
-                <div class="form-group">
-                    <button type="button" @onclick="@Crop">Crop View to Graph</button>
-                </div>
-            }
-
-
-        </EditForm>
-
+                @if (basicGraph != null)
+                {
+                    <div class="form-group">
+                        <button type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" @onclick="@Crop">Crop View to Graph</button>
+                    </div>
+                }
+            </EditForm>
+        }
+        else
+        {
+            <h4 class="alert alert-info">Es sind keine Graphen vorhanden</h4> 
+        }
     </div>
     <div class="left-container">
         <hr />
@@ -102,7 +107,8 @@
     {
         var graphFilePathes = graphPathes = await GraphService.GetGraphFilenames();
         graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).OrderBy(x => Path.GetFileNameWithoutExtension(x)).ToArray();
-        model.CurrentGraph = graphFilenames[0];
+        if(graphFilenames.Length > 0)
+            model.CurrentGraph = graphFilenames[0];
         base.OnInitialized();
     }
 
@@ -112,7 +118,7 @@
         var graphmodel = await GraphService.GetGraph(graphPath);
         model.Graph = graphmodel;
         StateHasChanged();
-        
+
     }
     private async Task LayoutGraph()
     {
