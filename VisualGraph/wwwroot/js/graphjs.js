@@ -46,8 +46,16 @@ window.getAllSVGTransformationMatrices = function () {
 };
 window.InitPanZoom = function (svgid) {
     window.VSSVG = svgPanZoom(svgid);
+    window.VSSVG.enableControlIcons();
 }
-window.DestroyPanZoom = function (svgid) {
+window.Fit = function () {
+    window.VSSVG.updateBBox();
+    window.VSSVG.fit();
+}
+window.Center = function () {
+    window.VSSVG.center();
+}
+window.DestroyPanZoom = function () {
     window.VSSVG.destroy();
 }
 window.DisablePan = function () {
@@ -75,7 +83,9 @@ window.GetPanZoomValues = function (svgid) {
         PanZoomHeight: panZoomHeight,
         PanZoomWidth: panZoomWidth,
         ViewBoxHeight: viewboxHeight,
-        ViewBoxWidth: viewboxWidth
+        ViewBoxWidth: viewboxWidth,
+        centerX: panZoomWidth / 2 - pan.x,
+        centerY: panZoomHeight / 2 - pan.y,
     }
     return obj;
 }

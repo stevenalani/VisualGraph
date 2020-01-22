@@ -4,7 +4,8 @@
 @using Microsoft.Msagl.Miscellaneous;
 @using Microsoft.Msagl.Routing;
 @using Microsoft.Msagl.Core.Geometry.Curves;
-@inject IGraphService GraphService
+@inject IGraphService graphService
+@inject IToastService toastService
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
         <h3>View Graph</h3>
@@ -17,7 +18,6 @@
                             {
                             <option value="@name">@name</option>
                             }
-                        /**/
                     </InputSelect>
                     <button type="submit">Laden</button>
                 </div>
@@ -34,7 +34,7 @@
         }
         else
         {
-            <h4 class="alert alert-info">Es sind keine Graphen vorhanden</h4> 
+            <h4 class="alert alert-info">Es sind keine Graphen vorhanden</h4>
         }
     </div>
     <div class="left-container">
@@ -68,6 +68,8 @@
                             BasicGraph graph = ((BasicGraph)sender);
                             if (graph.GraphModel.ActiveNode != null)
                             {
+                                string identifierB = graph.GraphModel.ActiveNode.Name == "" ? graph.GraphModel.ActiveNode.Id.ToString() : graph.GraphModel.ActiveNode.Name;
+                                toastService.ShowSuccess($"Deselected node: { identifierB }", "Active node changed");
                                 graph.GraphModel.ActiveNode.IsActive = false;
                             }
                         };
@@ -75,26 +77,30 @@
                         {
                             BasicGraph graph = ((BasicGraph)sender);
                             Data.Additional.Models.Node node = args.Target;
+                            string identifierA = node.Name == "" ? node.Id.ToString() : node.Name;
                             if (graph.GraphModel.ActiveNode != null)
                             {
+                                string identifierB = graph.GraphModel.ActiveNode.Name == "" ? graph.GraphModel.ActiveNode.Id.ToString() : graph.GraphModel.ActiveNode.Name;
                                 if (graph.GraphModel.ActiveNode.Id == node.Id)
                                 {
                                     node.IsActive = false;
+                                    toastService.ShowSuccess($"Deselected node: { identifierB }", "Active node changed");
                                 }
                                 else
                                 {
-                                    graph.GraphModel.ActiveNode.IsActive= false;
+                                    graph.GraphModel.ActiveNode.IsActive = false;
                                     node.IsActive = true;
+                                    toastService.ShowSuccess($"Old active node: { identifierB } </br> New active node: { identifierA }", "Active node changed");
                                 }
                             }
                             else
                             {
                                 node.IsActive = true;
+                                toastService.ShowSuccess($"Active node selected: { identifierA }", "Active node changed");
                             }
                             StateHasChanged();
                         };
                     });
-
                 builder.CloseComponent();
             }
         });
@@ -105,28 +111,28 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var graphFilePathes = graphPathes = await GraphService.GetGraphFilenames();
+        var graphFilePathes = graphPathes = await graphService.GetGraphFilenames();
         graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).OrderBy(x => Path.GetFileNameWithoutExtension(x)).ToArray();
-        if(graphFilenames.Length > 0)
+        if (graphFilenames.Length > 0)
             model.CurrentGraph = graphFilenames[0];
         base.OnInitialized();
     }
-
     public async void HandleSelectChange()
     {
         var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraph));
-        var graphmodel = await GraphService.GetGraph(graphPath);
+        var graphmodel = await graphService.GetGraph(graphPath);
         model.Graph = graphmodel;
         StateHasChanged();
 
     }
     private async Task LayoutGraph()
     {
-        var resultGraph = GraphService.LayoutGraph(model.Graph);
+        var resultGraph = graphService.LayoutGraph(model.Graph);
     }
     private async Task Crop()
     {
-        basicGraph.SVGViewRect.CropRect(basicGraph.GraphModel.ConvexHull[0].X, basicGraph.GraphModel.ConvexHull[0].Y, basicGraph.GraphModel.ConvexHull[1].X, basicGraph.GraphModel.ConvexHull[1].Y);
+        graphService.Fit();
+        graphService.Center();
     }
 
 }

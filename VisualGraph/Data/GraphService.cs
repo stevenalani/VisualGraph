@@ -132,32 +132,10 @@ namespace VisualGraph.Data
             RefreshRequested?.Invoke();
         }
 
-        public void StartParameterRefresh()
-        {
-            if (!GraphParameterThreadShouldRun )
-            {
-                if (GraphParameterThread != null && GraphParameterThread.IsAlive)
-                    return;
-                GraphParameterThreadShouldRun = true;
-                GraphParameterThread = new Thread(GraphParameterThreadArgs);
-                GraphParameterThread.Start();
-            }
-
-        }
-        public void StopParameterRefresh()
-        {
-            if (GraphParameterThreadShouldRun)
-            {
-                GraphParameterThreadShouldRun = false;
-                GraphParameterThread?.Join();
-            }
-        }
-
         public async Task<BasicGraphModel> LayoutGraph(BasicGraphModel GraphModel)
         {
             try
             {
-                StopParameterRefresh();
                 GeometryGraph geometryGraph = new GeometryGraph();
 
                 var nodes = GraphModel.Edges.Where(x => x.StartNode != null || x.EndNode != null).SelectMany(x => {
@@ -214,6 +192,15 @@ namespace VisualGraph.Data
             var svgInfo = await GetSvgInformation(graphname);
             var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = graphname, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } }  );
             return mousePos;
+        }
+
+        public async Task Fit()
+        {
+            await JSRuntime.InvokeVoidAsync("Fit");
+        }
+        public async Task Center()
+        {
+            await JSRuntime.InvokeVoidAsync("Center");
         }
     }
 }

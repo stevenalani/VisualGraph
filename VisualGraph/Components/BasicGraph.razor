@@ -1,5 +1,4 @@
-﻿@inject IJSRuntime JsRuntime
-@inject IGraphService GraphService
+﻿@inject IGraphService GraphService
 @if (GraphModel != null)
 {
     var activenode = GraphModel.ActiveNode;
@@ -93,7 +92,7 @@
 @code {
     public GraphDisplayParameters SVGMatrix;
     public GraphStyleParameters GraphStyleParameters = new GraphStyleParameters();
-    public SvgViewRect SVGViewRect = new SvgViewRect();
+    public SvgDisplay SVGViewRect = new SvgDisplay();
 
     [Parameter]
     public VisualGraph.Data.Additional.Models.BasicGraphModel GraphModel { get; set; }

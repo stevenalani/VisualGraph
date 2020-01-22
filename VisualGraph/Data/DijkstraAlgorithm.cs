@@ -25,12 +25,13 @@ namespace VisualGraph.Data
         public DijkstraAlgorithm( BasicGraphModel model,int startNodeId = -1)
         {
             this.Model = model;
-            StepCount = 0;
-            Q = model.Nodes.OrderBy(x => x.Id).ToList();
             Init(startNodeId);
         }
         private void Init(int startNodeId = -1)
         {
+            Results = new List<DijkstraResultTuple>();
+            StepCount = 0;
+            Q = Model.Nodes.OrderBy(x => x.Id).ToList();
             StartNode = currentNode = (startNodeId != -1) ? Q.First(x => x.Id == startNodeId) : Q[0];
             foreach (var node in Q)
             {
@@ -45,8 +46,7 @@ namespace VisualGraph.Data
         private void Update(Node neighbour)
         {
             var distanceCurrent = distances[currentNode];
-            var edgeWeight = neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
-            //var edgeWeight = neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
+            var edgeWeight = Model.IsDirectional? neighbour.Edges.First(x => x.StartNode == currentNode).Weight : neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
             var alt = distanceCurrent + edgeWeight;
             
             if(alt < distances[neighbour])
@@ -64,7 +64,8 @@ namespace VisualGraph.Data
                 var minval = distances.Where( d=> Q.Contains(d.Key)).Min(d => d.Value);
                 currentNode = Q.First(x => x == distances.FirstOrDefault(d => d.Value == minval && d.Key == x).Key);
                 Q.Remove(currentNode);
-                foreach(var neighbour in currentNode.Neighbours(Model.IsDirectional))
+                var neighbours = currentNode.Neighbours(Model.IsDirectional);
+                foreach (var neighbour in neighbours)
                 {
                     if (Q.Contains(neighbour))
                     {
@@ -77,16 +78,24 @@ namespace VisualGraph.Data
             }
             return Q.Count;
         }
-        public List<Node> GetShortestRoute()
+        public List<Node> GetShortestRoute(int startId, int endId)
         {
-            List<Node> route = new List<Node>();
+            if (startId == null || endId == null) return null;
+            if(startId != StartNode.Id)
+            {
+                StartNode = Model.Nodes.FirstOrDefault(x => x.Id == startId);
+                Init(StartNode.Id);
+                Iterate(true);
+            }
             
-            if(EndNode != null)
+            List<Node> route = new List<Node>();
+            EndNode = Model.Nodes.FirstOrDefault(x => x.Id == endId);
+            if (EndNode != null)
             {
                 Node currentNode = EndNode;
                 while(currentNode != null)
                 {
-                        route.Insert(0, currentNode);
+                    route.Insert(0, currentNode);
                     if (currentNode == StartNode)
                         break;
                     Previous.TryGetValue(currentNode,out currentNode);
@@ -98,7 +107,7 @@ namespace VisualGraph.Data
 
     public interface IGraphAlgorithm
     {
-        public List<Node> GetShortestRoute();
+        public List<Node> GetShortestRoute(int startnodeId, int endnodeId);
         public int Iterate(bool auto = false);
         public string Name { get; }
     }

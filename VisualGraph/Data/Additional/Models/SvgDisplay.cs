@@ -8,29 +8,21 @@ using System.Threading.Tasks;
 
 namespace VisualGraph.Data.Additional.Models
 {
-    public class SvgViewRect
-    {   public static double ZoomStep { get; set; } = 0.5;
-        public static double MaxZoomLevel { get; set; } = 200;
+    public class SvgDisplay
+
+    {   
+        public static double ZoomStep { get; set; }
+        public static double MaxZoomLevel { get; set; } 
         private double Width { get; set; }
         private double Height { get; set; }
         public double ZoomedWidth => Width / ZoomLevel;
         public double ZoomedHeight => Height / ZoomLevel;
-        public Vector2 Center;
+        public Vector2 Center { get; set; } = Vector2.Zero;
         private double ZoomLevel { get; set; } = 1.0;
         public double TextSize { get; set; } = 10;
         public bool HideInformation { get; set; } = false;
         private Vector2 UpperLeft => new Vector2((float)(Center.X - (ZoomedWidth/ 2)) , (float)(Center.Y - (ZoomedHeight/ 2) ));
-       
-        public void CropRect(double minX, double minY, double maxX,double maxY)
-        {
-            var width = maxX - minX;
-            var height = maxY - minY;
-            if(width > height)
-                ZoomLevel = Width / width;
-            else
-                ZoomLevel = Height / height;
-            Center = new Vector2((float)width / 2, (float)height / 2);
-        }
+
         public void SetHeight(double height)
         {
             Height = height;
@@ -39,18 +31,9 @@ namespace VisualGraph.Data.Additional.Models
         {
             Width = width;
         }
-        public void SetCenter(double x, double y)
+        public void UpdateDisplaySettings()
         {
-            var upperleftx = UpperLeft.X;
-            var upperlefty = UpperLeft.Y;
-            if (x > upperleftx && x < upperleftx + ZoomedWidth)
-            {
-                Center.X = (float)x;
-            }
-            if (y > upperlefty && y < upperlefty + ZoomedHeight)
-            {
-                Center.Y = (float)y;
-            }
+
         }
         public string ViewBox => $"{(UpperLeft.X).ToString(CultureInfo.InvariantCulture)}," +
                 $" {(UpperLeft.Y).ToString(CultureInfo.InvariantCulture)}," +

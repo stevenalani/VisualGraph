@@ -13,13 +13,12 @@ namespace VisualGraph.Data.Additional.Interfaces
         public Task<string[]> GetGraphFilenames();
         public Task SaveGraph(BasicGraphModel graph, string filename = null);
         public event Action RefreshRequested;
-        public void CallRequestRefresh();
-        public void StartParameterRefresh();
-        public void StopParameterRefresh();
         public Task InitZoomPan(string graphid);
         public Task DestroyZoomPan();
         public Task DisablePan();
         public Task EnablePan();
+        public Task Fit();
+        public Task Center();
         public Task<GraphDisplayParameters> GetGraphDisplayParameters(string graphid);
         public Task<GraphDisplayParameters> InitialGetGraphDisplayParameters(string graphid);
         public Task<SvgInformation> GetSvgInformation(string graphname); 

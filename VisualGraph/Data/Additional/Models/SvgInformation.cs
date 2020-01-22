@@ -16,5 +16,7 @@ namespace VisualGraph.Data.Additional.Models
         public double PanZoomWidth { get; set; }
         public double ViewBoxHeight { get; set; }
         public double ViewBoxWidth { get; set; }
+        public double CenterX { get; set; }
+        public double CenterY { get; set; }
     }
 }
