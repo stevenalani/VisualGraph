@@ -9,7 +9,8 @@
          @onmouseup="@OnSvgMouseUp"
          @onmousedown="@OnSvgMouseDown"
          @onmousewheel="@OnSvgMouseWheel"
-         @onkeydown="@OnSvgKeyDown">
+         @onkeydown="@OnSvgKeyDown"
+         @ontouchmove="@OnSvgTouchMove">
         <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
                     markerWidth="6" markerHeight="6"
@@ -70,19 +71,22 @@
             @((MarkupString)$"<text x=\"{ (@node.Pos.X + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
             if (node.IsActive)
                 @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
-                <circle id="@($"node-{ node.Id}")"
-                        class="vsnode @node.Activeclass draggable @(((ICSSProperties)node).ClassesProppertie)"
-                        cx="@node.PosXText"
-                        cy="@(node.PosYText)"
-                        r="@GraphStyleParameters.NodeRadiusText"
-                        stroke="@GraphStyleParameters.NodeStrokeColor"
-                        stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
-                        fill="@GraphStyleParameters.NodeFill"
-                        @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
-                        @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
-                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation>
-                    test
-                </circle>
+    <circle id="@($"node-{ node.Id}")"
+            class="vsnode @node.Activeclass draggable @(((ICSSProperties)node).ClassesProppertie)"
+            cx="@node.PosXText"
+            cy="@(node.PosYText)"
+            r="@GraphStyleParameters.NodeRadiusText"
+            stroke="@GraphStyleParameters.NodeStrokeColor"
+            stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
+            fill="@GraphStyleParameters.NodeFill"
+            @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
+            @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
+            @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation
+            @ontouchstart="(args) => { OnTouchStart(args, node); }" ontouchstart:event.stopPropagation
+            @ontouchenter="(args) => { OnTouchEnter(args, node); }" ontouchenter:event.stopPropagation
+            @ontouchend="(args) => { OnTouchEnd(args, node); }" ontouchend:event.stopPropagation>
+        test
+    </circle>
             }
     </svg>
 }
@@ -134,7 +138,7 @@
             StateHasChanged();
             return;
         }
-        
+
     }
 
     public async Task ChangedState()
@@ -162,10 +166,16 @@
     public event EventHandler<WheelEventArgs> SvgMouseWheel;
     public event EventHandler<KeyboardEventArgs> SvgKeyDown;
 
+    public event EventHandler<TouchEventArgs> SvgTouchMove;
+
     public event EventHandler<GraphMouseEventArgs<Node>> NodeClick;
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseDown;
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseUp;
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseMove;
+
+    public event EventHandler<GraphTouchEventArgs<Node>> NodeTouchStart;
+    public event EventHandler<GraphTouchEventArgs<Node>> NodeTouchEnd;
+    public event EventHandler<GraphTouchEventArgs<Node>> NodeTouchEnter;
 
     public event EventHandler<WheelEventArgs> NodeMouseWheel;
 
@@ -219,12 +229,47 @@
         }
     }
 
+    protected virtual void OnSvgTouchMove(TouchEventArgs e)
+    {
+
+        EventHandler<TouchEventArgs> handler = SvgTouchMove;
+        if (handler != null)
+        {
+            handler(this, e);
+        }
+    }
+
+
     protected virtual void OnNodeClick(MouseEventArgs e, Node node)
     {
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeClick;
         if (handler != null)
         {
             handler(this, new GraphMouseEventArgs<Node>(node, e));
+        }
+    }
+    protected virtual void OnTouchStart(TouchEventArgs e, Node node)
+    {
+        EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchStart;
+        if (handler != null)
+        {
+            handler(this, new GraphTouchEventArgs<Node>(node, e));
+        }
+    }
+    protected virtual void OnTouchEnd(TouchEventArgs e, Node node)
+    {
+        EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchEnd;
+        if (handler != null)
+        {
+            handler(this, new GraphTouchEventArgs<Node>(node, e));
+        }
+    }
+    protected virtual void OnTouchEnter(TouchEventArgs e, Node node)
+    {
+        EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchEnter;
+        if (handler != null)
+        {
+            handler(this, new GraphTouchEventArgs<Node>(node, e));
         }
     }
     protected virtual void OnNodeMouseDown(MouseEventArgs e, Node node)

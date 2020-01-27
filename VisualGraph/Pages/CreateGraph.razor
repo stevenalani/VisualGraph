@@ -80,7 +80,34 @@
                     await GraphService.DisablePan();
                 }
             };
+            basicGraph.NodeTouchStart += async (sender, args) =>
+            {
+                Node node = args.Target;
+                if (GraphModel.ActiveNode != null)
+                {
+                    if (GraphModel.ActiveNode.Id == node.Id)
+                    {
+                        node.IsActive = false;
+                    }
+                    else
+                    {
+                        GraphModel.ActiveNode.IsActive = false;
+                        node.IsActive = true;
+                    }
+                }
+                else
+                {
+                    node.IsActive = true;
+                }
+                basicGraph.NodeDragStarted = true;
+                await GraphService.DisablePan();
+            };
             basicGraph.NodeMouseUp += async (sender, args) =>
+            {
+                basicGraph.NodeDragStarted = false;
+                await GraphService.EnablePan();
+            };
+            basicGraph.NodeTouchEnd += async (sender, args) =>
             {
                 basicGraph.NodeDragStarted = false;
                 await GraphService.EnablePan();
@@ -92,6 +119,19 @@
                     try
                     {
                         Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
+                        GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
+                        GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
+                    }
+                    catch { }
+                }
+            };
+            basicGraph.SvgTouchMove += async (sender, args) =>
+            {
+                if (GraphModel.ActiveNode != null && basicGraph.NodeDragStarted)
+                {
+                    try
+                    {
+                        Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.Touches.First().ClientX, args.Touches.First().ClientY);
                         GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
                         GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
                     }

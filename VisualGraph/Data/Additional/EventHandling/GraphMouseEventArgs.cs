@@ -8,16 +8,28 @@ using VisualGraph.Data.Additional.Models;
 
 namespace VisualGraph.Data.Additional.EventHandling
 {
-    public class GraphMouseEventArgs<T> 
+    public class GraphMouseEventArgs<T>
     {
 
-        public T Target {get;set;}
+        public T Target { get; set; }
         public MouseEventArgs MouseEventArgs { get; set; }
-        public GraphMouseEventArgs(T target,MouseEventArgs e)
+        public GraphMouseEventArgs(T target, MouseEventArgs e)
         {
             Target = target;
             MouseEventArgs = e;
-            
+
+        }
+    }
+    public class GraphTouchEventArgs<T>
+    {
+
+        public T Target { get; set; }
+        public TouchEventArgs MouseEventArgs { get; set; }
+        public GraphTouchEventArgs(T target, TouchEventArgs e)
+        {
+            Target = target;
+            MouseEventArgs = e;
+
         }
     }
 }
