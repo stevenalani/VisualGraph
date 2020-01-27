@@ -14,6 +14,7 @@ using Microsoft.JSInterop;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Miscellaneous;
+using VisualGraph.Components;
 using VisualGraph.Data.Additional.Interfaces;
 using VisualGraph.Data.Additional.Models;
 using Edge = VisualGraph.Data.Additional.Models.Edge;
@@ -27,9 +28,7 @@ namespace VisualGraph.Data
         IJSRuntime JSRuntime;
         public event Action RefreshRequested;
         private ConcurrentDictionary<string, GraphDisplayParameters> GraphDisplayParameters = new ConcurrentDictionary<string, GraphDisplayParameters>();
-        private Thread GraphParameterThread;
-        private ThreadStart GraphParameterThreadArgs;
-        private bool GraphParameterThreadShouldRun = false;
+
         private readonly double runningtime = 0.5;
 
         public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime)
@@ -37,7 +36,6 @@ namespace VisualGraph.Data
             _logger = logger;
             JSRuntime = jsRuntime;
             GraphFileProvider.EnsureGraphDirExists();
-            GraphParameterThreadArgs = new ThreadStart(QueryGraphSVGs);
         }
         public async Task<BasicGraphModel[]> GetAllGraphs()
         {
@@ -97,23 +95,6 @@ namespace VisualGraph.Data
             };
             return Task.FromResult(graph);
         }
-        private async void QueryGraphSVGs()
-        {
-            DateTime starttime = DateTime.Now;;
-            while (GraphParameterThreadShouldRun)
-            {
-                try
-                {
-                    var parameters = await JSRuntime.InvokeAsync<GraphDisplayParameters[]>("getAllSVGTransformationMatrices");
-                    foreach(var param in parameters)
-                    {
-                        GraphDisplayParameters.AddOrUpdate(param.Name,param,(key,oldval) => { return param; } );
-                    }
-                }catch{}
-                if (starttime.AddSeconds(runningtime) < DateTime.Now)
-                    return;
-            }
-        }
         public async Task<GraphDisplayParameters> InitialGetGraphDisplayParameters(string graphid)
         {
             if (graphid == null || graphid == "") return null;
@@ -164,9 +145,9 @@ namespace VisualGraph.Data
             catch { }
             return GraphModel;
         }
-        public async Task InitZoomPan(string graphid)
+        public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference,string graphid)
         {
-            await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] { graphid });
+            await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] {reference, graphid });
         }
         public async Task DestroyZoomPan()
         {
@@ -181,17 +162,26 @@ namespace VisualGraph.Data
             await JSRuntime.InvokeVoidAsync("EnablePan");
         }
 
-        public async Task<SvgInformation> GetSvgInformation(string graphname)
+        public async Task<SvgPanZoomInformation> GetSvgPanZoomInformation(string graphname)
         {
-            var svginfo = await JSRuntime.InvokeAsync<SvgInformation>("GetPanZoomValues", new object[] { graphname });
+            var svginfo = await JSRuntime.InvokeAsync<SvgPanZoomInformation>("GetPanZoomValues", new object[] { graphname });
+            return svginfo;
+        }
+        public async Task<SvgContainerInformation> GetSvgContainerInformation(string graphname)
+        {
+            var svginfo = await JSRuntime.InvokeAsync<SvgContainerInformation>("GetSvgContainerSizes", new object[] { graphname });
             return svginfo;
         }
 
         public async Task<Point2> GetTranslatedMousePos(string graphname, double x, double y)
         {
-            var svgInfo = await GetSvgInformation(graphname);
+            var svgInfo = await GetSvgPanZoomInformation(graphname);
             var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = graphname, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } }  );
             return mousePos;
+        }
+        public async Task UpdateBBox()
+        {
+            await JSRuntime.InvokeVoidAsync("UpdateBBox");
         }
 
         public async Task Fit()
@@ -201,6 +191,15 @@ namespace VisualGraph.Data
         public async Task Center()
         {
             await JSRuntime.InvokeVoidAsync("Center");
+        }
+        public async Task Resize()
+        {
+            await JSRuntime.InvokeVoidAsync("Resize");
+        }
+        public async Task Crop()
+        {
+            await Fit();
+            await Center();
         }
     }
 }

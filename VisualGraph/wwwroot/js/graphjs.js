@@ -44,27 +44,64 @@ window.getAllSVGTransformationMatrices = function () {
     });
     return cout;
 };
-window.InitPanZoom = function (svgid) {
-    window.VSSVG = svgPanZoom(svgid);
+window.InitPanZoom = function (dotnetref, svgid) {
+    if (this.document.getElementById(svgid) == null) return;
+    if (window.VSSVG != null)
+        window.VSSVG.destroy();
+
+    window.VSSVG = svgPanZoom(`#${svgid}`, {
+        minZoom: 0.2,
+        maxZoom: 10
+    });
     window.VSSVG.enableControlIcons();
-}
+    window.VSSVG.setOnPan(function () { dotnetref.invokeMethodAsync('UpdateDisplay', window.GetPanZoomValues(svgid)); });
+};
+window.UpdateBBox = function () {
+    if (window.VSSVG == null) return;
+    window.VSSVG.updateBBox();
+};
 window.Fit = function () {
+    if (window.VSSVG == null) return; 
     window.VSSVG.updateBBox();
     window.VSSVG.fit();
 }
+window.Resize = function () {
+    if (window.VSSVG == null) return;
+    window.VSSVG.resize();
+}
 window.Center = function () {
+    if (window.VSSVG == null) return; 
     window.VSSVG.center();
 }
 window.DestroyPanZoom = function () {
+    if (window.VSSVG == null) return; 
     window.VSSVG.destroy();
 }
 window.DisablePan = function () {
+    if (window.VSSVG == null) return; 
     window.VSSVG.disablePan();
 }
 window.EnablePan = function () {
+    if (window.VSSVG == null) return; 
     window.VSSVG.enablePan();
 }
+window.GetSvgContainerSizes = function (svgid) {
+    if (this.document.getElementById(svgid) == null) return;
+    var svgelement = jQuery(`#${svgid}`);
+    var offsetLeft = svgelement.offset().left;
+    var offsetTop = svgelement.offset().top;
+    var conteinerWidth = window.innerWidth - offsetLeft;
+    var conteinerHeight = window.innerHeight - offsetTop;
+    var obj = {
+        ParentWidth: conteinerWidth,
+        ParentHeight: conteinerHeight,
+        OffsetLeft: offsetLeft,
+        OffsetTop: offsetTop,
+    }
+    return obj;
+}
 window.GetPanZoomValues = function (svgid) {
+    if (window.VSSVG == null || this.document.getElementById(svgid) == null) return;
     var svgelement = jQuery(`#${svgid}`);
     var offsetLeft = svgelement.offset().left;
     var offsetTop = svgelement.offset().top;
@@ -74,9 +111,9 @@ window.GetPanZoomValues = function (svgid) {
     var viewboxHeight = VSSVG.getSizes().viewBox.height;
     var panZoomWidth = VSSVG.getSizes().width;
     var viewboxWidth = VSSVG.getSizes().viewBox.width;
+    var conteinerWidth = window.innerWidth - offsetLeft;
+    var conteinerHeight = window.innerHeight - offsetTop;
     var obj = {
-        OffsetLeft: offsetLeft,
-        OffsetTop: offsetTop,
         PanX: pan.x,
         PanY: pan.y,
         Zoom: zoom,
@@ -86,6 +123,10 @@ window.GetPanZoomValues = function (svgid) {
         ViewBoxWidth: viewboxWidth,
         centerX: panZoomWidth / 2 - pan.x,
         centerY: panZoomHeight / 2 - pan.y,
+        OffsetLeft: offsetLeft,
+        OffsetTop: offsetTop,
+        ParentWidth: conteinerWidth,
+        ParentHeight: conteinerHeight,
     }
     return obj;
 }

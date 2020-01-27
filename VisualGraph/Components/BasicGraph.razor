@@ -1,9 +1,9 @@
 ﻿@inject IGraphService GraphService
-@if (GraphModel != null)
+@if (GraphModel != null && SvgDisplay != null)
 {
     var activenode = GraphModel.ActiveNode;
-    @SVGViewRect.GetDisplayInformationMarkupString(GraphStyleParameters)
-    <svg id="@(GraphModel.Name)" class="vssvg" viewBox="@(SVGViewRect.ViewBox)"
+    @SvgDisplay.GetDisplayInformationMarkupString(GraphStyleParameters)
+    <svg id="@(GraphModel.Name)" class="vssvg" viewBox="@(SvgDisplay.ViewBox)" style="@SvgDisplay.RatioLimit"
          @onclick="@OnSvgClick"
          @onmousemove="@OnSvgMouseMove"
          @onmouseup="@OnSvgMouseUp"
@@ -67,7 +67,7 @@
         @foreach (var node in GraphModel.Nodes)
         {
             var name = node.Name;
-            @((MarkupString)$"<text x=\"{ (@node.Pos.X+ GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
+            @((MarkupString)$"<text x=\"{ (@node.Pos.X + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
             if (node.IsActive)
                 @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
                 <circle id="@($"node-{ node.Id}")"
@@ -90,35 +90,68 @@
 
 
 @code {
-    public GraphDisplayParameters SVGMatrix;
+
     public GraphStyleParameters GraphStyleParameters = new GraphStyleParameters();
-    public SvgDisplay SVGViewRect = new SvgDisplay();
+
+    public SvgDisplay SvgDisplay;
+
+    private DotNetObjectReference<BasicGraph> dotnetreference;
+
+    [JSInvokable("UpdateDisplay")]
+    public async Task UpdateDisplay(SvgPanZoomInformation svgInformation)
+    {
+        SvgDisplay.UpdateDisplaySettings(svgInformation);
+    }
 
     [Parameter]
-    public VisualGraph.Data.Additional.Models.BasicGraphModel GraphModel { get; set; }
+    public BasicGraphModel GraphModel { get; set; }
 
+    private string oldGraphName;
+    bool hasUpdates = false;
+
+    protected override void OnParametersSet()
+    {
+        if (oldGraphName != GraphModel.Name)
+        {
+            SvgDisplay = new SvgDisplay(GraphModel.ConvexHull[0].X - 10, GraphModel.ConvexHull[0].Y - 10, GraphModel.ConvexHull[1].X + 10, GraphModel.ConvexHull[1].Y + 10);
+        }
+    }
     protected override async Task OnAfterRenderAsync(bool firstrender)
     {
+        await base.OnAfterRenderAsync(firstrender);
+
         if (firstrender)
         {
-            var SvgElement = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
-            SVGViewRect.SetWidth(SvgElement.Width);
-            SVGViewRect.SetHeight(SvgElement.Height);
-            StateHasChanged();
-            GraphService.InitZoomPan("svg#" + GraphModel.Name);
+            dotnetreference = DotNetObjectReference.Create(this);
         }
+        if (oldGraphName != GraphModel.Name)
+        {
+            oldGraphName = GraphModel.Name;
+            await GraphService.InitZoomPan(dotnetreference, GraphModel.Name);
+            var displayinfo = await GraphService.GetSvgContainerInformation(GraphModel.Name);
+            hasUpdates = await SvgDisplay.UpdateDisplaySettings(displayinfo);
 
+            StateHasChanged();
+            return;
+        }
+        
     }
+
     public async Task ChangedState()
     {
         StateHasChanged();
     }
 
+    public async Task ChangedModel()
+    {
 
+        await GraphService.InitZoomPan(dotnetreference, GraphModel.Name);
+        await GraphService.Crop();
+        await GraphService.Resize();
+        Console.WriteLine("changed Model");
+    }
 
     #region EventHandling
-    DateTime NodeClickTriggerdTime;
-    DateTime SvgClickTriggerdTime;
     public bool NodeDragStarted = false;
 
     public event EventHandler Update;
@@ -136,20 +169,11 @@
 
     public event EventHandler<WheelEventArgs> NodeMouseWheel;
 
-    public async Task UpdateSvgTransformationMatrix()
-    {
-        SVGMatrix = await GraphService.InitialGetGraphDisplayParameters(GraphModel.Name);
-    }
-
     protected virtual void OnSvgClick(MouseEventArgs e)
     {
 
         EventHandler<MouseEventArgs> handler = SvgClick;
         if (handler != null && NodeClick == null)
-        {
-            handler(this, e);
-        }
-        else if (NodeClick != null && NodeClickTriggerdTime < DateTime.Now.AddMilliseconds(-100))
         {
             handler(this, e);
         }
@@ -200,7 +224,6 @@
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeClick;
         if (handler != null)
         {
-            NodeClickTriggerdTime = DateTime.Now;
             handler(this, new GraphMouseEventArgs<Node>(node, e));
         }
     }

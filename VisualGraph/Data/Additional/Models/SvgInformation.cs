@@ -5,10 +5,15 @@ using System.Threading.Tasks;
 
 namespace VisualGraph.Data.Additional.Models
 {
-    public class SvgInformation
+    public class SvgContainerInformation
     {
+        public double ParentWidth { get; set; }
+        public double ParentHeight { get; set; }
         public double OffsetLeft { get; set; }
         public double OffsetTop { get; set; }
+    }
+    public class SvgPanZoomInformation : SvgContainerInformation
+    {
         public double PanX { get; set; }
         public double PanY { get; set; }
         public double Zoom { get; set; }
