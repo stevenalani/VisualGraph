@@ -22,32 +22,38 @@ namespace VisualGraph.Data
         private static string _graphdir = Path.GetFullPath("./Graphs");
         private static GraphFactory _graphFactory = new GraphFactory();
 
-        internal static string[] GetGraphFileNames()
+        internal static Task<string[]> GetGraphFileNames()
         {
-            var filenames = Directory.GetFiles(_graphdir).Select(x => Path.GetFileNameWithoutExtension(x)).OrderByDescending(x => x.ToLower()).ToArray();
-            return filenames;
+            return Task.FromResult(Directory.GetFiles(_graphdir).Select(x => Path.GetFileNameWithoutExtension(x)).OrderByDescending(x => x.ToLower()).ToArray());
         }
-        internal static void EnsureGraphDirExists()
+        internal static Task EnsureGraphDirExists()
         {
             if (!Directory.Exists(_graphdir))
             {
                 Directory.CreateDirectory(_graphdir);
             }
+            return Task.CompletedTask;
         }
         internal static async Task<List<BasicGraphModel>> GetBasicGraphs()
         {
             List<BasicGraphModel> graphs = new List<BasicGraphModel>();
 
-            foreach (var file in GetGraphFileNames())
+            foreach (var file in await GetGraphFileNames())
             {
                     var graph = await ReadGraphMlToBasicGraph(file);
                     graphs.Add(graph);
             }
             return graphs;
         }
+        internal static async Task<BasicGraphModel> GetBasicGraph(string filename)
+        {
+
+                return await ReadGraphMlToBasicGraph(filename);
+        }
         internal static async Task<BasicGraphModel> ReadGraphMlToBasicGraph(string filepath)
         {
-            if (filepath == String.Empty || !GetGraphFileNames().Contains(filepath)) 
+            var filenames = await GetGraphFileNames();
+            if (filepath == String.Empty || ! filenames.Contains(filepath)) 
                 return null;
             
             if (!Path.IsPathFullyQualified(filepath))
@@ -60,23 +66,24 @@ namespace VisualGraph.Data
             graph.Path = filepath;
             return graph;   
         }
-        internal static Task<TinkerGrapĥ> ReadGraphMl(string filepath)
+        internal static async Task<TinkerGrapĥ> ReadGraphMl(string filepath)
         {
-            if (filepath == String.Empty || !GetGraphFileNames().Any(f => filepath.Contains(f))) return null;
+            var filenames = await GetGraphFileNames();
+            if (filepath == String.Empty || !filenames.Any(f => filepath.Contains(f))) return null;
 
             using (StreamReader streamReader = new StreamReader(filepath))
             {
                 TinkerGrapĥ g = new TinkerGrapĥ();
                 GraphMlReader.InputGraph(g, streamReader.BaseStream);
-                return Task.FromResult(g);
+                return g;
             }
             
         }
 
-        internal static void WriteToGraphMlFile(BasicGraphModel graph, string filename)
+        internal static Task WriteToGraphMlFile(BasicGraphModel graph, string filename)
         {
             if (filename == String.Empty)
-                return;
+                return Task.FromException(new Exception("no filename was given"));
             filename = Path.Combine(_graphdir, filename + ".xml");
             TinkerGrapĥ tinkerGraph = new TinkerGrapĥ();
             
@@ -102,7 +109,7 @@ namespace VisualGraph.Data
             {
                 writer.OutputGraph(fos);
             }
-                
+            return Task.CompletedTask;
         }
     }
 }

@@ -2,7 +2,6 @@
 @if (GraphModel != null && SvgDisplay != null)
 {
     var activenode = GraphModel.ActiveNode;
-    @SvgDisplay.GetDisplayInformationMarkupString(GraphStyleParameters)
     <svg id="@(GraphModel.Name)" class="vssvg" viewBox="@(SvgDisplay.ViewBox)" style="@SvgDisplay.RatioLimit"
          @onclick="@OnSvgClick"
          @onmousemove="@OnSvgMouseMove"
@@ -33,35 +32,54 @@
                 var reverseEdge = GraphModel.Edges.FirstOrDefault(x => x.StartNode == edge.EndNode && x.EndNode == edge.StartNode);
                 var halfwayx = ((edge.StartNode.Pos.X + edge.EndNode.Pos.X) / 2).ToString(CultureInfo.InvariantCulture);
                 var halfwayy = ((edge.StartNode.Pos.Y + edge.EndNode.Pos.Y) / 2).ToString(CultureInfo.InvariantCulture);
-                var dir = Vector2.Normalize(edge.EndNode.Pos - edge.StartNode.Pos);
-                var startPos = edge.StartNode.Pos + dir * (float)GraphStyleParameters.NodeRadius;
-                var endPos = edge.EndNode.Pos - dir * ((float)GraphStyleParameters.NodeRadius + (float)GraphStyleParameters.NodeStrokeWidth);
-                if (reverseEdge == null)
+                if (GraphModel.IsDirectional)
                 {
-                    <line class="@(((ICSSProperties)edge).ClassesProppertie)"
-                          x1="@((startPos.X).ToString(CultureInfo.InvariantCulture))"
-                          y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
-                          x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
-                          y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
-                          style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"
-                          marker-end="url(#arrow)" />
-                    @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                    var dir = Vector2.Normalize(edge.EndNode.Pos - edge.StartNode.Pos);
+                    var startPos = edge.StartNode.Pos + dir * (float)GraphStyleParameters.NodeRadius;
+                    var endPos = edge.EndNode.Pos - dir * ((float)GraphStyleParameters.NodeRadius + (float)GraphStyleParameters.NodeStrokeWidth);
+                    if (reverseEdge == null)
+                    {
+                        <line class="@(((ICSSProperties)edge).ClassesProppertie)"
+                              x1="@((startPos.X).ToString(CultureInfo.InvariantCulture))"
+                              y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
+                              x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
+                              y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
+                              style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"
+                              marker-end="url(#arrow)" />
+                        @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                    }
+                    else
+                    {
+                        var curvepoint = startPos + dir * ((endPos - startPos).Length() / 2);
+                        var rotatedDir = Vector2.Transform(dir, Matrix3x2.CreateRotation(MathF.PI / 2));
+                        var lengthofVector = rotatedDir * (curvepoint - startPos).Length();
+                        var disiredPoint = lengthofVector * 0.2f + curvepoint;
+                        var testpos = lengthofVector * 0.1f + curvepoint;
+                        <path class="@(((ICSSProperties)edge).ClassesProppertie)"
+                              d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
+                              stroke="@GraphStyleParameters.EdgeStrokeColor"
+                              stroke-width="@GraphStyleParameters.EdgeWidthText"
+                              fill="transparent"
+                              marker-end="url(#arrow)" />
+                        @((MarkupString)$"<text x=\"{@testpos.X.ToString(CultureInfo.InvariantCulture)}\" y=\"{@testpos.Y.ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                    }
                 }
                 else
                 {
-                    var curvepoint = startPos + dir * ((endPos - startPos).Length() / 2);
-                    var rotatedDir = Vector2.Transform(dir, Matrix3x2.CreateRotation(MathF.PI / 2));
-                    var lengthofVector = rotatedDir * (curvepoint - startPos).Length();
-                    var disiredPoint = lengthofVector * 0.2f + curvepoint;
-                    var testpos = lengthofVector * 0.1f + curvepoint;
-                    <path class="@(((ICSSProperties)edge).ClassesProppertie)"
-                          d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
-                          stroke="@GraphStyleParameters.EdgeStrokeColor"
-                          stroke-width="@GraphStyleParameters.EdgeWidthText"
-                          fill="transparent"
-                          marker-end="url(#arrow)" />
-                    @((MarkupString)$"<text x=\"{@testpos.X.ToString(CultureInfo.InvariantCulture)}\" y=\"{@testpos.Y.ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                    var startPos = edge.StartNode.Pos;
+                    var endPos = edge.EndNode.Pos;
+                    if (reverseEdge == null)
+                    {
+                        <line class="@(((ICSSProperties)edge).ClassesProppertie)"
+                              x1="@((startPos.X).ToString(CultureInfo.InvariantCulture))"
+                              y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
+                              x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
+                              y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
+                              style="@($"stroke:{GraphStyleParameters.EdgeStrokeColor}; stroke-width:{GraphStyleParameters.EdgeWidthText}")"/>
+                        @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan font-size=\"{ (GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture)}\">Distance:{String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                    }
                 }
+
 
             }
         }
@@ -71,22 +89,22 @@
             @((MarkupString)$"<text x=\"{ (@node.Pos.X + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\">{@node.Name}</text>");
             if (node.IsActive)
                 @((MarkupString)$"<text text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\" fill=\"{GraphStyleParameters.TextColor}\" font-size=\"{GraphStyleParameters.TextSizeText}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
-    <circle id="@($"node-{ node.Id}")"
-            class="vsnode @node.Activeclass draggable @(((ICSSProperties)node).ClassesProppertie)"
-            cx="@node.PosXText"
-            cy="@(node.PosYText)"
-            r="@GraphStyleParameters.NodeRadiusText"
-            stroke="@GraphStyleParameters.NodeStrokeColor"
-            stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
-            fill="@GraphStyleParameters.NodeFill"
-            @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
-            @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
-            @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation
-            @ontouchstart="(args) => { OnTouchStart(args, node); }" ontouchstart:event.stopPropagation
-            @ontouchenter="(args) => { OnTouchEnter(args, node); }" ontouchenter:event.stopPropagation
-            @ontouchend="(args) => { OnTouchEnd(args, node); }" ontouchend:event.stopPropagation>
-        test
-    </circle>
+                <circle id="@($"node-{ node.Id}")"
+                        class="vsnode @node.Activeclass draggable @(((ICSSProperties)node).ClassesProppertie)"
+                        cx="@node.PosXText"
+                        cy="@(node.PosYText)"
+                        r="@GraphStyleParameters.NodeRadiusText"
+                        stroke="@GraphStyleParameters.NodeStrokeColor"
+                        stroke-width="@GraphStyleParameters.NodeStrokeWidthText"
+                        fill="@GraphStyleParameters.NodeFill"
+                        @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
+                        @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
+                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation
+                        @ontouchstart="(args) => { OnTouchStart(args, node); }" ontouchstart:event.stopPropagation
+                        @ontouchenter="(args) => { OnTouchEnter(args, node); }" ontouchenter:event.stopPropagation
+                        @ontouchend="(args) => { OnTouchEnd(args, node); }" ontouchend:event.stopPropagation>
+                    test
+                </circle>
             }
     </svg>
 }
@@ -102,9 +120,9 @@
     private DotNetObjectReference<BasicGraph> dotnetreference;
 
     [JSInvokable("UpdateDisplay")]
-    public async Task UpdateDisplay(SvgPanZoomInformation svgInformation)
+    public Task<bool> UpdateDisplay(SvgPanZoomInformation svgInformation)
     {
-        SvgDisplay.UpdateDisplaySettings(svgInformation);
+       return Task.FromResult(SvgDisplay.UpdateDisplaySettings(svgInformation));
     }
 
     [Parameter]
@@ -133,7 +151,7 @@
             oldGraphName = GraphModel.Name;
             await GraphService.InitZoomPan(dotnetreference, GraphModel.Name);
             var displayinfo = await GraphService.GetSvgContainerInformation(GraphModel.Name);
-            hasUpdates = await SvgDisplay.UpdateDisplaySettings(displayinfo);
+            hasUpdates = SvgDisplay.UpdateDisplaySettings(displayinfo);
 
             StateHasChanged();
             return;
@@ -141,7 +159,7 @@
 
     }
 
-    public async Task ChangedState()
+    public void ChangedState()
     {
         StateHasChanged();
     }
@@ -158,7 +176,6 @@
     #region EventHandling
     public bool NodeDragStarted = false;
 
-    public event EventHandler Update;
     public event EventHandler<MouseEventArgs> SvgClick;
     public event EventHandler<MouseEventArgs> SvgMouseDown;
     public event EventHandler<MouseEventArgs> SvgMouseUp;
@@ -220,7 +237,7 @@
             handler(this, e);
         }
     }
-    protected virtual async Task OnSvgKeyDown(KeyboardEventArgs e)
+    protected virtual void OnSvgKeyDown(KeyboardEventArgs e)
     {
         EventHandler<KeyboardEventArgs> handler = SvgKeyDown;
         if (handler != null)

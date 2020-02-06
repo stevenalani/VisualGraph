@@ -13,11 +13,11 @@ namespace VisualGraph.Data
         Node currentNode;
         public Node StartNode { get; private set; }
         public Node EndNode { get; set; }
-        Dictionary<Node, double> distances = new Dictionary<Node, double>();
-        Dictionary<Node, Node> Previous = new Dictionary<Node, Node>();
+        Dictionary<Node, double> distances;
+        Dictionary<Node, Node> Previous;
         
         public int StepCount;
-        public List<DijkstraResultTuple> Results = new List<DijkstraResultTuple>();
+        public List<DijkstraResultTuple> Results;
         public int RemainingSteps => Q.Count;
 
         public string Name => "Dijkstra Algorithm";
@@ -29,6 +29,9 @@ namespace VisualGraph.Data
         }
         private void Init(int startNodeId = -1)
         {
+            Results = new List<DijkstraResultTuple>();
+            distances = new Dictionary<Node, double>();
+            Previous = new Dictionary<Node, Node>();
             Results = new List<DijkstraResultTuple>();
             StepCount = 0;
             Q = Model.Nodes.OrderBy(x => x.Id).ToList();
@@ -78,16 +81,13 @@ namespace VisualGraph.Data
             }
             return Q.Count;
         }
-        public List<Node> GetShortestRoute(int startId, int endId)
+        public List<Node> GetShortestRoute(int startId = -1, int endId = -1)
         {
-            if (startId == null || endId == null) return null;
-            if(startId != StartNode.Id)
-            {
+            if (startId == -1 || endId == -1) return null;
                 StartNode = Model.Nodes.FirstOrDefault(x => x.Id == startId);
                 Init(StartNode.Id);
                 Iterate(true);
-            }
-            
+
             List<Node> route = new List<Node>();
             EndNode = Model.Nodes.FirstOrDefault(x => x.Id == endId);
             if (EndNode != null)

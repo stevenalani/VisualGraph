@@ -13,7 +13,6 @@ namespace VisualGraph.Data.Additional.Interfaces
 
         public Task<string[]> GetGraphFilenames();
         public Task SaveGraph(BasicGraphModel graph, string filename = null);
-        public event Action RefreshRequested;
         public Task InitZoomPan(DotNetObjectReference<BasicGraph> reference, string graphid);
         public Task DestroyZoomPan();
         public Task DisablePan();

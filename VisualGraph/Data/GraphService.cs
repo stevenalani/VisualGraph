@@ -13,12 +13,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Core.Layout;
+using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
 using VisualGraph.Components;
 using VisualGraph.Data.Additional.Interfaces;
 using VisualGraph.Data.Additional.Models;
-using Edge = VisualGraph.Data.Additional.Models.Edge;
-using Node = VisualGraph.Data.Additional.Models.Node;
 
 namespace VisualGraph.Data
 {
@@ -26,10 +25,8 @@ namespace VisualGraph.Data
     {
         ILogger<GraphService> _logger;
         IJSRuntime JSRuntime;
-        public event Action RefreshRequested;
         private ConcurrentDictionary<string, GraphDisplayParameters> GraphDisplayParameters = new ConcurrentDictionary<string, GraphDisplayParameters>();
 
-        private readonly double runningtime = 0.5;
 
         public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime)
         {
@@ -43,12 +40,12 @@ namespace VisualGraph.Data
         }
         public async Task<BasicGraphModel> GetGraph(string filename)
         {
-            return (await GraphFileProvider.GetBasicGraphs()).ToArray().First(x=>x.Path.Contains(filename));
+            return await GraphFileProvider.GetBasicGraph(filename);
         }
 
-        public Task<string[]> GetGraphFilenames()
+        public async Task<string[]> GetGraphFilenames()
         {
-            return Task.FromResult(GraphFileProvider.GetGraphFileNames());
+            return await GraphFileProvider.GetGraphFileNames();
         }
         public async Task SaveGraph(BasicGraphModel graph, string filename = "")
         {
@@ -69,31 +66,7 @@ namespace VisualGraph.Data
         }
         private async Task WriteGraph(BasicGraphModel graph,string filename)
         {
-            GraphFileProvider.WriteToGraphMlFile(graph, filename);
-        }
-
-        public Task<BasicGraphModel> GenerateGraph(string filename, int nodecount = 20 ,int fromx = -50, int fromy = -50, int tox = 50, int toy = 50)
-        {
-            if (filename == "") return null;
-            Random rand = new Random();
-            List<Node> nodes = new List<Node>();
-            List<Edge> edges = new List<Edge>();
-            for (var count = 0; count < tox; count++)
-            {
-                var x = rand.NextDouble() + Convert.ToDouble(rand.Next(fromx, tox));
-                var y = rand.NextDouble() + Convert.ToDouble(rand.Next(fromy, toy));
-
-                nodes.Add(new Node { Pos = new Vector2((float)x, (float)y), Id = count });
-
-            }
-
-            BasicGraphModel graph = new BasicGraphModel()
-            {
-                Nodes = nodes,
-                Edges = edges,
-                Path = filename,
-            };
-            return Task.FromResult(graph);
+            await GraphFileProvider.WriteToGraphMlFile(graph, filename);
         }
         public async Task<GraphDisplayParameters> InitialGetGraphDisplayParameters(string graphid)
         {
@@ -108,12 +81,8 @@ namespace VisualGraph.Data
             GraphDisplayParameters.TryGetValue(graphid,out outval);
             return Task.FromResult(outval);
         }
-        public void CallRequestRefresh()
-        {
-            RefreshRequested?.Invoke();
-        }
 
-        public async Task<BasicGraphModel> LayoutGraph(BasicGraphModel GraphModel)
+        public Task<BasicGraphModel> LayoutGraph(BasicGraphModel GraphModel)
         {
             try
             {
@@ -133,7 +102,7 @@ namespace VisualGraph.Data
                     geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2) { Length = x.Weight, UserData = x.Id });
                 });
 
-                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
+                var settings = new SugiyamaLayoutSettings();
                 LayoutHelpers.CalculateLayout(geometryGraph, settings, null);
                 nodes.ForEach(x =>
                 {
@@ -143,7 +112,7 @@ namespace VisualGraph.Data
                 });
             }
             catch { }
-            return GraphModel;
+            return Task.FromResult(GraphModel);
         }
         public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference,string graphid)
         {

@@ -75,7 +75,7 @@ namespace VisualGraph.Data.Additional.Models
         {
             GraphWidth = width;
         }
-        public async Task<bool> UpdateDisplaySettings(SvgPanZoomInformation svgPanZoomInformation)
+        public bool UpdateDisplaySettings(SvgPanZoomInformation svgPanZoomInformation)
         {
             bool hasChanges = false;
             if (svgPanZoomInformation == null) return hasChanges;
@@ -111,7 +111,7 @@ namespace VisualGraph.Data.Additional.Models
 
             return hasChanges;
         }
-        public async Task<bool> UpdateDisplaySettings(SvgContainerInformation svgContainerInformation)
+        public bool UpdateDisplaySettings(SvgContainerInformation svgContainerInformation)
         {
             bool hasChanges = false;
             if (svgContainerInformation == null) return hasChanges;
@@ -127,10 +127,11 @@ namespace VisualGraph.Data.Additional.Models
             }
             return hasChanges;
         }
-        public async Task UpdateDisplaySettings(Vector2[] ConvexHull)
+        public bool UpdateDisplaySettings(Vector2[] ConvexHull)
         {
             GraphWidth = Math.Abs(ConvexHull[0].X) + Math.Abs(ConvexHull[1].X);
             GraphHeight = Math.Abs(ConvexHull[0].Y) + Math.Abs(ConvexHull[1].Y);
+            return true;
         }
         public string ViewBox => 
             $"{(UpperLeft.X).ToString(CultureInfo.InvariantCulture)}," +

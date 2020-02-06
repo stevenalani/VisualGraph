@@ -53,7 +53,7 @@ window.InitPanZoom = function (dotnetref, svgid) {
         minZoom: 0.2,
         maxZoom: 10
     });
-    window.VSSVG.enableControlIcons();
+    
     window.VSSVG.setOnPan(function () { dotnetref.invokeMethodAsync('UpdateDisplay', window.GetPanZoomValues(svgid)); });
 };
 window.UpdateBBox = function () {
@@ -144,10 +144,5 @@ window.GetTranslatedMousePos = function (args) {
     };
 }
 $(document).ready(() => {
-    //$(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
-    $("svg").on("keydown", (e) => {
-        if (e.ctrlKey && (e.key == "+" || e.key == "-")) {
-            e.preventDefault();
-        }
-    });
+   // $(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
 });

@@ -63,7 +63,7 @@
                     {
                         var basicGraph1 = (BasicGraph)inst;
                         basicGraph = basicGraph1;
-                        basicGraph.SvgClick += async (sender, args) =>
+                        basicGraph.SvgClick += (sender, args) =>
                         {
                             BasicGraph graph = ((BasicGraph)sender);
                             if (graph.GraphModel.ActiveNode != null)
@@ -71,6 +71,7 @@
                                 string identifierB = graph.GraphModel.ActiveNode.Name == "" ? graph.GraphModel.ActiveNode.Id.ToString() : graph.GraphModel.ActiveNode.Name;
                                 toastService.ShowSuccess($"Deselected node: { identifierB }", "Active node changed");
                                 graph.GraphModel.ActiveNode.IsActive = false;
+                                basicGraph.NodeDragStarted = false;
                             }
                         };
                         basicGraph.NodeClick += (sender, args) =>
@@ -84,13 +85,14 @@
                                 if (graph.GraphModel.ActiveNode.Id == node.Id)
                                 {
                                     node.IsActive = false;
+                                    basicGraph.NodeDragStarted = false;
                                     toastService.ShowSuccess($"Deselected node: { identifierB }", "Active node changed");
                                 }
                                 else
                                 {
                                     graph.GraphModel.ActiveNode.IsActive = false;
                                     node.IsActive = true;
-                                    toastService.ShowSuccess($"Old active node: { identifierB } </br> New active node: { identifierA }", "Active node changed");
+                                    toastService.ShowSuccess($"Old active node: { identifierB } New active node: { identifierA }", "Active node changed");
                                 }
                             }
                             else
@@ -99,6 +101,78 @@
                                 toastService.ShowSuccess($"Active node selected: { identifierA }", "Active node changed");
                             }
                             StateHasChanged();
+                        };
+
+                        basicGraph.NodeMouseDown += async (sender, args) =>
+                        {
+                            if (model.Graph.ActiveNode != null)
+                            {
+                                basicGraph.NodeDragStarted = true;
+                                await graphService.DisablePan();
+                            }
+                        };
+
+                        basicGraph.NodeTouchStart += async (sender, args) =>
+                        {
+                            VisualGraph.Data.Additional.Models.Node node = args.Target;
+                            if (model.Graph.ActiveNode != null)
+                            {
+                                if (model.Graph.ActiveNode.Id == node.Id)
+                                {
+                                    node.IsActive = false;
+                                }
+                                else
+                                {
+                                    model.Graph.ActiveNode.IsActive = false;
+                                    node.IsActive = true;
+                                }
+                            }
+                            else
+                            {
+                                node.IsActive = true;
+                            }
+                            basicGraph.NodeDragStarted = true;
+                            await graphService.DisablePan();
+                        };
+                        basicGraph.NodeMouseUp += async (sender, args) =>
+                        {
+                            basicGraph.NodeDragStarted = false;
+                            await graphService.EnablePan();
+                        };
+                        basicGraph.NodeTouchEnd += async (sender, args) =>
+                        {
+                            basicGraph.NodeDragStarted = false;
+                            await graphService.EnablePan();
+                        };
+                        basicGraph.SvgMouseMove += async (sender, args) =>
+                        {
+                            if (model.Graph.ActiveNode != null && basicGraph.NodeDragStarted)
+                            {
+                                try
+                                {
+                                    Point2 coords = await graphService.GetTranslatedMousePos(model.Graph.Name, args.ClientX, args.ClientY);
+                                    model.Graph.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
+                                    model.Graph.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
+                                }
+                                catch { }
+                            }
+                        };
+                        basicGraph.SvgTouchMove += async (sender, args) =>
+                        {
+                            if (model.Graph.ActiveNode != null && basicGraph.NodeDragStarted)
+                            {
+                                try
+                                {
+                                    Point2 coords = await graphService.GetTranslatedMousePos(model.Graph.Name, args.Touches.First().ClientX, args.Touches.First().ClientY);
+                                    model.Graph.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
+                                    model.Graph.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
+                                }
+                                catch { }
+                            }
+                        };
+                        basicGraph.SvgMouseUp += (sender, args) =>
+                        {
+                            Refresh();
                         };
                     });
                 builder.CloseComponent();
@@ -119,20 +193,33 @@
     }
     public async void HandleSelectChange()
     {
-        var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraph));
-        var graphmodel = await graphService.GetGraph(graphPath);
+        var graphmodel = await graphService.GetGraph(model.CurrentGraph);
         model.Graph = graphmodel;
         StateHasChanged();
 
     }
     private async Task LayoutGraph()
     {
-        var resultGraph = graphService.LayoutGraph(model.Graph);
+        var resultGraph = await graphService.LayoutGraph(model.Graph);
+        model.Graph = resultGraph;
+        StateHasChanged();
     }
     private async Task Crop()
     {
-        graphService.Fit();
-        graphService.Center();
+        await graphService.Fit();
+        await graphService.Center();
+    }
+
+    public void Refresh()
+    {
+        StateHasChanged();
+        basicGraph.ChangedState();
+    }
+    public void Refresh(BasicGraphModel graph)
+    {
+        this.model.Graph = graph;
+        StateHasChanged();
+        basicGraph.ChangedState();
     }
 
 }

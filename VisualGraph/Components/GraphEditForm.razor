@@ -12,10 +12,13 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="GraphName" class="col-form-label">File Name:</label>
+                        <label for="IsDirectional" class="col-form-label">Is Directional:</label>
                         <div class="col">
-                            <InputCheckbox class="form-control" @bind-Value="@GraphModel.IsDirectional" />
-                            @GraphModel.IsBidirectional
+                            <InputCheckbox id="IsDirectional" class="form-control" @bind-Value="@GraphModel.IsDirectional" />
+                        </div>
+                        <label for="IsBidirectional" class="col-form-label">Is Bidirectional:</label>
+                        <div class="col">
+                            <input type="checkbox" id="IsBidirectional" class="form-control" disabled="disabled" checked="@(GraphModel.IsBidirectional?true:false)" />
                         </div>
                     </div>
                     <hr />
@@ -209,7 +212,7 @@
         {
             GraphModel.Edges.Remove(edge);
         }
-        GraphService.SaveGraph(GraphModel, GraphModel.Name);
+        await GraphService.SaveGraph(GraphModel, GraphModel.Name);
         Files = await GraphService.GetGraphFilenames();
         Parent.Refresh();
 
@@ -228,6 +231,7 @@
             IsActive = true,
         };
         GraphModel.Nodes.Add(activenode);
+        StateHasChanged();
         Parent.Refresh();
     }
 
@@ -241,6 +245,7 @@
             Weight = 0,
         };
         GraphModel.Edges.Add(newEdge);
+        StateHasChanged();
         Parent.Refresh();
     }
 
@@ -254,7 +259,7 @@
         {
             edge.EndNode = null;
         }
-
+        StateHasChanged();
         Parent.Refresh();
     }
     private void ChangedStartEdge(Edge edge, ChangeEventArgs args)
@@ -267,6 +272,7 @@
         {
             edge.StartNode = null;
         }
+        StateHasChanged();
         Parent.Refresh();
     }
 }

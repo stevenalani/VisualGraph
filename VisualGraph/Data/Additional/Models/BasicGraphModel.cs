@@ -15,7 +15,7 @@ using System.Numerics;
 
 namespace VisualGraph.Data.Additional.Models
 {
-    public class BasicGraphModel : IGraphFile//,IRenderable
+    public class BasicGraphModel : IGraphFile
     {
         public bool IsAxisShown { get; set; } = true;
         public static int sequence = 0;
@@ -33,6 +33,6 @@ namespace VisualGraph.Data.Additional.Models
         public Vector2[] ConvexHull => new[] { new Vector2(minX, minY), new Vector2(maxX, maxY) };
 
         public bool IsDirectional { get; set; } = true;
-        public bool IsBidirectional => IsDirectional && Edges.Count(x => Edges.FirstOrDefault(y => y.EndNode == x.StartNode)?.StartNode == x.EndNode) > 0;
+        public bool IsBidirectional => IsDirectional && Edges.Where( x=> x.StartNode != null && x.EndNode != null).Count(x => Edges.FirstOrDefault(y => y.EndNode == x.StartNode)?.StartNode == x.EndNode ) > 0;
     }
 }

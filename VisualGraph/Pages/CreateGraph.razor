@@ -28,9 +28,8 @@
     BasicGraphModel GraphModel { get; set; }
 
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        //GraphService.RefreshRequested += StateHasChanged;
         GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
         {
             Path = "unnamedGraph",
@@ -59,12 +58,11 @@
         });
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
-        //Files = await GraphService.GetGraphFilenames();
         if (firstRender)
         {
-            basicGraph.SvgClick += async (sender, args) =>
+            basicGraph.SvgClick += (sender, args) =>
             {
                 if (GraphModel.ActiveNode != null)
                 {
@@ -165,16 +163,16 @@
         }
     }
 
-    public async void Refresh()
+    public void Refresh()
     {
         StateHasChanged();
-        await basicGraph.ChangedState();
+        basicGraph.ChangedState();
     }
-    public async void Refresh(BasicGraphModel graph)
+    public void Refresh(BasicGraphModel graph)
     {
         this.GraphModel = graph;
         StateHasChanged();
-        await basicGraph.ChangedState();
+        basicGraph.ChangedState();
     }
 }
 

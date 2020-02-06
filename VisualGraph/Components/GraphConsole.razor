@@ -25,7 +25,7 @@
     string Inputline { get; set; } = "";
     List<string> OutputText = new List<string>();
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
         GraphCommandProcessor.model = Graph;
         Clear();

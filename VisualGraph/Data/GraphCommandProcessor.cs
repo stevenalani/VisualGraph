@@ -22,7 +22,7 @@ namespace VisualGraph.Data
                 command.Invoke(model);
                 return "Done: "+input;
             }
-            catch(Exception e)
+            catch
             {
                 return $"there went something wrong! please check your input: {input}";
             }
@@ -94,7 +94,7 @@ namespace VisualGraph.Data
 
     internal class AddEdgeCommand : GraphCommand
     {
-        public new Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1,w, g) => {
+        public Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1,w, g) => {
             Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
             Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
             var edge = new Edge {
@@ -154,7 +154,7 @@ namespace VisualGraph.Data
     }
     internal class RemoveEdgeCommand : GraphCommand
     {
-        public new Action<Node, Node, BasicGraphModel> Action = new Action<Node, Node, BasicGraphModel>((n0, n1, g) => {
+        public Action<Node, Node, BasicGraphModel> Action = new Action<Node, Node, BasicGraphModel>((n0, n1, g) => {
             Edge edge = n0.Edges.First(x => x.EndNode == n1 || x.StartNode == n1);
             g.Edges.Remove(edge);
         });
@@ -174,7 +174,7 @@ namespace VisualGraph.Data
     }
     internal class RemoveNodeCommand : GraphCommand
     {
-        public new Action<Node, Node, BasicGraphModel, double> Action = new Action<Node, Node, BasicGraphModel, double>((n0, n1, g, w) => {
+        public Action<Node, Node, BasicGraphModel, double> Action = new Action<Node, Node, BasicGraphModel, double>((n0, n1, g, w) => {
             var edge = new Edge
             {
                 StartNode = n0,

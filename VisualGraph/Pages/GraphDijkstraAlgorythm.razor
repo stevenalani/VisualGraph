@@ -28,7 +28,7 @@
                     <button type="button" @onclick="@DikstraAutostep">Autorun Dikstra</button>
                 </div>
                 <div class="form-group ml-1">
-                    <button type="button" @onclick="@DijkstraCheapestRoute" class="@(DijkstraAlgorithmRunner?.RemainingSteps < 1 ? "" : "hide")">Get the cheapest route</button>
+                    <button type="button" @onclick="@DijkstraCheapestRoute" class="@(DijkstraAlgorithmRunner?.RemainingSteps < 1 ? "" : "")">Get the cheapest route</button>
                 </div>
             }
         </EditForm>
@@ -41,7 +41,6 @@
     <div class="right-container">
         <div class="card pb-5">
             <div class="card-body">
-
                 @if (DijkstraAlgorithmRunner?.Results != null)
                 {
                     var headerEntries = DijkstraAlgorithmRunner?.Results[0];
@@ -63,18 +62,14 @@
                             @{ int StepCount = 1; }
                             @foreach (var resultEntries in DijkstraAlgorithmRunner?.Results)
                             {
-
                                 <tr>
                                     <td rowspan="2">@(StepCount++)</td>
                                     <td>Cost</td>
                                     <td>0</td>
                                     @foreach (var result in resultEntries.Previous)
                                     {
-
                                         if (resultEntries.Distances[result.Key] != double.PositiveInfinity)
                                         {
-                                            <!--<td>String.Format("{0,0:0.00}", result.Value.Edges.First(x => x.StartNode == result.Key || x.EndNode == result.Key).Weight))</td>-->
-
                                             <td>@(String.Format("{0,0:0.00}", resultEntries.Distances[result.Key]))</td>
                                         }
                                         else
@@ -82,7 +77,6 @@
                                             <td> &infin;</td>
                                         }
                                     }
-
                                 </tr>
                                 <tr>
                                     <td>Previous Node</td>
@@ -100,7 +94,6 @@
                                     }
                                 </tr>
                             }
-
                         </tbody>
                     </table>
                     <div>
@@ -155,7 +148,9 @@
     DijkstraAlgorithm DijkstraAlgorithmRunner;
     List<Node> ShortestRouteToEndnode;
     double PathCost = 0;
-
+    string vgpathclass = " vgpath";
+    string endnodeclass = "endnode";
+    string startnodeclass = "startnode";
     SelectGraphModel model = new SelectGraphModel();
     public string[] graphFilenames { get; set; }
     private string[] graphPathes { get; set; }
@@ -170,14 +165,13 @@
 
     public async void HandleSelectChange()
     {
-        var graphPath = graphPathes.First(x => x.Contains(model.CurrentGraphPath));
-        var graphmodel = await GraphService.GetGraph(graphPath);
+        var graphmodel = await GraphService.GetGraph(model.CurrentGraphPath);
         model.Graph = graphmodel;
         DijkstraAlgorithmRunner = null;
-
+        ShortestRouteToEndnode = null;
         StateHasChanged();
     }
-    private async Task LayoutGraph()
+    private void LayoutGraph()
     {
         var resultGraph = GraphService.LayoutGraph(model.Graph);
     }
@@ -188,7 +182,7 @@
         GraphService.Center();
     }
 
-    private async Task DikstraStep()
+    private void DikstraStep()
     {
         if (this.DijkstraAlgorithmRunner == null)
         {
@@ -204,7 +198,7 @@
         DijkstraAlgorithmRunner.Iterate();
     }
 
-    private async Task DikstraAutostep()
+    private void DikstraAutostep()
     {
         if (this.DijkstraAlgorithmRunner == null)
         {
@@ -220,12 +214,16 @@
         DijkstraAlgorithmRunner.Iterate(auto: true);
     }
 
-    private async Task DijkstraCheapestRoute()
+    private void DijkstraCheapestRoute()
     {
         PathCost = 0;
-        string vgpathclass = " vgpath";
+        var startnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode")).Id;
         var endnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode")).Id;
-        ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(model.Graph.ActiveNode.Id, endnodeId);
+        if (ShortestRouteToEndnode != null)
+            clearRouteClasses();
+        if (DijkstraAlgorithmRunner == null)
+            DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startnodeId);
+        ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
         for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
         {
             var node = ShortestRouteToEndnode[nodeindex];
@@ -249,6 +247,37 @@
         }
         StateHasChanged();
     }
+    private void clearRouteClasses()
+    {
+        if(ShortestRouteToEndnode != null)
+        {
+            for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
+            {
+                var node = ShortestRouteToEndnode[nodeindex];
+
+                if (node.Classes.Contains(vgpathclass))
+                    node.Classes.Remove(vgpathclass);
+
+                if (nodeindex < ShortestRouteToEndnode.Count - 1)
+                {
+                    var node1 = ShortestRouteToEndnode[nodeindex + 1];
+                    if (node1.Classes.Contains(vgpathclass))
+                        node1.Classes.Remove(vgpathclass);
+                    var edge = node.Edges.FirstOrDefault(x => (x.EndNode == node1 && x.StartNode == node) || (x.EndNode == node && x.StartNode == node1));
+                    if (edge != null)
+                    {
+                        if (edge.Classes.Contains(vgpathclass))
+                            edge.Classes.Remove(vgpathclass);
+                    }
+                }
+            }
+        }
+    }
+    private void resetDijkstra()
+    {
+        DijkstraAlgorithmRunner = null;
+        ShortestRouteToEndnode = null;
+    }
     BasicGraph basicGraph;
     RenderFragment RenderGraph()
     {
@@ -261,25 +290,44 @@
                 builder.AddComponentReferenceCapture(2,
                     inst =>
                     {
-                        string endnodeclass = "endnode";
+
                         var basicGraph1 = (BasicGraph)inst;
                         basicGraph = basicGraph1;
-                        basicGraph.NodeMouseDown += async (sender, args) =>
+                        basicGraph.NodeMouseDown += (sender, args) =>
                         {
                             if (args.MouseEventArgs.Buttons == 2)
                             {
-                                var currentEndnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(endnodeclass) && x != args.Target);
-                                currentEndnode?.Classes.Remove(endnodeclass);
-
-                                if (args.Target.Classes.Contains(endnodeclass))
-                                    args.Target.Classes.Remove(endnodeclass);
-                                else
+                                var currentStartNode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(startnodeclass));
+                                var currentEndnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(endnodeclass));
+                                if(currentStartNode == null)
+                                {
+                                    args.Target.Classes.Add(startnodeclass);
+                                }
+                                else if(currentStartNode != null && currentStartNode == args.Target)
+                                {
+                                    args.Target.Classes.Remove(startnodeclass);
+                                }
+                                /*else if (currentStartNode != null)
+                                {
+                                    currentStartNode.Classes.Remove(startnodeclass);
+                                    args.Target.Classes.Add(startnodeclass);
+                                }*/
+                                else if(currentEndnode == null)
+                                {
                                     args.Target.Classes.Add(endnodeclass);
-
-
+                                }
+                                else if(currentEndnode != null && currentEndnode == args.Target)
+                                {
+                                    args.Target.Classes.Remove(endnodeclass);
+                                }
+                                /*else if(currentEndnode != null)
+                                {
+                                    currentEndnode.Classes.Remove(endnodeclass);
+                                    args.Target.Classes.Add(endnodeclass);
+                                }*/
                             }
                         };
-                        basicGraph.SvgClick += async (sender, args) =>
+                        basicGraph.SvgClick += (sender, args) =>
                         {
                             BasicGraph graph = ((BasicGraph)sender);
                             if (graph.GraphModel.ActiveNode != null)
@@ -293,6 +341,7 @@
                             Data.Additional.Models.Node node = args.Target;
                             if (graph.GraphModel.ActiveNode != null)
                             {
+                                resetDijkstra();
                                 if (graph.GraphModel.ActiveNode.Id == node.Id)
                                 {
                                     node.IsActive = false;
