@@ -19,8 +19,10 @@
         @RenderGraph()
 
     </div>
-
-    <GraphEditForm GraphModel="@GraphModel" Parent="@this" />
+    <div class="right-container">
+        <GraphEditForm GraphModel="@GraphModel" Parent="@this" />
+        <Skriptloader GraphModel="@GraphModel" Parent="this"/>
+    </div>
 </div>
 
 @code {

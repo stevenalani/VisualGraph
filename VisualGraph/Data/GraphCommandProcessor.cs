@@ -35,19 +35,20 @@ namespace VisualGraph.Data
             { "add", new Dictionary<string, Type>()
                 {
                     { "node", typeof(AddNodeCommand) },
-                    { "edge", typeof(AddEdgeCommand) },
+                    { "edgebyids", typeof(AddEdgeCommand) },
+                    { "edgebynames", typeof(AddEdgeByNamesCommand) },
                 }
             },
-            { "remove", new Dictionary<string, Type>()
+            { "del", new Dictionary<string, Type>()
                 {
                     {"node",typeof(RemoveNodeCommand)},
-                    {"edge",typeof(RemoveEdgeCommand)},
+                    {"edgebyids",typeof(RemoveEdgeCommand)},
+                    {"edgebynames",typeof(RemoveEdgeCommand)},
                 }
             }
         };
         public static GraphCommand InterpretCommand(string inputstring)
         {
-            string lowerinput = inputstring.ToLower();
             Regex regex = new Regex(@"(\b[A-z]+\b[^,])");
             var match = regex.Matches(inputstring);
             if(match.Count > 0)
@@ -122,6 +123,42 @@ namespace VisualGraph.Data
             int n1id = (int)Parameters[typeof(int)][1];
             double weight = (double)Parameters[typeof(double)][0];
             Action.Invoke(n0id, n1id,weight,g);
+        }
+    }
+    internal class AddEdgeByNamesCommand : AddEdgeCommand
+    {
+        public new Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1, w, g) => {
+            Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
+            Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
+            var edge = new Edge
+            {
+                StartNode = node,
+                EndNode = node1,
+                Id = g.Edges.Count > 0 ? g.Edges.Max(e => e.Id) + 1 : 1,
+                Weight = w,
+            };
+            node.Edges.Add(edge);
+            node1.Edges.Add(edge);
+            g.Edges.Add(edge);
+        });
+        public AddEdgeByNamesCommand()
+        {
+            Parameters = new Dictionary<Type, object[]>
+            {
+                { typeof(string), new object[2] },
+                { typeof(double), new object[1] }
+            };
+        }
+
+        public override void Invoke(BasicGraphModel g)
+        {
+            string n0name = Parameters[typeof(string)][0].ToString().Trim();
+            string n1name = Parameters[typeof(string)][1].ToString().Trim();
+
+            int n0id = g.Nodes.First(x=> x.Name == n0name).Id;
+            int n1id = g.Nodes.First(x => x.Name == n1name).Id;
+            double weight = (double)Parameters[typeof(double)][0];
+            Action.Invoke(n0id, n1id, weight, g);
         }
     }
     internal class AddNodeCommand : GraphCommand

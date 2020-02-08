@@ -18,6 +18,7 @@ namespace VisualGraph.Data.Additional.Models
     public class BasicGraphModel : IGraphFile
     {
         public bool IsAxisShown { get; set; } = true;
+
         public static int sequence = 0;
 
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
@@ -34,5 +35,25 @@ namespace VisualGraph.Data.Additional.Models
 
         public bool IsDirectional { get; set; } = true;
         public bool IsBidirectional => IsDirectional && Edges.Where( x=> x.StartNode != null && x.EndNode != null).Count(x => Edges.FirstOrDefault(y => y.EndNode == x.StartNode)?.StartNode == x.EndNode ) > 0;
+
+        public BasicGraphModel Clone()
+        {
+            BasicGraphModel model = new BasicGraphModel();
+
+            foreach(var node in this.Nodes)
+            {
+                model.Nodes.Add(new Node() { Id = node.Id, Name = node.Name, Pos = new Vector2(node.Pos.X, node.Pos.Y)});
+            }
+            foreach (var edge in this.Edges)
+            {
+                model.Edges.Add(new Edge() { Id = edge.Id, Weight = edge.Weight, EndNode = model.Nodes.First(x => x.Id == edge.EndNode.Id), StartNode = model.Nodes.First(x => x.Id == edge.StartNode.Id) });
+            }
+            foreach( var edge in model.Edges)
+            {
+                edge.EndNode.Edges.Add(edge);
+                edge.StartNode.Edges.Add(edge);
+            }
+            return model;
+        }
     }
 }

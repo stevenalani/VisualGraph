@@ -126,11 +126,9 @@ app {
     display:flex;
 }
 .right-container {
-    /*background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 70%);
-    flex: 1;*/
     max-width:50%;
-    height: calc(100vh - 100px) !important;
-    overflow: hidden auto;
+    height: calc(100vh - 120px) !important;
+    overflow: auto;
 }
 .right-flex-container form{
     padding:1em;
@@ -156,6 +154,44 @@ svg.responsive.vert{
 }
 circle {
     z-index: 100;
+}
+#legend{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    left:0;
+    
+}
+#legend a {
+    vertical-align: middle;
+}
+.legend-edge {
+    width: 50px;
+    height: 2px;
+    background-color: #d966ff;
+    display: inline-block;
+}
+.legend-edge.pathedge {
+    background-color: lime;
+}
+.legend-node {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: 2px solid black;
+    border-radius: 50%;
+}
+.legend-node.startnode {
+    background-color: rgba(0,255,224,0.7);
+}
+.legend-node.endnode {
+    background-color: rgba(79,0,224,0.7);
+}
+.legend-node.active {
+    background-color: rgba(0,79,224,0.7);
+}
+#collapseForm{
+    padding:0 !important;
 }
 .collapse.width {
     height: auto;

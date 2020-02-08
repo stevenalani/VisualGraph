@@ -1,101 +1,60 @@
 ﻿@page "/dijkstra"
 @using System.IO
 @using VisualGraph.Data
+@using Blazored.Toast;
 @using Node = VisualGraph.Data.Additional.Models.Node
 @inject IGraphService GraphService
 @inject IJSRuntime JsRuntime
-<div class="flex-wrapper">
-    <div class="flex-wrapper-title">
-        <h3>Run Dijkstra Algorithm</h3>
-        <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
-            <div class="form-group">
-                <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraphPath">
-                    @foreach (var name in graphFilenames)
-                    {
-                        <option value="@name">@name</option>
-                    }
-                </InputSelect>
-                <button type="submit">Laden</button>
-            </div>
-            @if (basicGraph != null)
-            {
+@inject IToastService toastService
+    <div class="flex-wrapper">
+        <div class="flex-wrapper-title">
+            <h3>Run Dijkstra Algorithm</h3>
+            <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
                 <div class="form-group">
-                    <button type="button" @onclick="@Crop">Crop View to Graph</button>
-                    <button type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                    <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraphPath">
+                        @foreach (var name in graphFilenames)
+                        {
+                            <option value="@name">@name</option>
+                        }
+                    </InputSelect>
+                    <button type="submit" class="btn btn-primary">Load</button>
                 </div>
-                <div class="form-group ml-1">
-                    <button type="button" @onclick="@DikstraStep">Singlestep Dikstra</button>
-                    <button type="button" @onclick="@DikstraAutostep">Autorun Dikstra</button>
-                </div>
-                <div class="form-group ml-1">
-                    <button type="button" @onclick="@DijkstraCheapestRoute" class="@(DijkstraAlgorithmRunner?.RemainingSteps < 1 ? "" : "")">Get the cheapest route</button>
-                </div>
-            }
-        </EditForm>
-
-    </div>
-    <hr />
-    <div class="left-container">
-        @RenderGraph()
-    </div>
-    <div class="right-container">
-        <div class="card pb-5">
-            <div class="card-body">
-                @if (DijkstraAlgorithmRunner?.Results != null)
+                @if (basicGraph != null)
                 {
-                    var headerEntries = DijkstraAlgorithmRunner?.Results[0];
-                    <h5>Result Table</h5>
-                    <h6>Startnode: ID=@(headerEntries.StartNode.Id); Name=@(headerEntries.StartNode.Name)</h6>
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Iteration</th>
-                                <th></th>
-                                <th>ID: @headerEntries.StartNode.Id Name:@headerEntries.StartNode.Name</th>
-                                @foreach (var resultEntries in headerEntries.Previous)
-                                {
-                                    <th><span>ID:@resultEntries.Key.Id</span><span> Name:@resultEntries.Key.Name</span></th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{ int StepCount = 1; }
-                            @foreach (var resultEntries in DijkstraAlgorithmRunner?.Results)
-                            {
-                                <tr>
-                                    <td rowspan="2">@(StepCount++)</td>
-                                    <td>Cost</td>
-                                    <td>0</td>
-                                    @foreach (var result in resultEntries.Previous)
-                                    {
-                                        if (resultEntries.Distances[result.Key] != double.PositiveInfinity)
-                                        {
-                                            <td>@(String.Format("{0,0:0.00}", resultEntries.Distances[result.Key]))</td>
-                                        }
-                                        else
-                                        {
-                                            <td> &infin;</td>
-                                        }
-                                    }
-                                </tr>
-                                <tr>
-                                    <td>Previous Node</td>
-                                    <td>-</td>
-                                    @foreach (var result in resultEntries.Previous)
-                                    {
-                                        if (result.Value != null)
-                                        {
-                                            <td>@result.Value.Name, @result.Value.Id</td>
-                                        }
-                                        else
-                                        {
-                                            <td>-</td>
-                                        }
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" type="button" @onclick="@Crop">Crop View to Graph</button>
+                        <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                    </div>
+                    <div class="form-group ml-1">
+                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Singlestep Dikstra</button>
+                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Autorun Dikstra</button>
+                    </div>
+                    <div class="form-group ml-1">
+                        <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Get the cheapest route</button>
+                    </div>
+                }
+            </EditForm>
+
+        </div>
+        <hr />
+        <div class="left-container">
+
+            @RenderGraph()
+            <div id="legend">
+                <span class="col"><a class="startnode legend-node"></a> Startnode</span>
+                <span class="col"><a class="endnode legend-node"></a> Endnode</span>
+                <span class="col"><a class="active legend-node"></a> active node</span>
+                <span class="col"><a class="legend-edge"></a> edge</span>
+                <span class="col"><a class="pathedge legend-edge"></a> cheapest path edge</span>
+            </div>
+        </div>
+        <div class="right-container">
+        @if (DijkstraAlgorithmRunner?.Results != null)
+        {
+            <div class="card pb-5">
+                <div class="card-body">
+
+                    <VisualGraph.Components.DijkstraResultTable Results="@DijkstraAlgorithmRunner.Results" />
                     <div>
                         @if (ShortestRouteToEndnode != null)
                         {
@@ -133,11 +92,12 @@
                             </table>
                         }
                     </div>
-                }
+                    
+                </div>
             </div>
+        }
         </div>
     </div>
-</div>
 
 @code {
     public class SelectGraphModel
@@ -182,48 +142,53 @@
         GraphService.Center();
     }
 
-    private void DikstraStep()
+    private void RunDikstra(bool autostep = false)
     {
         if (this.DijkstraAlgorithmRunner == null)
         {
-            if (model.Graph.ActiveNode != null)
+            var startNodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(startnodeclass))?.Id ?? -1;
+            if (startNodeId != -1)
             {
-                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, model.Graph.ActiveNode.Id);
-            }
-            else
-            {
-                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph);
-            }
-        }
-        DijkstraAlgorithmRunner.Iterate();
-    }
 
-    private void DikstraAutostep()
-    {
-        if (this.DijkstraAlgorithmRunner == null)
-        {
-            if (model.Graph.ActiveNode != null)
-            {
-                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, model.Graph.ActiveNode.Id);
+                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startNodeId);
             }
             else
             {
                 DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph);
             }
         }
-        DijkstraAlgorithmRunner.Iterate(auto: true);
+        if (DijkstraAlgorithmRunner.RemainingSteps > 0)
+        {
+            DijkstraAlgorithmRunner.Iterate(autostep);
+        }
+        else
+        {
+            DijkstraAlgorithmRunner = null;
+            RunDikstra(autostep);
+        }
     }
 
     private void DijkstraCheapestRoute()
     {
         PathCost = 0;
-        var startnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode")).Id;
-        var endnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode")).Id;
+        var startnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id??-1;
+        var endnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id??-1;
+        if (startnodeId == -1 || endnodeId == -1)
+        {
+            toastService.ShowError("Select a start and end node, first");
+            return;
+        }
         if (ShortestRouteToEndnode != null)
             clearRouteClasses();
         if (DijkstraAlgorithmRunner == null)
             DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startnodeId);
+
         ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
+        visualizeRoute();
+        StateHasChanged();
+    }
+    private void visualizeRoute()
+    {
         for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
         {
             var node = ShortestRouteToEndnode[nodeindex];
@@ -245,11 +210,10 @@
                 }
             }
         }
-        StateHasChanged();
     }
     private void clearRouteClasses()
     {
-        if(ShortestRouteToEndnode != null)
+        if (ShortestRouteToEndnode != null)
         {
             for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
             {
@@ -299,11 +263,11 @@
                             {
                                 var currentStartNode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(startnodeclass));
                                 var currentEndnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(endnodeclass));
-                                if(currentStartNode == null)
+                                if (currentStartNode == null)
                                 {
                                     args.Target.Classes.Add(startnodeclass);
                                 }
-                                else if(currentStartNode != null && currentStartNode == args.Target)
+                                else if (currentStartNode != null && currentStartNode == args.Target)
                                 {
                                     args.Target.Classes.Remove(startnodeclass);
                                 }
@@ -312,11 +276,11 @@
                                     currentStartNode.Classes.Remove(startnodeclass);
                                     args.Target.Classes.Add(startnodeclass);
                                 }*/
-                                else if(currentEndnode == null)
+                                else if (currentEndnode == null)
                                 {
                                     args.Target.Classes.Add(endnodeclass);
                                 }
-                                else if(currentEndnode != null && currentEndnode == args.Target)
+                                else if (currentEndnode != null && currentEndnode == args.Target)
                                 {
                                     args.Target.Classes.Remove(endnodeclass);
                                 }

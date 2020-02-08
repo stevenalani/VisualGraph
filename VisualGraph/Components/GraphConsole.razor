@@ -9,8 +9,6 @@
     <EditForm Model="@Inputline" OnSubmit="@executeCommand">
         <InputText @bind-Value="@Inputline" @onkeydown="@clearCommand" class="w-100" />
     </EditForm>
-    
-
 </div>
 @code {
     static string introMessage = "Commands: add [ node ( name:string ) | edge ( startNodeId:int endNodeId:int weight:double ) ] \r\n"
@@ -28,7 +26,6 @@
     protected override void OnParametersSet()
     {
         GraphCommandProcessor.model = Graph;
-        Clear();
     }
 
     private void Clear() {

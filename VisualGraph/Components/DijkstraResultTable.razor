@@ -1,0 +1,46 @@
+﻿<h3>DijkstraResultTable</h3>
+@if (Results != null)
+{
+    var headerEntries = Results[0];
+    <h5>Result Table</h5>
+    <h6>Startnode: ID=@(headerEntries.StartNode.Id); Name=@(headerEntries.StartNode.Name)</h6>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Iteration</th>
+                <th>Considered<br>node</th>
+                @foreach (var resultEntries in headerEntries.Previous)
+                {
+                    <th>Cost<br>@(resultEntries.Key.Name!=""? resultEntries.Key.Name: resultEntries.Key.Id.ToString())</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{ int StepCount = 0; }
+            @foreach (var resultEntry in Results)
+            {
+                <tr>
+                    <td>@(StepCount == 0?"initial":$"{StepCount}")</td>
+                    @{ StepCount++; }
+                    <td>@(resultEntry.StartNode.Name!=""? resultEntry.StartNode.Name: resultEntry.StartNode.Id.ToString())</td>
+                    @foreach (var result in resultEntry.Previous)
+                    {
+                        if (resultEntry.Distances[result.Key] != double.PositiveInfinity)
+                        {
+                            <td>@(String.Format("{0,0:0.00}", resultEntry.Distances[result.Key]))</td>
+                        }
+                        else
+                        {
+                            <td> &infin;</td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    [Parameter]
+    public List<DijkstraResultTuple> Results { get; set; }
+
+}

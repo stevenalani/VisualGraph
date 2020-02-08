@@ -60,7 +60,6 @@ namespace VisualGraph.Data
         }
         public int Iterate(bool auto = false)
         {
-            
             while (Q.Count > 0)
             {
                 StepCount++;
@@ -75,7 +74,7 @@ namespace VisualGraph.Data
                         Update(neighbour);
                     }
                 }
-                Results.Add(new DijkstraResultTuple(StartNode, new Dictionary<Node,Node>(Previous), new Dictionary<Node,double>(distances)));
+                Results.Add(new DijkstraResultTuple(currentNode, new Dictionary<Node,Node>(Previous), new Dictionary<Node,double>(distances)));
                 if (!auto)
                     break;
             }

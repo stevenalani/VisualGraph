@@ -1,6 +1,9 @@
 ﻿@inject IGraphService GraphService
-    <a class="col-1 toggler" @onclick="@(async (args) => { collapseClass = collapseClass == "" ? "collapse" : ""; Parent.Refresh();await GraphService.Resize(); })"><span class="oi oi-expand-@(collapseClass == ""?"left":"right")"></span><span class="btn-text"> @(collapseClass == "" ? "CLOSE" : "OPEN")</span></a>
-    <div id="#collapseForm" class="@collapseClass">
+
+<div class="container-fluid">
+    <div class="row">
+    <a class="col-1 toggler" @onclick="@(async (args) => { collapseClass = collapseClass == "" ? "collapse" : ""; Parent.Refresh();await GraphService.Resize(); })"><span class="oi oi-expand-@(collapseClass == ""?"left":"right")"></span></a>
+    <div id="collapseForm" class="@collapseClass col-11">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title"><span class="oi oi-graph" aria-hidden="true"></span> Edit Graph Data</h5>
@@ -179,7 +182,8 @@
         </div>
         <GraphConsole Graph="@GraphModel" Parent="@Parent" />
     </div>
-
+</div>
+</div>
 @code {
     [Parameter]
     public BasicGraphModel GraphModel { get; set; }

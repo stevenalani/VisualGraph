@@ -1,0 +1,46 @@
+﻿<h3>Create graph from script</h3>
+<span>
+    <InputFile OnChange="@processScript" />
+</span>
+    
+
+
+@code {
+    [Parameter]
+    public IRefreshableParent Parent { get; set; }
+    [Parameter]
+    public BasicGraphModel GraphModel { get; set; }
+    private IFileListEntry file;
+
+    private async void processScript(IFileListEntry[] files)
+    {
+        if (files.Length == 0) return;
+        file = files.First();
+        GraphModel.Nodes = new List<Node>();
+        GraphModel.Edges = new List<Edge>();
+        GraphCommandProcessor.model = GraphModel;
+        string line = string.Empty;
+        System.IO.StreamReader filereader = new System.IO.StreamReader(file.Data);
+        int linecnt = 0;
+        while ((line = await filereader.ReadLineAsync()) != null)
+        {
+            if(line.Trim() != "") {
+                if (linecnt == 0)
+                {
+                    if (line.Contains("name:"))
+                    {
+                        GraphModel.Path = line.Split(':')[1].Trim().Replace(" ", "_");
+                        continue;
+                    }
+                    else
+                    {
+                        GraphModel.Path = file.Name;
+                    }
+                }
+                GraphCommandProcessor.Process(line);
+            }
+        }
+        filereader.Close();
+        Parent.Refresh();
+    }
+}
