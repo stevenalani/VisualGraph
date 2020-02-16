@@ -6,20 +6,20 @@
     <div id="collapseForm" class="@collapseClass col-11">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title"><span class="oi oi-graph" aria-hidden="true"></span> Edit Graph Data</h5>
+                <h5 class="card-title"><span class="oi oi-graph" aria-hidden="true"></span>Graphdaten bearbeiten</h5>
                 <EditForm @onchange="(args)=> { Parent.Refresh(); }" Model="@GraphModel">
                     <div class="form-group row">
-                        <label for="GraphName" class="col-form-label">File Name:</label>
+                        <label for="GraphName" class="col-form-label">Dateiname:</label>
                         <div class="col">
                             <InputText id="GraphName" class="form-control" @bind-Value="@GraphModel.Path"></InputText>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="IsDirectional" class="col-form-label">Is Directional:</label>
+                        <label for="IsDirectional" class="col-form-label">Gerichtet:</label>
                         <div class="col">
                             <InputCheckbox id="IsDirectional" class="form-control" @bind-Value="@GraphModel.IsDirectional" />
                         </div>
-                        <label for="IsBidirectional" class="col-form-label">Is Bidirectional:</label>
+                        <label for="IsBidirectional" class="col-form-label">Mehrfachkanten:</label>
                         <div class="col">
                             <input type="checkbox" id="IsBidirectional" class="form-control" disabled="disabled" checked="@(GraphModel.IsBidirectional?true:false)" />
                         </div>
@@ -27,7 +27,7 @@
                     <hr />
                     @if (GraphModel.ActiveNode != null)
                     {
-                        <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Active node</h5>
+                        <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Aktiver Knoten</h5>
                         <table>
                             <tbody>
                                 <tr>
@@ -49,15 +49,15 @@
                     }
 
                     <hr />
-                    <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Edit All Nodes</h5>
+                    <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Knoten bearbeiten</h5>
                     <table>
                         <thead>
                             <tr>
-                                <th>Node Id</th>
+                                <th>Id</th>
                                 <th>Pos X</th>
                                 <th>Pos Y</th>
                                 <th>Name</th>
-                                <th>Deleate</th>
+                                <th>Löschen</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -83,20 +83,20 @@
                             }
                         </tbody>
                     </table>
-                    <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Add new Node</button>
+                    <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Knoten Hinzufügen</button>
                     <hr />
-                    <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span> Edit All Edges</h5>
+                    <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Kanten bearbeiten</h5>
                     @if (GraphModel.Edges.Count > 0)
                     {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Edge Id</th>
-                                    <th>Start Node</th>
-                                    <th>End Node</th>
-                                    <th>Weight</th>
-                                    <th>Distance</th>
-                                    <th>Deleate</th>
+                                    <th>Id</th>
+                                    <th>Start- Knoten</th>
+                                    <th>End- Knoten </th>
+                                    <th>Kanten- Gewicht</th>
+                                    <th>Distanz</th>
+                                    <th>Löschen</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -109,22 +109,18 @@
                                             <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
                                                 @if (edge.StartNode == null)
                                                 {
-                                                    <option default selected="selected">Select Startnode</option>
-                                                }
-                                                else
-                                                {
-                                                    <option default>Select Startnode</option>
+                                                    <option default selected="selected">Startknoten wählen</option>
                                                 }
                                                 @foreach (var node in GraphModel.Nodes)
                                                 {
                                                     if (node == edge.EndNode) continue;
                                                     if (edge.StartNode == node)
                                                     {
-                                                        <option value="@node.Id" selected="selected">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        <option value="@node.Id" selected="selected">@($"Id:{node.Id}; Name:{node.Name}")</option>
                                                     }
                                                     else
                                                     {
-                                                        <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        <option value="@node.Id">@($"Id:{node.Id}; Name:{node.Name}")</option>
                                                     }
                                                 }
                                             </select>
@@ -134,22 +130,22 @@
 
                                                 @if (edge.EndNode == null)
                                                 {
-                                                    <option default selected="selected">Select Endnode</option>
+                                                    <option default selected="selected">Endknoten wählen</option>
                                                 }
                                                 else
                                                 {
-                                                    <option default>Select Endnode</option>
+                                                    <option default>Endknoten wählen</option>
                                                 }
                                                 @foreach (var node in GraphModel.Nodes)
                                                 {
                                                     if (node == edge.StartNode) continue;
                                                     if (edge.EndNode == node)
                                                     {
-                                                        <option value="@node.Id" selected="selected">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        <option value="@node.Id" selected="selected">@($"Id:{node.Id}; Name:{node.Name}")</option>
                                                     }
                                                     else
                                                     {
-                                                        <option value="@node.Id">@($"id:{node.Id}; name:{node.Name}")</option>
+                                                        <option value="@node.Id">@($"Id:{node.Id}; Name:{node.Name}")</option>
                                                     }
                                                 }
                                             </select>
@@ -165,12 +161,12 @@
                             </tbody>
                         </table>
                     }
-                    <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Add new Edge</button>
+                    <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Kante hinzufügen</button>
                     <hr />
-                    <button type="button" class="btn btn-outline-info" @onclick="@SaveGraph"><span class="oi oi-data-transfer-download"></span> Save Graph </button>
-                    <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Load</button>
+                    <button type="button" class="btn btn-outline-info" @onclick="@SaveGraph"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
+                    <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
                     <select class="form-control" @onchange="@((args) => { FileToRead = args.Value.ToString(); })">
-                        <option default>Select a Graph</option>
+                        <option default>Graph auswählen</option>
                         @foreach (var file in Files)
                         {
                             <option value="@file">@file</option>
@@ -180,7 +176,10 @@
                 </EditForm>
             </div>
         </div>
+        <Skriptloader GraphModel="@GraphModel" Parent="@Parent" />
+        <hr />
         <GraphConsole Graph="@GraphModel" Parent="@Parent" />
+        
     </div>
 </div>
 </div>

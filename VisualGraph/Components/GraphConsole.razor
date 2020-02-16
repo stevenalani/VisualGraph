@@ -1,4 +1,6 @@
-﻿<div class="graphconsole w-100">
+﻿<h3>Graph Console</h3>
+<h5>Befehle auf Graph ausführen</h5>
+<div class="graphconsole w-100">
     <p>@introMessage</p>
     <textarea rows="7" class="w-100" disabled>
         @foreach(string s in OutputText)
@@ -11,8 +13,8 @@
     </EditForm>
 </div>
 @code {
-    static string introMessage = "Commands: add [ node ( name:string ) | edge ( startNodeId:int endNodeId:int weight:double ) ] \r\n"
-        +"example: add edge 0, 1, 13.50";
+    static string introMessage = "Befehle: add [ node ( name:string ) | edgebyids ( startNodeId:int endNodeId:int weight:double ) | edgebynames ( startNodeName:string endNodeName:string weight:double ) ] \r\n"
+        + "example: add edgeids 0, 1, 13.50";
 
     [Parameter]
     public BasicGraphModel Graph { get; set; }
@@ -30,9 +32,9 @@
 
     private void Clear() {
         if (Graph != null)
-            OutputText = new List<string>() { $"Working on graph {Graph.Name}\n" };
+            OutputText = new List<string>() { $"Führe Befehle auf Graph \"{Graph.Name}\" aus\n" };
         else
-            OutputText = new List<string>() { $"You're currently not working on a graph!\n" };
+            OutputText = new List<string>() { $"Es ist kein Graph ausgewählt!\n" };
         StateHasChanged();
     }
     private void clearCommand(KeyboardEventArgs args)

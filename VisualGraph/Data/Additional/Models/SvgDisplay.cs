@@ -138,7 +138,7 @@ namespace VisualGraph.Data.Additional.Models
             $"{(UpperLeft.Y).ToString(CultureInfo.InvariantCulture)}," +
             $"{(GraphWidth).ToString(CultureInfo.InvariantCulture) }," +
             $"{(GraphHeight).ToString(CultureInfo.InvariantCulture) }";
-       public MarkupString GetDisplayInformationMarkupString(GraphStyleParameters graphStyleParameters)
+       public MarkupString GetDisplayInformationMarkupString()
         {
             var mstring = HideInformation ? "": $"<div id=\"ViewInformation\"><p>"+
                     $"<span>{String.Format("Window Width: {0,0:0.00}, Height {1,0:0.00}", GraphWidth,GraphHeight)}</span></br>"+

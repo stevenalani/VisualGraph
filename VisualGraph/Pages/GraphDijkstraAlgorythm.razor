@@ -17,20 +17,20 @@
                             <option value="@name">@name</option>
                         }
                     </InputSelect>
-                    <button type="submit" class="btn btn-primary">Load</button>
+                    <button type="submit" class="btn btn-outline-primary"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
                 </div>
                 @if (basicGraph != null)
                 {
                     <div class="form-group">
-                        <button class="btn btn-secondary" type="button" @onclick="@Crop">Crop View to Graph</button>
-                        <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Run Layouting</button>
+                        <button class="btn btn-secondary" type="button" @onclick="@Crop">Graph zuschneiden und zentrieren</button>
+                        <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Graph layouten</button>
                     </div>
                     <div class="form-group ml-1">
-                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Singlestep Dikstra</button>
-                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Autorun Dikstra</button>
+                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
+                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
                     </div>
                     <div class="form-group ml-1">
-                        <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Get the cheapest route</button>
+                        <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Günstigste Route ermitteln</button>
                     </div>
                 }
             </EditForm>
@@ -40,13 +40,6 @@
         <div class="left-container">
 
             @RenderGraph()
-            <div id="legend">
-                <span class="col"><a class="startnode legend-node"></a> Startnode</span>
-                <span class="col"><a class="endnode legend-node"></a> Endnode</span>
-                <span class="col"><a class="active legend-node"></a> active node</span>
-                <span class="col"><a class="legend-edge"></a> edge</span>
-                <span class="col"><a class="pathedge legend-edge"></a> cheapest path edge</span>
-            </div>
         </div>
         <div class="right-container">
         @if (DijkstraAlgorithmRunner?.Results != null)
@@ -175,7 +168,7 @@
         var endnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id??-1;
         if (startnodeId == -1 || endnodeId == -1)
         {
-            toastService.ShowError("Select a start and end node, first");
+            toastService.ShowError("Es muss ein Start- und Endknoten per Rechtsklick gewählt werden.");
             return;
         }
         if (ShortestRouteToEndnode != null)
@@ -255,15 +248,15 @@
                     inst =>
                     {
 
-                        var basicGraph1 = (BasicGraph)inst;
-                        basicGraph = basicGraph1;
+                        basicGraph = (BasicGraph)inst;
+                        basicGraph.RegisterDefaultNodeCallbacks();
                         basicGraph.NodeMouseDown += (sender, args) =>
                         {
                             if (args.MouseEventArgs.Buttons == 2)
                             {
                                 var currentStartNode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(startnodeclass));
                                 var currentEndnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(endnodeclass));
-                                if (currentStartNode == null)
+                                if (currentStartNode == null && !args.Target.Classes.Contains(endnodeclass))
                                 {
                                     args.Target.Classes.Add(startnodeclass);
                                 }
@@ -271,12 +264,7 @@
                                 {
                                     args.Target.Classes.Remove(startnodeclass);
                                 }
-                                /*else if (currentStartNode != null)
-                                {
-                                    currentStartNode.Classes.Remove(startnodeclass);
-                                    args.Target.Classes.Add(startnodeclass);
-                                }*/
-                                else if (currentEndnode == null)
+                                else if (currentEndnode == null && !args.Target.Classes.Contains(startnodeclass))
                                 {
                                     args.Target.Classes.Add(endnodeclass);
                                 }
@@ -284,11 +272,6 @@
                                 {
                                     args.Target.Classes.Remove(endnodeclass);
                                 }
-                                /*else if(currentEndnode != null)
-                                {
-                                    currentEndnode.Classes.Remove(endnodeclass);
-                                    args.Target.Classes.Add(endnodeclass);
-                                }*/
                             }
                         };
                         basicGraph.SvgClick += (sender, args) =>

@@ -31,14 +31,14 @@ namespace VisualGraph.Data.Additional.Models
             markup += $"x2=\"{maxX.ToString(CultureInfo.InvariantCulture)}\" ";
             markup += $"y2=\"{0}\" ";
             markup += $"style=\"{$"stroke:{CoordinateSystemColor}; stroke-width:0.1;"}\" ";
-            markup += $"></line>";
+            markup += $" marker-start=\"url(#axisarrow)\" marker-end=\"url(#axisarrow)\"/>";
             markup += "<line ";
             markup += $"x1=\"{0}\" ";
             markup += $"y1=\"{minY.ToString(CultureInfo.InvariantCulture)}\" ";
             markup += $"x2=\"{0}\" ";
             markup += $"y2=\"{maxY.ToString(CultureInfo.InvariantCulture)}\" ";
             markup += $"style=\"{$"stroke:{CoordinateSystemColor}; stroke-width:0.1;"}\" ";
-            markup += $"></line>";
+            markup += $" marker-start=\"url(#axisarrow)\" marker-end=\"url(#axisarrow)\"/>";
             var stepSizeX = 5;
             var stepSizeY = 5;
             var text = ((int)(minX / 10)) * 10;

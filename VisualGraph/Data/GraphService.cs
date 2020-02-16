@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Frontenac.Blueprints.Impls.TG;
 using Frontenac.Blueprints.Util.IO.GraphML;
 using Microsoft.Extensions.Configuration;
@@ -26,8 +27,23 @@ namespace VisualGraph.Data
         ILogger<GraphService> _logger;
         IJSRuntime JSRuntime;
         private ConcurrentDictionary<string, GraphDisplayParameters> GraphDisplayParameters = new ConcurrentDictionary<string, GraphDisplayParameters>();
+        public static string settingsFile = "settings.xml";
+        public void LoadGraphStyleParameters()
+        {
+            if (File.Exists(settingsFile))
+            {
+                TextReader sr = new StreamReader(settingsFile);
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(GraphStyleParametersPOCO));
+                GraphStyleParametersPOCO styleParametersPOCO = (GraphStyleParametersPOCO)xmlSerializer.Deserialize(sr);
+                sr.Close();
+                GraphStyleParameters.InitFromPoco(styleParametersPOCO);
 
-
+            }
+            else
+            {
+                SaveGraphStyleParameters();
+            }
+        }
         public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime)
         {
             _logger = logger;
@@ -99,10 +115,10 @@ namespace VisualGraph.Data
                 GraphModel.Edges.ForEach(x => {
                     var node1 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.StartNode.Id);
                     var node2 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.EndNode.Id);
-                    geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2) { Length = x.Weight, UserData = x.Id });
+                    geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2) { Length = x.Weight, UserData = x.Id,Weight = (int)x.Weight });
                 });
 
-                var settings = new SugiyamaLayoutSettings();
+                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings() { RemoveOverlaps = true, IdealEdgeLength = new IdealEdgeLengthSettings() { } };
                 LayoutHelpers.CalculateLayout(geometryGraph, settings, null);
                 nodes.ForEach(x =>
                 {
@@ -169,6 +185,20 @@ namespace VisualGraph.Data
         {
             await Fit();
             await Center();
+        }
+
+        public void SaveGraphStyleParameters(GraphStyleParametersPOCO styleParametersPOCO = null)
+        {
+            if(styleParametersPOCO == null)
+            {
+                styleParametersPOCO = new GraphStyleParametersPOCO();
+                styleParametersPOCO.Initialize();
+            }
+            
+            TextWriter textWriter = new StreamWriter(settingsFile);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(GraphStyleParametersPOCO));
+            xmlSerializer.Serialize(textWriter, styleParametersPOCO);
+            textWriter.Close();
         }
     }
 }

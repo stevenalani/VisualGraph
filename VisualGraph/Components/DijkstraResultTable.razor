@@ -1,17 +1,16 @@
-﻿<h3>DijkstraResultTable</h3>
+﻿<h3>Ergebnistabelle</h3>
 @if (Results != null)
 {
     var headerEntries = Results[0];
-    <h5>Result Table</h5>
     <h6>Startnode: ID=@(headerEntries.StartNode.Id); Name=@(headerEntries.StartNode.Name)</h6>
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
                 <th>Iteration</th>
-                <th>Considered<br>node</th>
+                <th>Betrachteter<br>Knoten</th>
                 @foreach (var resultEntries in headerEntries.Previous)
                 {
-                    <th>Cost<br>@(resultEntries.Key.Name!=""? resultEntries.Key.Name: resultEntries.Key.Id.ToString())</th>
+                    <th>Kosten<br>@(resultEntries.Key.Name!=""? resultEntries.Key.Name: resultEntries.Key.Id.ToString())</th>
                 }
             </tr>
         </thead>

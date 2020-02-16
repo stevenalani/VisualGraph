@@ -8,6 +8,8 @@ namespace VisualGraph.Data.Additional.Interfaces
 {
     public interface IGraphService
     {
+        public void LoadGraphStyleParameters();
+        public void SaveGraphStyleParameters(GraphStyleParametersPOCO graphStyleParameters = null);
         public Task<BasicGraphModel[]> GetAllGraphs();
         public Task<BasicGraphModel> GetGraph(string filename);
 

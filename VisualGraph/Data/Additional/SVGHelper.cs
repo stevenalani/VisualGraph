@@ -15,7 +15,7 @@ namespace VisualGraph.Data.Additional
             markup += $"x2=\"{x2.ToString(CultureInfo.InvariantCulture)}\" ";
             markup += $"y2=\"{y2.ToString(CultureInfo.InvariantCulture)}\" ";
             markup += $"style=\"{$"stroke:{stroke}; stroke-width:{strokewidth.ToString(CultureInfo.InvariantCulture)};"}\" ";
-            markup += $"></line>";
+            markup += $"/>";
             return markup;
         }
         internal static string RotatedTriangle(double x1, double y1, double x2, double y2, string stroke = "black", string strokewidth = "0.1")

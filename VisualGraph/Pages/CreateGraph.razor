@@ -9,19 +9,17 @@
                     Timeout="2"
                     SuccessClass="success-toast-override"
                     SuccessIconClass="oi oi-thumbs-up"
-                    ErrorIconClass="oi oi-bug" />
+                    ErrorIconClass="oi oi-bug"  />
     <div class="flex-wrapper-title">
-        <h3>Edit or Create new Graph</h3>
+        <h3>Graph erstellen und bearbeiten</h3>
         <hr />
     </div>
 
     <div class="left-container">
         @RenderGraph()
-
     </div>
     <div class="right-container">
         <GraphEditForm GraphModel="@GraphModel" Parent="@this" />
-        <Skriptloader GraphModel="@GraphModel" Parent="this"/>
     </div>
 </div>
 
@@ -64,104 +62,7 @@
     {
         if (firstRender)
         {
-            basicGraph.SvgClick += (sender, args) =>
-            {
-                if (GraphModel.ActiveNode != null)
-                {
-                    GraphModel.ActiveNode.IsActive = false;
-                    basicGraph.NodeDragStarted = false;
-                }
-            };
-            basicGraph.NodeMouseDown += async (sender, args) =>
-            {
-                if (GraphModel.ActiveNode != null)
-                {
-                    basicGraph.NodeDragStarted = true;
-                    await GraphService.DisablePan();
-                }
-            };
-            basicGraph.NodeTouchStart += async (sender, args) =>
-            {
-                Node node = args.Target;
-                if (GraphModel.ActiveNode != null)
-                {
-                    if (GraphModel.ActiveNode.Id == node.Id)
-                    {
-                        node.IsActive = false;
-                    }
-                    else
-                    {
-                        GraphModel.ActiveNode.IsActive = false;
-                        node.IsActive = true;
-                    }
-                }
-                else
-                {
-                    node.IsActive = true;
-                }
-                basicGraph.NodeDragStarted = true;
-                await GraphService.DisablePan();
-            };
-            basicGraph.NodeMouseUp += async (sender, args) =>
-            {
-                basicGraph.NodeDragStarted = false;
-                await GraphService.EnablePan();
-            };
-            basicGraph.NodeTouchEnd += async (sender, args) =>
-            {
-                basicGraph.NodeDragStarted = false;
-                await GraphService.EnablePan();
-            };
-            basicGraph.SvgMouseMove += async (sender, args) =>
-            {
-                if (GraphModel.ActiveNode != null && basicGraph.NodeDragStarted)
-                {
-                    try
-                    {
-                        Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
-                        GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
-                        GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
-                    }
-                    catch { }
-                }
-            };
-            basicGraph.SvgTouchMove += async (sender, args) =>
-            {
-                if (GraphModel.ActiveNode != null && basicGraph.NodeDragStarted)
-                {
-                    try
-                    {
-                        Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.Touches.First().ClientX, args.Touches.First().ClientY);
-                        GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
-                        GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
-                    }
-                    catch { }
-                }
-            };
-            basicGraph.SvgMouseUp += (sender, args) =>
-            {
-                Refresh();
-            };
-            basicGraph.NodeClick += (sender, args) =>
-            {
-                Node node = args.Target;
-                if (GraphModel.ActiveNode != null)
-                {
-                    if (GraphModel.ActiveNode.Id == node.Id)
-                    {
-                        node.IsActive = false;
-                    }
-                    else
-                    {
-                        GraphModel.ActiveNode.IsActive = false;
-                        node.IsActive = true;
-                    }
-                }
-                else
-                {
-                    node.IsActive = true;
-                }
-            };
+            basicGraph.RegisterDefaultNodeCallbacks();
         }
     }
 

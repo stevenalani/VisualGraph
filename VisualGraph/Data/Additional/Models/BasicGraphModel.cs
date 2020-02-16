@@ -25,7 +25,7 @@ namespace VisualGraph.Data.Additional.Models
         public List<Node> Nodes { get; set; } = new List<Node>();
         public List<Edge> Edges { get; set; } = new List<Edge>();
         public string Path { get; set; }
-        public Node ActiveNode => Nodes.FirstOrDefault(x => x.Activeclass != "");
+        public Node ActiveNode => Nodes.FirstOrDefault(x => x.IsActive);
 
         float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X));
         float minX => Nodes.Min(x => (int)Math.Ceiling(x.Pos.X));

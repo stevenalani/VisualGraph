@@ -8,37 +8,24 @@
 @inject IToastService toastService
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
-        <h3>View Graph</h3>
-        @if (graphFilenames.Length > 0)
-        {
-            <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
-                <div class="form-group">
-                    <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
-                        @foreach (var name in graphFilenames)
-                            {
-                            <option value="@name">@name</option>
-                            }
-                    </InputSelect>
-                    <button type="submit">Laden</button>
-                </div>
-                @if (basicGraph != null)
-                {
-                    <div class="form-group">
-                        <button type="button" @onclick="@LayoutGraph">Run Layouting</button>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" @onclick="@Crop">Crop View to Graph</button>
-                    </div>
-                }
-            </EditForm>
-        }
-        else
-        {
-            <h4 class="alert alert-info">Es sind keine Graphen vorhanden</h4>
-        }
+            
+            
+        <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
+            <h3 class="pr-2">Graphen betrachten</h3>
+            <div class="form-group">
+                <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
+                    <option selected="selected" value="">Bitte Graph wählen</option>
+                    @foreach (var name in graphFilenames)
+                    {
+                        <option value="@name">@name</option>
+                    }
+                </InputSelect>
+                <button type="submit" class="btn btn-outline-primary"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
+            </div>
+        </EditForm>
+
     </div>
     <div class="left-container">
-        <hr />
         @RenderGraph()
     </div>
 </div>

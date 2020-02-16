@@ -1,4 +1,4 @@
-﻿<h3>Create graph from script</h3>
+﻿<h3>Graph aus Skript importieren</h3>
 <span>
     <InputFile OnChange="@processScript" />
 </span>
@@ -25,7 +25,7 @@
         while ((line = await filereader.ReadLineAsync()) != null)
         {
             if(line.Trim() != "") {
-                if (linecnt == 0)
+                if (linecnt++ == 0)
                 {
                     if (line.Contains("name:"))
                     {

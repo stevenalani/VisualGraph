@@ -1,5 +1,6 @@
 ﻿@using Blazored.Toast.Configuration
 @inherits LayoutComponentBase
+@inject VisualGraph.Data.Additional.Interfaces.IGraphService graphService
 <BlazoredToasts Position="ToastPosition.TopLeft"
                 Timeout="5"
                 SuccessClass="success-toast-override"
@@ -11,6 +12,20 @@
 
 <div class="main">
     <div class="content vh-100">
+        <div id="settings" class="collapse width vh-100 mh-100">
+            <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
+                <VisualGraph.Pages.Settings />
+            </div>
+        </div>
         @Body
     </div>
 </div>
+@code{      
+    protected override void OnInitialized()
+    {
+        graphService.LoadGraphStyleParameters();
+        StateHasChanged();
+        base.OnInitialized();
+    }
+
+}
