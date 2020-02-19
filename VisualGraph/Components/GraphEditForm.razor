@@ -201,7 +201,7 @@
     private async void OpenFile()
     {
         GraphModel = await GraphService.GetGraph(FileToRead);
-        Parent.Refresh(GraphModel);
+        //Parent.Refresh(GraphModel);
     }
     private async void SaveGraph()
     {
@@ -217,7 +217,7 @@
         }
         await GraphService.SaveGraph(GraphModel, GraphModel.Name);
         Files = await GraphService.GetGraphFilenames();
-        Parent.Refresh();
+        //Parent.Refresh();
 
     }
 
@@ -235,7 +235,7 @@
         };
         GraphModel.Nodes.Add(activenode);
         StateHasChanged();
-        Parent.Refresh();
+        //Parent.Refresh();
     }
 
     private void AddEdge()
@@ -249,7 +249,7 @@
         };
         GraphModel.Edges.Add(newEdge);
         StateHasChanged();
-        Parent.Refresh();
+        //Parent.Refresh();
     }
 
     private void ChangedEndEdge(Edge edge, ChangeEventArgs args)
@@ -263,7 +263,7 @@
             edge.EndNode = null;
         }
         StateHasChanged();
-        Parent.Refresh();
+        //Parent.Refresh();
     }
     private void ChangedStartEdge(Edge edge, ChangeEventArgs args)
     {
@@ -276,6 +276,6 @@
             edge.StartNode = null;
         }
         StateHasChanged();
-        Parent.Refresh();
+        //Parent.Refresh();
     }
 }

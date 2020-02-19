@@ -1,103 +1,35 @@
 ﻿@page "/"
 @namespace VisualGraph.Pages
-@using VisualGraph.Data.Additional.Models
+@using VisualGraph.Components
 @using System.Globalization
+@using VisualGraph.Data.Additional.Interfaces
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IGraphService graphService 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VisualGraph</title>
-    <base href="~/" />
-    <link rel="stylesheet" href="~/dist/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="~/dist/open-iconic/font/css/open-iconic-bootstrap.min.css" rel="stylesheet">
-    <link href="css/site.css" rel="stylesheet" />
-    <link href="_content/Blazored.Toast/blazored-toast.css" rel="stylesheet" />
-    <script src="~/js/jquery/jquery.min.js"></script>
-    <script src="~/js/popper/dist/popper.min.js"></script>
-    <script src="~/js/svgpanzoom/dist/svg-pan-zoom.js"></script>
-    <script src="~/dist/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="_content/BlazorInputFile/inputfile.js"></script>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>VisualGraph</title>
+        <base href="~/" />
+        <link rel="stylesheet" href="~/dist/bootstrap/dist/css/bootstrap.min.css" />
+        <link href="~/dist/open-iconic/font/css/open-iconic-bootstrap.min.css" rel="stylesheet">
+        <link href="css/site.css" rel="stylesheet" />
+        <link href="_content/Blazored.Toast/blazored-toast.css" rel="stylesheet" />
+        <script src="~/js/jquery/jquery.min.js"></script>
+        <script src="~/js/popper/dist/popper.min.js"></script>
+        <script src="~/js/svgpanzoom/dist/svg-pan-zoom.js"></script>
+        <script src="~/dist/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="_content/BlazorInputFile/inputfile.js"></script>
 
-    <script src="js/graphjs.js"></script>
-    <style type="text/css">
+        <script src="js/graphjs.js"></script>
+        @(await Html.RenderComponentAsync<SettingsCSS>(RenderMode.Server))
+    </head>
+    <body>
+        <app>
+            @(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))
+        </app>
 
-        .vssvg g g text, .nodeText {
-            font-size: @GraphStyleParameters.TextSizeText;
-            fill: @GraphStyleParameters.TextColor;
-        }
-        .vssvg .hovertext {
-            font-size:@((GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture) + "px") ;
-
-        }
-        .vssvg circle{
-            fill:@GraphStyleParameters.NodeFill;
-            stroke:@GraphStyleParameters.NodeStrokeColor;
-            stroke-width:@GraphStyleParameters.NodeStrokeWidthText;
-        }
-        .vssvg circle.active {
-            fill: @GraphStyleParameters.NodeActiveFill;
-        }
-
-        .vssvg circle.endnode {
-            fill: @GraphStyleParameters.NodeEndFill;
-        }
-
-        .vssvg circle.startnode {
-            fill: @GraphStyleParameters.NodeStartFill;
-        }
-        .vssvg .edge {
-            fill:transparent;
-            stroke:@GraphStyleParameters.EdgeStrokeColor;
-            stroke-width:@GraphStyleParameters.EdgeWidthText
-        }
-        .vssvg .edge.vgpath {
-            stroke:@GraphStyleParameters.EdgeRouteColor;
-            stroke-width:@GraphStyleParameters.EdgeRouteWidthText;
-        }
-        svg g g:hover .edge, svg g g:hover .edge {
-            stroke: @GraphStyleParameters.EdgeHighlitingColor !important;
-            stroke-width: @GraphStyleParameters.EdgeHighlitingWidthText;
-        }
-        .legend-edge {
-            width: 50px;
-            height: 2px;
-            background-color: @GraphStyleParameters.EdgeStrokeColor;
-            display: inline-block;
-        }
-
-        .legend-edge.pathedge {
-            background-color: @GraphStyleParameters.EdgeRouteColor;
-        }
-
-        .legend-node {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            border: 2px solid @GraphStyleParameters.NodeStrokeColor;
-            border-radius: 50%;
-            background-color:@GraphStyleParameters.NodeFill;
-        }
-
-        .legend-node.startnode {
-            background-color: @GraphStyleParameters.NodeStartFill;
-        }
-
-        .legend-node.endnode {
-            background-color: @GraphStyleParameters.NodeEndFill;
-        }
-
-        .legend-node.active {
-            background-color: @GraphStyleParameters.NodeActiveFill;
-        }
-    </style>
-</head>
-<body>
-    <app>
-        @(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))
-    </app>
-
-    <script src="_framework/blazor.server.js"></script>
-</body>
+        <script src="_framework/blazor.server.js"></script>
+    </body>
 </html>

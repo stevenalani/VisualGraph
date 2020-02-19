@@ -18,9 +18,7 @@
     <div class="left-container">
         @RenderGraph()
     </div>
-    <div class="right-container">
-        <GraphEditForm GraphModel="@GraphModel" Parent="@this" />
-    </div>
+
 </div>
 
 @code {
@@ -62,7 +60,7 @@
     {
         if (firstRender)
         {
-            basicGraph.RegisterDefaultNodeCallbacks();
+            basicGraph.RegisterDefaultCallbacks();
         }
     }
 

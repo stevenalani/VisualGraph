@@ -1,0 +1,80 @@
+﻿@inject IGraphService graphService
+        <style type="text/css">
+
+        .vssvg g g text, .nodeText {
+            font-size: @graphService.GraphStyleParameters.TextSizeText;
+            fill: @graphService.GraphStyleParameters.TextColor;
+        }
+        .vssvg .hovertext {
+            font-size:@((graphService.GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture) + "px") ;
+
+        }
+        .vssvg circle{
+            fill:@graphService.GraphStyleParameters.NodeFill;
+            stroke:@graphService.GraphStyleParameters.NodeStrokeColor;
+            stroke-width:@graphService.GraphStyleParameters.NodeStrokeWidthText;
+        }
+        .vssvg circle.active {
+            fill: @graphService.GraphStyleParameters.NodeActiveFill;
+        }
+
+        .vssvg circle.endnode {
+            fill: @graphService.GraphStyleParameters.NodeEndFill;
+        }
+
+        .vssvg circle.startnode {
+            fill: @graphService.GraphStyleParameters.NodeStartFill;
+        }
+        .vssvg .edge {
+            fill:transparent;
+            stroke:@graphService.GraphStyleParameters.EdgeStrokeColor;
+            stroke-width:@graphService.GraphStyleParameters.EdgeWidthText
+        }
+        .vssvg .edge.vgpath {
+            stroke:@graphService.GraphStyleParameters.EdgeRouteColor;
+            stroke-width:@graphService.GraphStyleParameters.EdgeRouteWidthText;
+        }
+        svg g g:hover .edge, svg g g:hover .edge {
+            stroke: @graphService.GraphStyleParameters.EdgeHighlitingColor !important;
+            stroke-width: @graphService.GraphStyleParameters.EdgeHighlitingWidthText;
+        }
+        .legend-edge {
+            width: 50px;
+            height: 2px;
+            background-color: @graphService.GraphStyleParameters.EdgeStrokeColor;
+            display: inline-block;
+        }
+
+        .legend-edge.pathedge {
+            background-color: @graphService.GraphStyleParameters.EdgeRouteColor;
+        }
+
+        .legend-node {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border: 2px solid @graphService.GraphStyleParameters.NodeStrokeColor;
+            border-radius: 50%;
+            background-color:@graphService.GraphStyleParameters.NodeFill;
+        }
+
+        .legend-node.startnode {
+            background-color: @graphService.GraphStyleParameters.NodeStartFill;
+        }
+
+        .legend-node.endnode {
+            background-color: @graphService.GraphStyleParameters.NodeEndFill;
+        }
+
+        .legend-node.active {
+            background-color: @graphService.GraphStyleParameters.NodeActiveFill;
+        }
+</style>
+
+@code{
+    public Task ChangedState()
+    {
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+}

@@ -18,14 +18,6 @@ namespace VisualGraph
     {
         public static void Main(string[] args)
         {
-            if (File.Exists(GraphService.settingsFile))
-            {
-                TextReader sr = new StreamReader(GraphService.settingsFile);
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(GraphStyleParametersPOCO));
-                GraphStyleParametersPOCO styleParametersPOCO = (GraphStyleParametersPOCO)xmlSerializer.Deserialize(sr);
-                sr.Close();
-                GraphStyleParameters.InitFromPoco(styleParametersPOCO);
-            }
             CreateHostBuilder(args).Build().Run();
         }
 

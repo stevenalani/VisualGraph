@@ -95,8 +95,8 @@ namespace VisualGraph.Data
                 while(currentNode != null)
                 {
                     route.Insert(0, currentNode);
-                    if (currentNode == StartNode)
-                        break;
+                    /*f (currentNode == StartNode)
+                        break;*/
                     Previous.TryGetValue(currentNode,out currentNode);
                 }
             }

@@ -15,8 +15,8 @@
                     markerWidth="6" markerHeight="6"
                     orient="auto-start-reverse">
                 <path d="M 0 0 L 9 5 L 0 10 z"
-                      stroke="@GraphStyleParameters.EdgeStrokeColor"
-                      stroke-width="@GraphStyleParameters.EdgeWidthText" />
+                      stroke="@GraphService.GraphStyleParameters.EdgeStrokeColor"
+                      stroke-width="@GraphService.GraphStyleParameters.EdgeWidthText" />
             </marker>
             <marker id="axisarrow" viewBox="0 0 10 10" refX="5" refY="5"
                     markerWidth="10" markerHeight="10"
@@ -45,8 +45,8 @@
                         if (GraphModel.IsDirectional)
                         {
                             var dir = Vector2.Normalize(edge.EndNode.Pos - edge.StartNode.Pos);
-                            var startPos = edge.StartNode.Pos + dir * (float)GraphStyleParameters.NodeRadius;
-                            var endPos = edge.EndNode.Pos - dir * ((float)GraphStyleParameters.NodeRadius + (float)GraphStyleParameters.NodeStrokeWidth);
+                            var startPos = edge.StartNode.Pos + dir * (float)GraphService.GraphStyleParameters.NodeRadius;
+                            var endPos = edge.EndNode.Pos - dir * ((float)GraphService.GraphStyleParameters.NodeRadius + (float)GraphService.GraphStyleParameters.NodeStrokeWidth);
                             if (reverseEdge == null)
                             {
 
@@ -92,14 +92,14 @@
         @foreach (var node in GraphModel.Nodes)
         {
             var name = node.Name;
-            @((MarkupString)$"<text class=\"nodeText\" x=\"{ (@node.Pos.X + GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\">{@node.Name}</text>");
+            @((MarkupString)$"<text class=\"nodeText\" x=\"{ (@node.Pos.X + GraphService.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 *GraphService.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\">{@node.Name}</text>");
             if (node.IsActive)
-                @((MarkupString)$"<text class=\"nodeText\" text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 * GraphStyleParameters.NodeRadius + GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
+                @((MarkupString)$"<text class=\"nodeText\" text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 *GraphService.GraphStyleParameters.NodeRadius +GraphService.GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
                 <circle id="@($"node-{ node.Id}")"
                         class="vsnode @node.Activeclass @(((ICSSProperties)node).ClassesProppertie)"
                         cx="@node.PosXText"
                         cy="@(node.PosYText)"
-                        r="@GraphStyleParameters.NodeRadiusText"
+                        r="@GraphService.GraphStyleParameters.NodeRadiusText"
                         @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
                         @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
                         @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation
@@ -166,9 +166,10 @@
 
     }
 
-    public void ChangedState()
+    public Task ChangedState()
     {
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     public async Task ChangedModel()
@@ -215,7 +216,7 @@
     {
 
         EventHandler<MouseEventArgs> handler = SvgClick;
-        if (handler != null && NodeClick == null)
+        if (handler != null)
         {
             handler(this, e);
         }
@@ -277,7 +278,7 @@
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeClick;
         if (handler != null)
         {
-            handler(this, new GraphMouseEventArgs<Node>(node, e));
+            handler(this, new GraphMouseEventArgs<Node>(node,e));
         }
     }
     protected virtual void OnTouchStart(TouchEventArgs e, Node node)
@@ -338,25 +339,20 @@
     }
     #endregion
 
+    public async Task<Point2> RequestTransformedEventPosition(double x, double y)
+    {
+        return await GraphService.GetTranslatedMousePos(GraphModel.Name,x, y);
+    }
+
     #region Defaut Callbacks
-    public void RegisterDefaultSvgKlick()
-    {
-        this.SvgClick += DefaultCallbacks.DeactivateNode;
-    }
-    public void RegisterDefaultNodeMouseDown()
-    {
-        this.NodeMouseDown += DefaultCallbacks.ActivateNode;
-    }
-    public void RegisterDefaultNodeTouchStart()
-    {
 
-    }
 
-    public void RegisterDefaultNodeCallbacks() {
-        RegisterDefaultSvgKlick();
-        RegisterDefaultNodeMouseDown();
-        RegisterDefaultNodeTouchStart();
-        this.NodeTouchStart += async (sender, args) =>
+    public void RegisterDefaultCallbacks() {
+
+        this.NodeMouseDown += DefaultCallbacks.ActivateDragNode;
+        this.NodeTouchStart += DefaultCallbacks.ToggleActiveStateNode;
+        this.NodeTouchStart += DefaultCallbacks.ActivateDragNode;
+        /*this.NodeTouchStart += async (sender, args) =>
         {
             Node node = args.Target;
             if (GraphModel.ActiveNode != null)
@@ -377,67 +373,13 @@
             }
             this.NodeDragStarted = true;
             await GraphService.DisablePan();
-        };
-        this.NodeMouseUp += async (sender, args) =>
-        {
-            this.NodeDragStarted = false;
-            await GraphService.EnablePan();
-        };
-        this.NodeTouchEnd += async (sender, args) =>
-        {
-            this.NodeDragStarted = false;
-            await GraphService.EnablePan();
-        };
-        this.SvgMouseMove += async (sender, args) =>
-        {
-            if (GraphModel.ActiveNode != null && this.NodeDragStarted)
-            {
-                try
-                {
-                    Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.ClientX, args.ClientY);
-                    GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
-                    GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
-                }
-                catch { }
-            }
-        };
-        this.SvgTouchMove += async (sender, args) =>
-        {
-            if (GraphModel.ActiveNode != null && this.NodeDragStarted)
-            {
-                try
-                {
-                    Point2 coords = await GraphService.GetTranslatedMousePos(GraphModel.Name, args.Touches.First().ClientX, args.Touches.First().ClientY);
-                    GraphModel.ActiveNode.Pos.X = Convert.ToSingle(coords.X);
-                    GraphModel.ActiveNode.Pos.Y = Convert.ToSingle(coords.Y);
-                }
-                catch { }
-            }
-        };
-        this.SvgMouseUp += (sender, args) =>
-        {
-            StateHasChanged();
-        };
-        this.NodeClick += (sender, args) =>
-        {
-            Node node = args.Target;
-            if (GraphModel.ActiveNode != null)
-            {
-                if (GraphModel.ActiveNode.Id == node.Id)
-                {
-                    node.IsActive = false;
-                }
-                else
-                {
-                    GraphModel.ActiveNode.IsActive = false;
-                    node.IsActive = true;
-                }
-            }
-            else
-            {
-                node.IsActive = true;
-            }
-        };
+        };*/
+        this.NodeMouseUp += DefaultCallbacks.DeactivateDragNode;
+        this.NodeTouchEnd += DefaultCallbacks.DeactivateDragNode;
+        this.SvgMouseMove += DefaultCallbacks.MoveNode;
+        this.SvgTouchMove += DefaultCallbacks.MoveNode;
+        this.SvgMouseUp += DefaultCallbacks.DeactivateDragNode;
+        this.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
     }
     #endregion
 }

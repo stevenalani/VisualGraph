@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GraphStyleParametersPOCO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Padding>3</Padding>
-  <TextSize>1.5</TextSize>
+  <TextSize>1</TextSize>
   <TextColor>#000000</TextColor>
-  <NodeRadius>1</NodeRadius>
-  <NodeStrokeColor>black</NodeStrokeColor>
-  <NodeStrokeWidth>0.1</NodeStrokeWidth>
+  <NodeRadius>1.2</NodeRadius>
+  <NodeStrokeColor>rgba(0, 79, 224, 0.9)</NodeStrokeColor>
+  <NodeStrokeWidth>0.2</NodeStrokeWidth>
   <NodeFill>#8cd9d9</NodeFill>
-  <NodeActiveFill>rgba(0, 79, 224, 1)</NodeActiveFill>
+  <NodeActiveFill>rgba(0, 79, 224, 0.7)</NodeActiveFill>
   <NodeStartFill>rgba(0, 255, 224, 1)</NodeStartFill>
   <NodeEndFill>rgba(79,0,224,1)</NodeEndFill>
-  <EdgeStrokeColor>#d966ff</EdgeStrokeColor>
-  <EdgeWidth>0.1</EdgeWidth>
-  <EdgeRouteColor>lime</EdgeRouteColor>
+  <EdgeStrokeColor>rgba(255,125,125,0.9)</EdgeStrokeColor>
+  <EdgeWidth>0.2</EdgeWidth>
+  <EdgeRouteColor>rgba(125,255,125,0.9)</EdgeRouteColor>
   <EdgeRouteWidth>0.2</EdgeRouteWidth>
   <EdgeHighlitingColor>fuchsia</EdgeHighlitingColor>
   <EdgeHighlitingWidth>0.3</EdgeHighlitingWidth>

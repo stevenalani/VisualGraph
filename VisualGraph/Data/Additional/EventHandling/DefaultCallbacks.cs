@@ -12,49 +12,72 @@ namespace VisualGraph.Data.Additional.EventHandling
 {
     public static class DefaultCallbacks
     {
-        public static void ActivateNode(object sender, GraphMouseEventArgs<Node> args)
+        public static void ActivateDragNode(object sender, GraphMouseEventArgs<Node> args)
         {
-            if (((BasicGraph)sender).GraphModel.ActiveNode != null)
+            activateDragNode((BasicGraph)sender, args.Target);
+        }
+        public static void ActivateDragNode(object sender, GraphTouchEventArgs<Node> args)
+        {
+            activateDragNode((BasicGraph)sender, args.Target);
+        }
+        private static void activateDragNode(BasicGraph sender, Node target)
+        {
+            if (((BasicGraph)sender).GraphModel.ActiveNode != null && target.IsActive)
             {
-                if (((BasicGraph)sender).GraphModel.ActiveNode.Id == args.Target.Id)
-                {
-                    args.Target.IsActive = false;
-                }
-                else
-                {
-                    ((BasicGraph)sender).GraphModel.ActiveNode.IsActive = false;
-                    args.Target.IsActive = true;
-                }
-                ((BasicGraph)sender).NodeDragStarted = true;
-
-                ((BasicGraph)sender).DisablePan();
+                sender.NodeDragStarted = true;
+                sender.DisablePan();
             }
         }
-        public static void DeactivateNode(object sender, MouseEventArgs args)
+        public static void DeactivateDragNode(object sender, MouseEventArgs args)
         {
-            Console.WriteLine("clicked");
+            Console.WriteLine("Callback Event");
+            deactivateDragNode((BasicGraph)sender, null);
+        }
+        public static void DeactivateDragNode(object sender, GraphMouseEventArgs<Node> args)
+        {
+            Console.WriteLine("Callback Event");
+            deactivateDragNode((BasicGraph)sender,args.Target);
+        }
+        public static void DeactivateDragNode(object sender, GraphTouchEventArgs<Node> args)
+        {
+            Console.WriteLine("Callback Event");
+            deactivateDragNode((BasicGraph)sender, args.Target);
+        }
+        private static void deactivateDragNode(BasicGraph sender, Node target)
+        {
+            Console.WriteLine("Callback Event Method");
+            sender.NodeDragStarted = false;
+            sender.EnablePan();   
+        }
+        public static void DeactivateDragNode(object sender, TouchEventArgs args)
+        {
             if (((BasicGraph)sender).GraphModel.ActiveNode != null)
             {
-                Console.WriteLine("is one active");
-                ((BasicGraph)sender).GraphModel.ActiveNode.IsActive = false;
                 ((BasicGraph)sender).NodeDragStarted = false;
                 ((BasicGraph)sender).EnablePan();
-                Console.WriteLine("worked");
             }
         }
 
-        public static void ActivateNode(object sender, GraphTouchEventArgs<Node> args)
+        public static void ToggleActiveStateNode(object sender, GraphMouseEventArgs<Node>args)
         {
-            Node node = args.Target;
-            if (((BasicGraph)sender).GraphModel.ActiveNode != null)
+
+            toggleActiveStateNode((BasicGraph)sender, args.Target);
+        }
+        public static void ToggleActiveStateNode(object sender, GraphTouchEventArgs<Node> args)
+        {
+            toggleActiveStateNode((BasicGraph)sender, args.Target);
+        }
+        private static void toggleActiveStateNode(BasicGraph sender,Node node)
+        {
+            if (sender.GraphModel.ActiveNode != null)
             {
-                if (((BasicGraph)sender).GraphModel.ActiveNode.Id == node.Id)
+                if (sender.GraphModel.ActiveNode.Id == node.Id)
                 {
                     node.IsActive = false;
                 }
                 else
                 {
-                    ((BasicGraph)sender).GraphModel.ActiveNode.IsActive = false;
+                    sender.GraphModel.ActiveNode.IsActive = false;
                     node.IsActive = true;
                 }
             }
@@ -62,9 +85,32 @@ namespace VisualGraph.Data.Additional.EventHandling
             {
                 node.IsActive = true;
             }
-            ((BasicGraph)sender).NodeDragStarted = true;
-            ((BasicGraph)sender).DisablePan();
-        } 
+        }
+        public static void MoveNode(object sender, MouseEventArgs args)
+        {
+            moveNode((BasicGraph)sender, args.ClientX, args.ClientY);
+        }
+        public static void MoveNode(object sender, TouchEventArgs args)
+        {
+            moveNode((BasicGraph)sender, args.Touches.First().ClientX, args.Touches.First().ClientY);
+        }
+        private static async void moveNode(BasicGraph sender,double x, double y) 
+        {
+            if (sender.NodeDragStarted && sender.GraphModel.ActiveNode != null)
+            {
+                try
+                {
+                    Point2 coords = await sender.RequestTransformedEventPosition(x, y);
+                    setNodePosition(((BasicGraph)sender).GraphModel.ActiveNode, coords);
+                }
+                catch { }
+            }
+        }
+        private static void setNodePosition(Node node, Point2 coords)
+        {             
+            node.Pos.X = Convert.ToSingle(coords.X);
+            node.Pos.Y = Convert.ToSingle(coords.Y);
+        }
     }
        
 }

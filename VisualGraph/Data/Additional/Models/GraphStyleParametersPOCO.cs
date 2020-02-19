@@ -31,7 +31,7 @@ namespace VisualGraph.Data.Additional.Models
         public string EdgeHighlitingColor { get; set; }
         public double EdgeHighlitingWidth { get; set; }
         #endregion
-        public void Initialize() {
+        public void Initialize(GraphStyleParameters GraphStyleParameters) {
             Padding = GraphStyleParameters.Padding;
             TextSize = GraphStyleParameters.TextSize;
             TextColor = GraphStyleParameters.TextColor;

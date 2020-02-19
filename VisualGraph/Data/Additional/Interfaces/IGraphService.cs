@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System;
 using System.Threading.Tasks;
 using VisualGraph.Components;
@@ -8,8 +9,11 @@ namespace VisualGraph.Data.Additional.Interfaces
 {
     public interface IGraphService
     {
-        public void LoadGraphStyleParameters();
-        public void SaveGraphStyleParameters(GraphStyleParametersPOCO graphStyleParameters = null);
+        public BasicGraph CurrentGraph { get; }
+        public GraphStyleParameters GraphStyleParameters { get; }
+        public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel);
+        public Task LoadGraphStyleParameters();
+        public Task SaveGraphStyleParameters(GraphStyleParameters graphStyleParameters = null);
         public Task<BasicGraphModel[]> GetAllGraphs();
         public Task<BasicGraphModel> GetGraph(string filename);
 
@@ -24,12 +28,11 @@ namespace VisualGraph.Data.Additional.Interfaces
         public Task Center();
         public Task Crop();
         public Task Resize();
-        public Task<GraphDisplayParameters> GetGraphDisplayParameters(string graphid);
-        public Task<GraphDisplayParameters> InitialGetGraphDisplayParameters(string graphid);
+        public Task Rerender();
         public Task<SvgPanZoomInformation> GetSvgPanZoomInformation(string graphname);
         public Task<SvgContainerInformation> GetSvgContainerInformation(string graphname);
         public Task<Point2> GetTranslatedMousePos(string graphname, double x, double y);
         public Task<BasicGraphModel> LayoutGraph(BasicGraphModel graphModel);
-
+        public Task<RenderFragment> GraphStyeTag ();
     }
 }

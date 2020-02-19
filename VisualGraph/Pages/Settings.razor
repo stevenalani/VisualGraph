@@ -2,105 +2,111 @@
 @inject IToastService toastService
 @inject NavigationManager navigationManager
 
-    <EditForm class="p-2" Model="styleParametersPOCO" OnValidSubmit="SaveSettings">
+    <EditForm Model="StyleParameters" OnValidSubmit="SaveSettings">
 
-        <h3>Settings</h3>
-        <h4>SVG Container Einstellungen</h4>
-        <div class="form-group form-inline">
-            <label for="padding" class="col-sm-3 col-form-label text-right">Padding</label>
-            <InputNumber class="form-control col" id="padding" @bind-Value="styleParametersPOCO.Padding"></InputNumber>
-        </div>
+        <h3>Einstellungen</h3>
 
-        <h4>Text</h4>
-        <div class="form-group form-inline">
-            <label for="textsize" class="col-sm-3 col-form-label text-right">Größe</label>
-            <InputNumber class="form-control col" id="textsize" @bind-Value="styleParametersPOCO.TextSize"></InputNumber>
+        <div class="card">
+            <h4>SVG Container</h4>
+            <div class="form-group form-inline">
+                <label for="padding" class="col-sm-3 col-form-label text-right">Padding</label>
+                <InputNumber class="form-control input-sm col" id="padding" @bind-Value="StyleParameters.Padding"></InputNumber>
+            </div>
         </div>
-        <div class="form-group form-inline">
-            <label for="textcolor" class="col-sm-3 col-form-label text-right">Farbe</label>
-            <InputText class="form-control col" id="textcolor" @bind-Value="styleParametersPOCO.TextColor"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.TextColor"></div>
+        <div class="card">
+            <h4>Text</h4>
+            <div class="form-group form-inline">
+                <label for="textsize" class="col-sm-3 col-form-label text-right">Größe</label>
+                <InputNumber class="form-control input-sm col" id="textsize" @bind-Value="StyleParameters.TextSize"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="textcolor" class="col-sm-3 col-form-label text-right">Farbe</label>
+                <InputText class="form-control input-sm col" id="textcolor" @bind-Value="StyleParameters.TextColor"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.TextColor"></div>
+            </div>
         </div>
-
-        <h4>Knoten</h4>
-        <div class="form-group form-inline">
-            <label for="noderadius" class="col-sm-3 col-form-label text-right">Radius</label>
-            <InputNumber class="form-control col" id="noderadius" @bind-Value="styleParametersPOCO.NodeRadius"></InputNumber>
+        <div class="card">
+            <h4>Knoten</h4>
+            <div class="form-group form-inline">
+                <label for="noderadius" class="col-sm-3 col-form-label text-right">Radius</label>
+                <InputNumber class="form-control input-sm col" id="noderadius" @bind-Value="StyleParameters.NodeRadius"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeFill" class="col-sm-3 col-form-label text-right">Farbe</label>
+                <InputText class="form-control input-sm col" id="nodeFill" @bind-Value="StyleParameters.NodeFill"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.NodeFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeStartFill" class="col-sm-3 col-form-label text-right">Farbe Startknoten</label>
+                <InputText class="form-control input-sm col" id="nodeStartFill" @bind-Value="StyleParameters.NodeStartFill"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.NodeStartFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeEndFill" class="col-sm-3 col-form-label text-right">Farbe Endknoten</label>
+                <InputText class="form-control input-sm col" id="nodeEndFill" @bind-Value="StyleParameters.NodeEndFill"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.NodeEndFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeActiveFill" class="col-sm-3 col-form-label text-right">Farbe aktiver Knoten</label>
+                <InputText class="form-control input-sm col" id="nodeActiveFill" @bind-Value="StyleParameters.NodeActiveFill"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.NodeActiveFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeStrokeColor" class="col-sm-3 col-form-label text-right">Outline Farbe</label>
+                <InputText class="form-control input-sm col" id="nodeStrokeColor" @bind-Value="StyleParameters.NodeStrokeColor"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.NodeStrokeColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeStrokeWidth" class="col-sm-3 col-form-label text-right">Outline Stärke</label>
+                <InputNumber class="form-control input-sm col" id="nodeStrokeWidth" @bind-Value="StyleParameters.NodeStrokeWidth"></InputNumber>
+            </div>
         </div>
-        <div class="form-group form-inline">
-            <label for="nodeFill" class="col-sm-3 col-form-label text-right">Farbe</label>
-            <InputText class="form-control col" id="nodeFill" @bind-Value="styleParametersPOCO.NodeFill"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.NodeFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeStartFill" class="col-sm-3 col-form-label text-right">Farbe Startknoten</label>
-            <InputText class="form-control col" id="nodeStartFill" @bind-Value="styleParametersPOCO.NodeStartFill"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.NodeStartFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeEndFill" class="col-sm-3 col-form-label text-right">Farbe Endknoten</label>
-            <InputText class="form-control col" id="nodeEndFill" @bind-Value="styleParametersPOCO.NodeEndFill"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.NodeEndFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeActiveFill" class="col-sm-3 col-form-label text-right">Farbe aktiver Knoten</label>
-            <InputText class="form-control col" id="nodeActiveFill" @bind-Value="styleParametersPOCO.NodeActiveFill"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.NodeActiveFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeStrokeColor" class="col-sm-3 col-form-label text-right">Outline Farbe</label>
-            <InputText class="form-control col" id="nodeStrokeColor" @bind-Value="styleParametersPOCO.NodeStrokeColor"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.NodeStrokeColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeStrokeWidth" class="col-sm-3 col-form-label text-right">Outline Stärke</label>
-            <InputNumber class="form-control col" id="nodeStrokeWidth" @bind-Value="styleParametersPOCO.NodeStrokeWidth"></InputNumber>
-        </div>
-
-        <h4>Kanten</h4>
-        <div class="form-group form-inline">
-            <label for="edgeWidth" class="col-sm-3 col-form-label text-right">Stärke</label>
-            <InputNumber class="form-control col" id="edgeWidth" @bind-Value="styleParametersPOCO.EdgeWidth"></InputNumber>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeStrokeColor" class="col-sm-3 col-form-label text-right">Farbe</label>
-            <InputText class="form-control col" id="edgeStrokeColor" @bind-Value="styleParametersPOCO.EdgeStrokeColor"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.EdgeStrokeColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="EdgeRouteColor" class="col-sm-3 col-form-label text-right">Pfad Farbe</label>
-            <InputText class="form-control col" id="edgeStrokeColor" @bind-Value="styleParametersPOCO.EdgeRouteColor"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.EdgeRouteColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeRouteWidth" class="col-sm-3 col-form-label text-right">Pfad Stärke</label>
-            <InputNumber class="form-control col" id="edgeRouteWidth" @bind-Value="styleParametersPOCO.EdgeRouteWidth"></InputNumber>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeHighlitingWidth" class="col-sm-3 col-form-label text-right">Highlight Stärke</label>
-            <InputNumber class="form-control col" id="edgeHighlitingWidth" @bind-Value="styleParametersPOCO.EdgeHighlitingWidth"></InputNumber>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeHighlitingColor" class="col-sm-3 col-form-label text-right">Highlight Farbe</label>
-            <InputText class="form-control col" id="edgeHighlitingColor" @bind-Value="styleParametersPOCO.EdgeHighlitingColor"></InputText>
-            <div class="colorpreview" style="background-color:@styleParametersPOCO.EdgeHighlitingColor"></div>
-        </div>
+        <div class="card">
+            <h4>Kanten</h4>
+            <div class="form-group form-inline">
+                <label for="edgeWidth" class="col-sm-3 col-form-label text-right">Stärke</label>
+                <InputNumber class="form-control input-sm col" id="edgeWidth" @bind-Value="StyleParameters.EdgeWidth"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeStrokeColor" class="col-sm-3 col-form-label text-right">Farbe</label>
+                <InputText class="form-control input-sm col" id="edgeStrokeColor" @bind-Value="StyleParameters.EdgeStrokeColor"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.EdgeStrokeColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="EdgeRouteColor" class="col-sm-3 col-form-label text-right">Pfad Farbe</label>
+                <InputText class="form-control input-sm col" id="edgeRouteColor" @bind-Value="StyleParameters.EdgeRouteColor"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.EdgeRouteColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeRouteWidth" class="col-sm-3 col-form-label text-right">Pfad Stärke</label>
+                <InputNumber class="form-control input-sm col" id="edgeRouteWidth" @bind-Value="StyleParameters.EdgeRouteWidth"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeHighlitingWidth" class="col-sm-3 col-form-label text-right">Highlight Stärke</label>
+                <InputNumber class="form-control input-sm col" id="edgeHighlitingWidth" @bind-Value="StyleParameters.EdgeHighlitingWidth"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeHighlitingColor" class="col-sm-3 col-form-label text-right">Highlight Farbe</label>
+                <InputText class="form-control input-sm col" id="edgeHighlitingColor" @bind-Value="StyleParameters.EdgeHighlitingColor"></InputText>
+                <div class="colorpreview" style="background-color:@StyleParameters.EdgeHighlitingColor"></div>
+            </div>
+        </div>    
         <button type="submit" class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
-
     </EditForm>
 @code { 
-    private GraphStyleParametersPOCO styleParametersPOCO { get; set; }
+    [Parameter]
+    public GraphStyleParameters StyleParameters { get; set; }
+    
     protected override void OnInitialized()
     {
-        styleParametersPOCO = new GraphStyleParametersPOCO();
-        styleParametersPOCO.Initialize();
         base.OnInitialized();
     }
 
     private void SaveSettings()
     {
-        graphService.SaveGraphStyleParameters(styleParametersPOCO);
+        graphService.SaveGraphStyleParameters(StyleParameters);
         graphService.LoadGraphStyleParameters();
-        navigationManager.NavigateTo(navigationManager.Uri, true);
+        graphService.Rerender();
+        //navigationManager.NavigateTo(navigationManager.Uri, true);
     }
 }
