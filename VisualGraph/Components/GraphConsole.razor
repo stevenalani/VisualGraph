@@ -1,4 +1,5 @@
-﻿<h3>Graph Console</h3>
+﻿@inject IGraphService graphService
+<h3>Graph Console</h3>
 <h5>Befehle auf Graph ausführen</h5>
 <div class="graphconsole w-100">
     <p>@introMessage</p>
@@ -15,7 +16,7 @@
 @code {
     static string introMessage = "Befehle: add [ node ( name:string ) | edgebyids ( startNodeId:int endNodeId:int weight:double ) | edgebynames ( startNodeName:string endNodeName:string weight:double ) ] \r\n"
         + "example: add edgeids 0, 1, 13.50";
-
+    private GraphCommandProcessor GraphCommandProcessor;
     [Parameter]
     public BasicGraphModel Graph { get; set; }
 
@@ -27,7 +28,7 @@
 
     protected override void OnParametersSet()
     {
-        GraphCommandProcessor.model = Graph;
+        GraphCommandProcessor = new GraphCommandProcessor(Graph);
     }
 
     private void Clear() {
@@ -44,11 +45,11 @@
             Clear();
         }
     }
-    private void executeCommand()
+    private async void executeCommand()
     {
         var result = GraphCommandProcessor.Process(Inputline);
         OutputText.Add(result);
-        Parent.Refresh();
+        await graphService.Rerender();
         StateHasChanged();
     }
 }

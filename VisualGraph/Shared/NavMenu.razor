@@ -14,8 +14,8 @@
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="creategraph">
-                <span class="oi oi-graph" aria-hidden="true"></span> Graph Editor
+            <NavLink class="nav-link" data-toggle="collapse" @onclick="@(async() => { openedEditform = !openedEditform; })" data-target="#grapheditform" href="creategraph">
+                <span><span class="oi oi-graph" aria-hidden="true"></span> Graph Editor  <span class="text-right oi oi-chevron-@(!openedEditform?"right":"left")"></span></span>
             </NavLink>
         </li>
         <li class="nav-item px-3">
@@ -29,8 +29,8 @@
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <a role="button" class="nav-link text-white" data-toggle="collapse" data-target="#settings">
-                 <span class="oi oi-wrench" aria-hidden="true"></span> Einstellungen
+            <a role="button" class="nav-link text-white" @onclick="@(async() => { openedSettings = !openedSettings; })" data-toggle="collapse" data-target="#settings">
+                 <span><span class="oi oi-wrench" aria-hidden="true"></span> Einstellungen </span><span class="text-right oi oi-chevron-@(!openedSettings?"right":"left")"></span>
             </a>
         </li>
     </ul>
@@ -39,7 +39,8 @@
 
 @code {
     bool collapseNavMenu = true;
-
+    bool openedSettings = false;
+    bool openedEditform = false;
     string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     void ToggleNavMenu()

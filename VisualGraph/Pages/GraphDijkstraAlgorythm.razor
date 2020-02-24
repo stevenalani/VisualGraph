@@ -131,7 +131,7 @@
     }
     private void LayoutGraph()
     {
-        var resultGraph = GraphService.LayoutGraph(model.Graph);
+        var resultGraph = GraphService.LayoutGraph();
     }
     private void Crop()
     {
@@ -179,8 +179,7 @@
         }
         if (ShortestRouteToEndnode != null)
             clearRouteClasses();
-        if (DijkstraAlgorithmRunner == null)
-            DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startnodeId);
+        DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startnodeId);
 
         ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
         visualizeRoute();

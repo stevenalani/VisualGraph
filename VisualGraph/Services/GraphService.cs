@@ -11,28 +11,31 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using VisualGraph.Components;
-using VisualGraph.Data.Additional.Interfaces;
+using VisualGraph.Services.Interfaces;
 using VisualGraph.Data.Additional.Models;
+using VisualGraph.Data;
 
-namespace VisualGraph.Data
+namespace VisualGraph.Services
 {
     public class GraphService : IGraphService
     {
         ILogger<GraphService> _logger;
         IJSRuntime JSRuntime;
         public static string settingsFile = "settings.xml";
+        public BasicGraphModel CurrentGraphModel { get; set; } 
+        public BasicGraph CurrentGraph { get; set; } 
+        public Settings Settings { get; set; } 
+        public GraphEditForm GraphEditForm { get; set; } 
+        public SettingsCSS SettingsCSS { get; set; } 
+        public GraphStyleParameters GraphStyleParameters { get; set; } = new GraphStyleParameters();
 
-        public BasicGraph CurrentGraph { get; private set; }
-        public SettingsCSS SettingsCSS { get; private set; }
-        public GraphStyleParameters GraphStyleParameters { get; private set; } = new GraphStyleParameters();
-
-        
         public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime)
         {
             _logger = logger;
             JSRuntime = jsRuntime;
-            LoadGraphStyleParameters();
             GraphFileProvider.EnsureGraphDirExists();
+            LoadGraphStyleParameters();
+            CurrentGraphModel = CreateNewGraphModel();
         }
         public async Task<BasicGraphModel[]> GetAllGraphs()
         {
@@ -42,7 +45,44 @@ namespace VisualGraph.Data
         {
             return await GraphFileProvider.GetBasicGraph(filename);
         }
+        public async Task LoadGraph(string filename)
+        {
+            BasicGraphModel graph;
+            if (filename == null)
+            {
+                graph = CreateNewGraphModel();
+            }
+            else
+            {
+                graph = await GetGraph(filename);
+            }
+            CurrentGraphModel = graph;
+            await Rerender();
+            
+        }
+        private BasicGraphModel CreateNewGraphModel()
+        {
+            var nodes = new System.Collections.Generic.List<Data.Additional.Models.Node>{
+                new Data.Additional.Models.Node() {
+                    Id = 0,
+                    Pos = new System.Numerics.Vector2(-10,10),
+                    Name = "Knoten A"
+                },
+                new Data.Additional.Models.Node() {
+                    Id = 1,
+                    Pos = new System.Numerics.Vector2(10,-10),
+                    Name = "Knoten B"
 
+                }
+                
+            };
+            var graphmodel = new BasicGraphModel()
+            {
+                Nodes = nodes,
+                Path = "Unbenannter-Graph"
+            };
+            return graphmodel;
+        }
         public async Task<string[]> GetGraphFilenames()
         {
             return await GraphFileProvider.GetGraphFileNames();
@@ -52,7 +92,7 @@ namespace VisualGraph.Data
             if (filename == "")
             {
                 filename = graph.Name;
-                if (filename == "")
+                if (filename.Trim() == "")
                     filename = "untitledgraph" + DateTime.Now.Millisecond;
             }
             try
@@ -70,13 +110,13 @@ namespace VisualGraph.Data
             await GraphFileProvider.WriteToGraphMlFile(graph, filename);
         }
 
-        public Task<BasicGraphModel> LayoutGraph(BasicGraphModel GraphModel)
+        public Task LayoutGraph()
         {
             try
             {
                 GeometryGraph geometryGraph = new GeometryGraph();
 
-                var nodes = GraphModel.Edges.Where(x => x.StartNode != null || x.EndNode != null).SelectMany(x =>
+                var nodes = CurrentGraphModel.Edges.Where(x => x.StartNode != null || x.EndNode != null).SelectMany(x =>
                 {
                     if (x.StartNode != null && x.EndNode != null) return new[] { x.StartNode, x.EndNode };
                     else if (x.StartNode != null) return new[] { x.StartNode };
@@ -85,7 +125,7 @@ namespace VisualGraph.Data
 
 
                 nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(CurveFactory.CreateCircle(1, new Microsoft.Msagl.Core.Geometry.Point()), x.Id)));
-                GraphModel.Edges.ForEach(x =>
+                CurrentGraphModel.Edges.ForEach(x =>
                 {
                     var node1 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.StartNode.Id);
                     var node2 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.EndNode.Id);
@@ -102,11 +142,11 @@ namespace VisualGraph.Data
                 });
             }
             catch { }
-            return Task.FromResult(GraphModel);
+            return Task.CompletedTask;
         }
-        public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference, string graphid)
+        public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference)
         {
-            await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] { reference, graphid });
+            await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] { reference, CurrentGraphModel.Name });
         }
         public async Task DestroyZoomPan()
         {
@@ -195,12 +235,13 @@ namespace VisualGraph.Data
             }
             return Task.CompletedTask;
         }
-        public async Task Rerender()
+        public async Task<RenderFragment> GetRenderFragment()
         {
-            if(CurrentGraph != null)
-                await CurrentGraph.ChangedState();
-            if( SettingsCSS != null)
-                await SettingsCSS.ChangedState();
+            if(CurrentGraphModel != null)
+            {
+                return await buildBasicGraphFragment(CurrentGraphModel);
+            }
+            return null;
         }
         public Task<RenderFragment> GetRenderFragment(BasicGraphModel Graph)
         {
@@ -209,8 +250,8 @@ namespace VisualGraph.Data
                 if (Graph != null)
                 {
                     builder.OpenComponent<BasicGraph>(0);
-                    builder.AddAttribute(1, "GraphModel", Graph);
-                    builder.AddComponentReferenceCapture(2,
+                    //builder.AddAttribute(1, "GraphModel", Graph);
+                    builder.AddComponentReferenceCapture(1,
                         inst =>
                         {
                             CurrentGraph = (BasicGraph)inst;
@@ -221,24 +262,93 @@ namespace VisualGraph.Data
             });
             return Task.FromResult(fragment);
         }
+        private Task<RenderFragment> buildBasicGraphFragment(BasicGraphModel graphModel)
+        {
+            var fragment = new RenderFragment(builder =>
+            {
+                if (graphModel != null)
+                {
+                    builder.OpenComponent<BasicGraph>(0);
+                    //builder.AddAttribute(1, "GraphModel", graphModel);
+                    builder.AddComponentReferenceCapture(1,
+                        inst =>
+                        {
+                            CurrentGraph = (BasicGraph)inst;
+                            CurrentGraph.RegisterDefaultCallbacks();
+                        });
+                    builder.CloseComponent();
+                }
+            });
+
+            return Task.FromResult(fragment);
+        }
+       
 
         public Task<RenderFragment> GraphStyeTag()
         {
             var fragment = new RenderFragment(builder =>
             {
-                    
                 builder.OpenComponent<SettingsCSS>(0);
-                builder.AddAttribute(1, "StyleParameters", GraphStyleParameters);
                 builder.AddComponentReferenceCapture(2,
                 inst =>
                 {
                     SettingsCSS = (SettingsCSS)inst;
                 });
                 builder.CloseComponent();
-                
+
             });
             return Task.FromResult(fragment);
         }
+        public Task<RenderFragment> GetSettingsRenderFragment()
+        {
+            var fragment = new RenderFragment(builder =>
+            {
 
+                builder.OpenComponent<Settings>(0);
+                builder.AddComponentReferenceCapture(1,
+                inst =>
+                {
+                    Settings = (Settings)inst;
+                });
+                builder.CloseComponent();
+
+            });
+            return Task.FromResult(fragment);
+        }
+        public async Task Rerender()
+        {
+            if(CurrentGraph != null && await CurrentGraph?.IsRendered)
+            {
+                await CurrentGraph.ChangedState();
+            }
+            if (SettingsCSS != null && await SettingsCSS?.IsRendered) {
+                await SettingsCSS.ChangedState();
+            }
+            if (Settings != null && await Settings?.IsRendered) {
+                
+                await Settings.ChangedState();
+            }
+            if (GraphEditForm != null && await GraphEditForm?.IsRendered) {
+                await GraphEditForm.ChangedState();
+            }
+        }
+
+        public Task<RenderFragment> GetEditFormRenderFragment()
+        {
+            var fragment = new RenderFragment(builder =>
+            {
+
+                builder.OpenComponent<GraphEditForm>(0);
+                builder.AddComponentReferenceCapture(1,
+                inst =>
+                {
+                    GraphEditForm = (GraphEditForm)inst;
+                });
+                builder.CloseComponent();
+
+            });
+            return Task.FromResult(fragment);
+        }
     }
+
 }

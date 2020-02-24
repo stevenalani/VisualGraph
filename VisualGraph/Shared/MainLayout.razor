@@ -1,7 +1,7 @@
 ﻿@using Blazored.Toast.Configuration
 @inherits LayoutComponentBase
-@inject VisualGraph.Data.Additional.Interfaces.IGraphService graphService
-@implements VisualGraph.Components.Additional.Interfaces.IRefreshableParent
+@inject VisualGraph.Services.Interfaces.IGraphService graphService
+
 <BlazoredToasts Position="ToastPosition.TopLeft"
                 Timeout="5"
                 SuccessClass="success-toast-override"
@@ -10,32 +10,29 @@
 <div class="sidebar">
     <NavMenu />
 </div>
-<div id="settings" class="collapse vh-100 mh-100">
+<div id="settings" class="navmenu-collapse collapse vh-100 mh-100">
     <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
-        <VisualGraph.Pages.Settings StyleParameters="graphService.GraphStyleParameters" />
+        @graphService.GetSettingsRenderFragment().Result
     </div>
 </div>
-<div id="Edit" class="collapse width vh-100 mh-100" >
-    <GraphEditForm GraphModel="@graphService.CurrentGraph.GraphModel"/>
+<div id="grapheditform" class="navmenu-collapse collapse vh-100 mh-100">
+    <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
+        @graphService.GetEditFormRenderFragment().Result
+    </div>
 </div>
 <div class="main">
+    <div class="top-row pl-4 navbar navbar-dark">
+        
+    </div>
     <div class="content vh-100">
         @Body
     </div>
 </div>
 @code{
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        graphService.LoadGraphStyleParameters();
+        await graphService.LoadGraphStyleParameters();
         StateHasChanged();
         base.OnInitialized();
     }
-    void Refresh() {
-        StateHasChanged();
-    }
-    void Refresh(BasicGraphModel graph)
-    {
-        StateHasChanged();
-    }
-
 }

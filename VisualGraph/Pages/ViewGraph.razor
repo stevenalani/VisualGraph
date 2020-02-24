@@ -8,8 +8,8 @@
 @inject IToastService toastService
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
-            
-            
+
+
         <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
             <h3 class="pr-2">Graphen betrachten</h3>
             <div class="form-group">
@@ -17,7 +17,7 @@
                     <option selected="selected" value="">Bitte Graph wählen</option>
                     @foreach (var name in graphFilenames)
                     {
-                        <option value="@name">@name</option>
+                    <option value="@name">@name</option>
                     }
                 </InputSelect>
                 <button type="submit" class="btn btn-outline-primary"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
@@ -26,7 +26,7 @@
 
     </div>
     <div class="left-container">
-        @(graphService.GetRenderFragment(model.Graph).Result);
+        @(graphService.GetRenderFragment().Result);
     </div>
 </div>
 
@@ -50,15 +50,13 @@
     }
     public async void HandleSelectChange()
     {
-        var graphmodel = await graphService.GetGraph(model.CurrentGraph);
-        model.Graph = graphmodel;
+        await graphService.LoadGraph(model.CurrentGraph);
         StateHasChanged();
 
     }
     private async Task LayoutGraph()
     {
-        var resultGraph = await graphService.LayoutGraph(model.Graph);
-        model.Graph = resultGraph;
+        await graphService.LayoutGraph();
         StateHasChanged();
     }
     private async Task Crop()
@@ -66,17 +64,4 @@
         await graphService.Fit();
         await graphService.Center();
     }
-
-    public void Refresh()
-    {
-        StateHasChanged();
-        graphService.Rerender();
-    }
-    public void Refresh(BasicGraphModel graph)
-    {
-        this.model.Graph = graph;
-        StateHasChanged();
-        graphService.Rerender();
-    }
-
 }

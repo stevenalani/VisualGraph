@@ -1,4 +1,5 @@
-﻿@inject IGraphService graphService
+﻿@inject IGraphService GraphService
+@inherits GraphInternalUI
         <style type="text/css">
 
         .vssvg g g text, .nodeText {
@@ -71,10 +72,6 @@
         }
 </style>
 
-@code{
-    public Task ChangedState()
-    {
-        StateHasChanged();
-        return Task.CompletedTask;
-    }
+@code{ 
+    public override IGraphService graphService => GraphService;
 }

@@ -2,25 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using VisualGraph.Data.Additional.Models;
 
 namespace VisualGraph.Data
 {
-    public static class GraphCommandProcessor
+    public class GraphCommandProcessor
     {
-        public static BasicGraphModel model { get; set; }
-        public static string Process(string input)
+        public GraphCommandProcessor(BasicGraphModel model)
+        {
+            this.model = model;
+        }
+        private BasicGraphModel model { get; set; }
+        private GraphCommandInterpreter graphCommandInterpreter = new GraphCommandInterpreter();
+        public string Process(string input)
         {
             try
             {
-                var command = GraphCommandInterpreter.InterpretCommand(input);
+                var command = graphCommandInterpreter.InterpretCommand(input);
                 if (command == null) return $"No command was not found in {input}";
-                GraphCommandInterpreter.InterpretAndSetCommandParameters(command, input);
+                graphCommandInterpreter.InterpretAndSetCommandParameters(command, input);
                 command.Invoke(model);
-                return "Done: "+input;
+                return "Done: " + input;
             }
             catch
             {
@@ -28,9 +31,9 @@ namespace VisualGraph.Data
             }
         }
     }
-    public static class GraphCommandInterpreter
+    public class GraphCommandInterpreter
     {
-        private static Dictionary<string, Dictionary<string, Type>> BaseKeywords = new Dictionary<string, Dictionary<string, Type>>()
+        private Dictionary<string, Dictionary<string, Type>> BaseKeywords = new Dictionary<string, Dictionary<string, Type>>()
         {
             { "add", new Dictionary<string, Type>()
                 {
@@ -47,20 +50,20 @@ namespace VisualGraph.Data
                 }
             }
         };
-        public static GraphCommand InterpretCommand(string inputstring)
+        public GraphCommand InterpretCommand(string inputstring)
         {
             Regex regex = new Regex(@"(\b[A-z]+\b[^,])");
             var match = regex.Matches(inputstring);
-            if(match.Count > 0)
+            if (match.Count > 0)
             {
-                
+
                 var commandType = BaseKeywords[match[0].Value.Trim().ToLower()][match[1].Value.Trim().ToLower()];
                 dynamic instance = commandType.Assembly.CreateInstance(commandType.FullName);
                 return instance;
             }
             return null;
         }
-        public static void InterpretAndSetCommandParameters(GraphCommand command, string inputstring)
+        public void InterpretAndSetCommandParameters(GraphCommand command, string inputstring)
         {
             Regex regex = new Regex(@"(\b[A-z]+\b[^,])");
             var matches = regex.Matches(inputstring);
@@ -76,11 +79,11 @@ namespace VisualGraph.Data
                         if (paramKey == typeof(int))
                         {
                             command.Parameters[paramKey][j] = Convert.ToInt32(currentparameter);
-                            
+
                         }
                         else if (paramKey == typeof(double))
                         {
-                            command.Parameters[paramKey][j] = Convert.ToDouble(currentparameter.Replace('.',','));
+                            command.Parameters[paramKey][j] = Convert.ToDouble(currentparameter.Replace('.', ','));
                         }
                         else
                         {
@@ -95,13 +98,15 @@ namespace VisualGraph.Data
 
     internal class AddEdgeCommand : GraphCommand
     {
-        public Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1,w, g) => {
+        public Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1, w, g) =>
+        {
             Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
             Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
-            var edge = new Edge {
+            var edge = new Edge
+            {
                 StartNode = node,
                 EndNode = node1,
-                Id = g.Edges.Count > 0? g.Edges.Max(e => e.Id) + 1 : 1,
+                Id = g.Edges.Count > 0 ? g.Edges.Max(e => e.Id) + 1 : 1,
                 Weight = w,
             };
             node.Edges.Add(edge);
@@ -110,7 +115,7 @@ namespace VisualGraph.Data
         });
         public AddEdgeCommand()
         {
-            Parameters = new Dictionary<Type,object[]>
+            Parameters = new Dictionary<Type, object[]>
             {
                 { typeof(int), new object[2] },
                 { typeof(double), new object[1] }
@@ -122,12 +127,13 @@ namespace VisualGraph.Data
             int n0id = (int)Parameters[typeof(int)][0];
             int n1id = (int)Parameters[typeof(int)][1];
             double weight = (double)Parameters[typeof(double)][0];
-            Action.Invoke(n0id, n1id,weight,g);
+            Action.Invoke(n0id, n1id, weight, g);
         }
     }
     internal class AddEdgeByNamesCommand : AddEdgeCommand
     {
-        public new Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1, w, g) => {
+        public new Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1, w, g) =>
+        {
             Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
             Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
             var edge = new Edge
@@ -155,7 +161,7 @@ namespace VisualGraph.Data
             string n0name = Parameters[typeof(string)][0].ToString().Trim();
             string n1name = Parameters[typeof(string)][1].ToString().Trim();
 
-            int n0id = g.Nodes.First(x=> x.Name == n0name).Id;
+            int n0id = g.Nodes.First(x => x.Name == n0name).Id;
             int n1id = g.Nodes.First(x => x.Name == n1name).Id;
             double weight = (double)Parameters[typeof(double)][0];
             Action.Invoke(n0id, n1id, weight, g);
@@ -163,7 +169,8 @@ namespace VisualGraph.Data
     }
     internal class AddNodeCommand : GraphCommand
     {
-        public Action<string, double, double, BasicGraphModel> Action = new Action<string, double, double, BasicGraphModel>((n, x, y, g) => {
+        public Action<string, double, double, BasicGraphModel> Action = new Action<string, double, double, BasicGraphModel>((n, x, y, g) =>
+        {
             Node newnode = new Node
             {
                 Name = n,
@@ -191,7 +198,8 @@ namespace VisualGraph.Data
     }
     internal class RemoveEdgeCommand : GraphCommand
     {
-        public Action<Node, Node, BasicGraphModel> Action = new Action<Node, Node, BasicGraphModel>((n0, n1, g) => {
+        public Action<Node, Node, BasicGraphModel> Action = new Action<Node, Node, BasicGraphModel>((n0, n1, g) =>
+        {
             Edge edge = n0.Edges.First(x => x.EndNode == n1 || x.StartNode == n1);
             g.Edges.Remove(edge);
         });
@@ -211,7 +219,8 @@ namespace VisualGraph.Data
     }
     internal class RemoveNodeCommand : GraphCommand
     {
-        public Action<Node, Node, BasicGraphModel, double> Action = new Action<Node, Node, BasicGraphModel, double>((n0, n1, g, w) => {
+        public Action<Node, Node, BasicGraphModel, double> Action = new Action<Node, Node, BasicGraphModel, double>((n0, n1, g, w) =>
+        {
             var edge = new Edge
             {
                 StartNode = n0,
@@ -233,6 +242,6 @@ namespace VisualGraph.Data
     abstract public class GraphCommand
     {
         public abstract void Invoke(BasicGraphModel g);
-        internal Dictionary<Type,object[]> Parameters;
+        internal Dictionary<Type, object[]> Parameters;
     }
 }

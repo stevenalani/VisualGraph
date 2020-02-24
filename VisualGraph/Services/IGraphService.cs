@@ -5,13 +5,18 @@ using System.Threading.Tasks;
 using VisualGraph.Components;
 using VisualGraph.Data.Additional.Models;
 
-namespace VisualGraph.Data.Additional.Interfaces
+namespace VisualGraph.Services.Interfaces
 {
     public interface IGraphService
     {
-        public BasicGraph CurrentGraph { get; }
-        public GraphStyleParameters GraphStyleParameters { get; }
-        public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel);
+        public BasicGraphModel CurrentGraphModel { get; set; }
+        public BasicGraph CurrentGraph { get; set; }
+        public GraphStyleParameters GraphStyleParameters { get; set; }
+        public Settings Settings { get; set; }
+        public GraphEditForm GraphEditForm { get; set; }
+        public SettingsCSS SettingsCSS { get; set; }
+        public Task LoadGraph(string filename);
+
         public Task LoadGraphStyleParameters();
         public Task SaveGraphStyleParameters(GraphStyleParameters graphStyleParameters = null);
         public Task<BasicGraphModel[]> GetAllGraphs();
@@ -19,7 +24,7 @@ namespace VisualGraph.Data.Additional.Interfaces
 
         public Task<string[]> GetGraphFilenames();
         public Task SaveGraph(BasicGraphModel graph, string filename = null);
-        public Task InitZoomPan(DotNetObjectReference<BasicGraph> reference, string graphid);
+        public Task InitZoomPan(DotNetObjectReference<BasicGraph> reference);
         public Task DestroyZoomPan();
         public Task DisablePan();
         public Task EnablePan();
@@ -28,11 +33,19 @@ namespace VisualGraph.Data.Additional.Interfaces
         public Task Center();
         public Task Crop();
         public Task Resize();
-        public Task Rerender();
+       
         public Task<SvgPanZoomInformation> GetSvgPanZoomInformation(string graphname);
         public Task<SvgContainerInformation> GetSvgContainerInformation(string graphname);
         public Task<Point2> GetTranslatedMousePos(string graphname, double x, double y);
-        public Task<BasicGraphModel> LayoutGraph(BasicGraphModel graphModel);
-        public Task<RenderFragment> GraphStyeTag ();
+        public Task LayoutGraph();
+
+
+
+        public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel);
+        public Task<RenderFragment> GetRenderFragment();
+        public Task<RenderFragment> GraphStyeTag();
+        public Task<RenderFragment> GetSettingsRenderFragment();
+        public Task<RenderFragment> GetEditFormRenderFragment();
+        public Task Rerender();
     }
 }

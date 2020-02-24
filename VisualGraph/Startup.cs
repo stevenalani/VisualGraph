@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using VisualGraph.Data;
-using VisualGraph.Data.Additional.Interfaces;
+using VisualGraph.Services;
+using VisualGraph.Services.Interfaces;
 
 namespace VisualGraph
 {

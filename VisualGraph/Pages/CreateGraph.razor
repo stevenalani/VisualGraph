@@ -2,7 +2,6 @@
 @using System.IO
 @using Blazored.Toast.Configuration
 @inject IGraphService GraphService
-@implements IRefreshableParent
 
 <div class="flex-wrapper">
     <BlazoredToasts Position="ToastPosition.TopLeft"
@@ -16,64 +15,22 @@
     </div>
 
     <div class="left-container">
-        @RenderGraph()
+        @GraphService.GetRenderFragment().Result
     </div>
 
 </div>
 
 @code {
-    BasicGraph basicGraph;
-    BasicGraphModel GraphModel { get; set; }
-
-
-    protected override void OnInitialized()
+    protected override async Task OnParametersSetAsync()
     {
-        GraphModel = new VisualGraph.Data.Additional.Models.BasicGraphModel()
-        {
-            Path = "unnamedGraph",
-
-            Nodes = new List<Node>() {
-                new Node { Pos = new Vector2(-10), IsActive = true, Id = 0, },
-                new Node { Pos = new Vector2(10), Id = 1},
-            }
-        };
-    }
-
-    RenderFragment RenderGraph()
-    {
-        return new RenderFragment(builder =>
-        {
-            builder.OpenComponent<BasicGraph>(0);
-            builder.AddAttribute(1, "GraphModel", GraphModel);
-            builder.AddComponentReferenceCapture(2,
-                inst =>
-                {
-                    var basicGraph1 = (BasicGraph)inst;
-                    basicGraph = basicGraph1;
-                });
-
-            builder.CloseComponent();
-        });
+        //await GraphService.GetNewGraphModel();
+        await base.OnParametersSetAsync();
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender)
-        {
-            basicGraph.RegisterDefaultCallbacks();
-        }
+        
     }
 
-    public void Refresh()
-    {
-        StateHasChanged();
-        basicGraph.ChangedState();
-    }
-    public void Refresh(BasicGraphModel graph)
-    {
-        this.GraphModel = graph;
-        StateHasChanged();
-        basicGraph.ChangedState();
-    }
 }
 

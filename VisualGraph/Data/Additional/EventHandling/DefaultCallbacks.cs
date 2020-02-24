@@ -22,7 +22,7 @@ namespace VisualGraph.Data.Additional.EventHandling
         }
         private static void activateDragNode(BasicGraph sender, Node target)
         {
-            if (((BasicGraph)sender).GraphModel.ActiveNode != null && target.IsActive)
+            if (((BasicGraph)sender).graphService.CurrentGraphModel.ActiveNode != null && target.IsActive)
             {
                 sender.NodeDragStarted = true;
                 sender.DisablePan();
@@ -51,7 +51,7 @@ namespace VisualGraph.Data.Additional.EventHandling
         }
         public static void DeactivateDragNode(object sender, TouchEventArgs args)
         {
-            if (((BasicGraph)sender).GraphModel.ActiveNode != null)
+            if (((BasicGraph)sender).graphService.CurrentGraphModel.ActiveNode != null)
             {
                 ((BasicGraph)sender).NodeDragStarted = false;
                 ((BasicGraph)sender).EnablePan();
@@ -68,21 +68,26 @@ namespace VisualGraph.Data.Additional.EventHandling
             toggleActiveStateNode((BasicGraph)sender, args.Target);
         }
         private static void toggleActiveStateNode(BasicGraph sender,Node node)
-        {
-            if (sender.GraphModel.ActiveNode != null)
+        {                
+            var activeNode = sender.graphService.CurrentGraphModel.ActiveNode;
+            Console.WriteLine($"Active Node: {activeNode?.Name}" );
+            if (activeNode != null)
             {
-                if (sender.GraphModel.ActiveNode.Id == node.Id)
+                if (activeNode.Id == node.Id)
                 {
+                    Console.WriteLine($"deselected");
                     node.IsActive = false;
                 }
                 else
                 {
-                    sender.GraphModel.ActiveNode.IsActive = false;
+                    Console.WriteLine($"switched");
+                    activeNode.IsActive = false;
                     node.IsActive = true;
                 }
             }
             else
             {
+                Console.WriteLine("simple pick");
                 node.IsActive = true;
             }
         }
@@ -96,12 +101,12 @@ namespace VisualGraph.Data.Additional.EventHandling
         }
         private static async void moveNode(BasicGraph sender,double x, double y) 
         {
-            if (sender.NodeDragStarted && sender.GraphModel.ActiveNode != null)
+            if (sender.NodeDragStarted && sender.graphService.CurrentGraphModel.ActiveNode != null)
             {
                 try
                 {
                     Point2 coords = await sender.RequestTransformedEventPosition(x, y);
-                    setNodePosition(((BasicGraph)sender).GraphModel.ActiveNode, coords);
+                    setNodePosition(((BasicGraph)sender).graphService.CurrentGraphModel.ActiveNode, coords);
                 }
                 catch { }
             }

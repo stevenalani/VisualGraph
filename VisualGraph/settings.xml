@@ -6,7 +6,7 @@
   <NodeRadius>1.2</NodeRadius>
   <NodeStrokeColor>rgba(0, 79, 224, 0.9)</NodeStrokeColor>
   <NodeStrokeWidth>0.2</NodeStrokeWidth>
-  <NodeFill>#8cd9d9</NodeFill>
+  <NodeFill>rgba(0, 255, 175, 1)</NodeFill>
   <NodeActiveFill>rgba(0, 79, 224, 0.7)</NodeActiveFill>
   <NodeStartFill>rgba(0, 255, 224, 1)</NodeStartFill>
   <NodeEndFill>rgba(79,0,224,1)</NodeEndFill>

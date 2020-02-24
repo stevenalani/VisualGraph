@@ -1,8 +1,9 @@
-﻿<h3>Graph aus Skript importieren</h3>
+﻿@inject IGraphService graphService
+<h3>Graph aus Skript importieren</h3>
 <span>
     <InputFile OnChange="@processScript" />
 </span>
-    
+
 
 
 @code {
@@ -18,13 +19,14 @@
         file = files.First();
         GraphModel.Nodes = new List<Node>();
         GraphModel.Edges = new List<Edge>();
-        GraphCommandProcessor.model = GraphModel;
+        var graphCP = new GraphCommandProcessor(GraphModel);
         string line = string.Empty;
         System.IO.StreamReader filereader = new System.IO.StreamReader(file.Data);
         int linecnt = 0;
         while ((line = await filereader.ReadLineAsync()) != null)
         {
-            if(line.Trim() != "") {
+            if (line.Trim() != "")
+            {
                 if (linecnt++ == 0)
                 {
                     if (line.Contains("name:"))
@@ -37,10 +39,10 @@
                         GraphModel.Path = file.Name;
                     }
                 }
-                GraphCommandProcessor.Process(line);
+                graphCP.Process(line);
             }
         }
         filereader.Close();
-        Parent.Refresh();
+        await graphService.Rerender();
     }
 }
