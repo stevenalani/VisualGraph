@@ -8,25 +8,10 @@
 @inject IToastService toastService
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
-
-
-        <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
-            <h3 class="pr-2">Graphen betrachten</h3>
-            <div class="form-group">
-                <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraph">
-                    <option selected="selected" value="">Bitte Graph wählen</option>
-                    @foreach (var name in graphFilenames)
-                    {
-                    <option value="@name">@name</option>
-                    }
-                </InputSelect>
-                <button type="submit" class="btn btn-outline-primary"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
-            </div>
-        </EditForm>
-
+        <h3 class="pr-2">Graphen betrachten</h3>
     </div>
     <div class="left-container">
-        @(graphService.GetRenderFragment().Result);
+        @(graphService.GetRenderFragment().Result)
     </div>
 </div>
 

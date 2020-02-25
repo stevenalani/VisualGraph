@@ -8,22 +8,7 @@
 </Modal>
 <h3><span class="oi oi-graph" aria-hidden="true"></span> Graphdaten bearbeiten</h3>
 <EditForm Model="@GraphService.CurrentGraphModel">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"><span>Graph öffnen</span></h5>
-            <div class="form-group form-inline">
-                <select class="form-control col mr-4" @bind="@FileToRead" >
-                    <option value="" default>Neuer Graph</option>
-                    @foreach (var file in Files)
-                    {
-                        <option value="@file">@file</option>
-                    }
-
-                </select>
-                <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
-            </div>
-        </div>
-    </div>
+    <CollapseToggle Classes="ml-4 btn-outline-danger" Target="grapheditform" Title=" " IconClass="oi oi-x" />
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">@GraphService.CurrentGraphModel.Name</h5>
@@ -81,7 +66,7 @@
 
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Knoten bearbeiten</h5>
+            <h5 class="card-title"><span class="legend-node" aria-hidden="true"></span> Knoten bearbeiten</h5>
             <table>
                 <thead>
                     <tr>
@@ -126,11 +111,8 @@
                 </tbody>
             </table>
             <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Knoten Hinzufügen</button>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Kanten bearbeiten</h5>
+            <hr />
+            <h5 class="card-title"><span class="legend-edge" aria-hidden="true"></span> Kanten bearbeiten</h5>
             @if (GraphService.CurrentGraphModel.Edges.Count > 0)
             {
                 <table>
@@ -207,10 +189,7 @@
                 </table>
             }
             <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Kante hinzufügen</button>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
+            <hr />
             <button type="button" class="btn btn-outline-info" @onclick="@SaveGraph"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
         </div>
     </div>
@@ -222,19 +201,9 @@
 }
 @code {
     public override IGraphService graphService => GraphService;
-    private string[] Files { get; set; }
-    private string FileToRead { get; set; }
-    protected override async Task OnInitializedAsync()
-    {
-        Files = await GraphService.GetGraphFilenames();
-    }
 
-    private async void OpenFile()
-    {
 
-            await GraphService.LoadGraph(FileToRead);
-        
-    }
+
     private async void SaveGraph()
     {
         var wrongEdges = GraphService.CurrentGraphModel.Edges.Where(x => x.StartNode.Id == -1 || x.EndNode.Id == -1).ToList();
@@ -248,8 +217,6 @@
             GraphService.CurrentGraphModel.Edges.Remove(edge);
         }
         await GraphService.SaveGraph(GraphService.CurrentGraphModel, GraphService.CurrentGraphModel.Name);
-        Files = await GraphService.GetGraphFilenames();
-
     }
 
     private async void AddNode()

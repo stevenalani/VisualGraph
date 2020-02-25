@@ -1,5 +1,4 @@
-﻿@page "/CreateGraph"
-@using System.IO
+﻿@page "/console"
 @using Blazored.Toast.Configuration
 @inject IGraphService GraphService
 
@@ -8,26 +7,17 @@
                     Timeout="2"
                     SuccessClass="success-toast-override"
                     SuccessIconClass="oi oi-thumbs-up"
-                    ErrorIconClass="oi oi-bug"  />
+                    ErrorIconClass="oi oi-bug" />
     <div class="flex-wrapper-title">
-        <h3>Graph erstellen und bearbeiten</h3>
+        <h3>Console</h3>
         <hr />
     </div>
     <div class="left-container">
         @GraphService.GetRenderFragment().Result
+        <GraphConsole />
     </div>
 </div>
 
-@code {
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        
-    }
+@code{
 
 }
-

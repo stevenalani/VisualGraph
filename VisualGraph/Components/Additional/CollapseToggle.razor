@@ -1,0 +1,20 @@
+﻿<button class="btn @Classes" data-toggle="collapse" data-target="#@Target" @onclick="@(()=> { istoggled = !istoggled; })">
+    <span><span class="@IconClass" aria-hidden="true"></span> @Title @(!istoggled?OpenText:CloseText) </span>
+</button>
+@code {
+    [Parameter]
+    public string Title { get; set; } = "";
+    [Parameter]
+    public string Target { get; set; } = "";
+    [Parameter]
+    public string Classes { get; set; } = "";
+    [Parameter]
+    public string IconClass { get; set; } = "";
+    [Parameter]
+    public string OpenText { get; set; } = "";
+    [Parameter]
+    public string CloseText { get; set; } = "";
+
+    private bool istoggled = false;
+
+}

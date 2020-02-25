@@ -48,7 +48,7 @@ namespace VisualGraph.Services
         public async Task LoadGraph(string filename)
         {
             BasicGraphModel graph;
-            if (filename == null)
+            if (filename == "Neuer Graph")
             {
                 graph = CreateNewGraphModel();
             }

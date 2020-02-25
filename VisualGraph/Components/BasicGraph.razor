@@ -111,11 +111,11 @@
             }
     </svg>
     <div id="legend">
-        <span class="col"><a class="startnode legend-node"></a> Startknoten</span>
-        <span class="col"><a class="endnode legend-node"></a> Endknoten</span>
-        <span class="col"><a class="active legend-node"></a> Aktiver Knoten</span>
-        <span class="col"><a class="legend-edge"></a> Kante</span>
-        <span class="col"><a class="pathedge legend-edge"></a> Kante auf der günstigsten Route</span>
+        <span class="legend-row"><a class="startnode legend-node"></a> Startknoten</span><br />
+        <span class="legend-row"><a class="endnode legend-node"></a> Endknoten</span><br />
+        <span class="legend-row"><a class="active legend-node"></a> Aktiver Knoten</span><br />
+        <span class="legend-row"><a class="legend-edge"></a> Kante</span><br />
+        <span class="legend-row"><a class="pathedge legend-edge"></a> Kante auf Route</span>
     </div>
 }
 else
@@ -139,7 +139,7 @@ else
         return Task.FromResult(SvgDisplay.UpdateDisplaySettings(svgInformation));
     }
 
-    private string oldGraphName;
+    private string oldGraphName = string.Empty;
 
 
     protected override void OnInitialized()

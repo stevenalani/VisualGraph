@@ -1,7 +1,7 @@
 ﻿@inject IGraphService graphService
-<h3>Graph Console</h3>
-<h5>Befehle auf Graph ausführen</h5>
+
 <div class="graphconsole w-100">
+    <h5>Befehle auf Graph ausführen</h5>
     <p>@introMessage</p>
     <textarea rows="7" class="w-100" disabled>
         @foreach(string s in OutputText)
@@ -17,23 +17,19 @@
     static string introMessage = "Befehle: add [ node ( name:string ) | edgebyids ( startNodeId:int endNodeId:int weight:double ) | edgebynames ( startNodeName:string endNodeName:string weight:double ) ] \r\n"
         + "example: add edgeids 0, 1, 13.50";
     private GraphCommandProcessor GraphCommandProcessor;
-    [Parameter]
-    public BasicGraphModel Graph { get; set; }
 
-    [Parameter]
-    public IRefreshableParent Parent { get; set; }
 
     string Inputline { get; set; } = "";
     List<string> OutputText = new List<string>();
 
     protected override void OnParametersSet()
     {
-        GraphCommandProcessor = new GraphCommandProcessor(Graph);
+        GraphCommandProcessor = new GraphCommandProcessor(graphService.CurrentGraphModel);
     }
 
     private void Clear() {
-        if (Graph != null)
-            OutputText = new List<string>() { $"Führe Befehle auf Graph \"{Graph.Name}\" aus\n" };
+        if (graphService.CurrentGraphModel != null)
+            OutputText = new List<string>() { $"Führe Befehle auf Graph \"{graphService.CurrentGraphModel.Name}\" aus\n" };
         else
             OutputText = new List<string>() { $"Es ist kein Graph ausgewählt!\n" };
         StateHasChanged();

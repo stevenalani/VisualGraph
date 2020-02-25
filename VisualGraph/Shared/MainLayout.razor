@@ -1,6 +1,7 @@
 ﻿@using Blazored.Toast.Configuration
 @inherits LayoutComponentBase
 @inject VisualGraph.Services.Interfaces.IGraphService graphService
+@inject NavigationManager navigationManager
 
 <BlazoredToasts Position="ToastPosition.TopLeft"
                 Timeout="5"
@@ -15,15 +16,33 @@
         @graphService.GetSettingsRenderFragment().Result
     </div>
 </div>
-<div id="grapheditform" class="navmenu-collapse collapse vh-100 mh-100">
-    <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
-        @graphService.GetEditFormRenderFragment().Result
+@if (navigationManager.Uri.Contains("creategraph"))
+{
+    <div id="grapheditform" class="navmenu-collapse collapse vh-100 mh-100">
+        <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
+            @graphService.GetEditFormRenderFragment().Result
+        </div>
     </div>
-</div>
+}
+
 <div class="main">
     <div class="top-row pl-4 navbar navbar-dark">
+        <LoadGraph></LoadGraph>
         
-    </div>
+        @if (navigationManager.Uri.Contains("creategraph"))
+        {
+            <div class="form-group">
+                <CollapseToggle 
+                    Classes="btn-outline-primary ml-4" 
+                    Target="grapheditform" 
+                    Title="Editor Formular"
+                    IconClass="oi oi-spreadsheet"
+                    OpenText="öffnen"
+                    CloseText="schließen"            />
+
+            </div>
+    }
+</div>
     <div class="content vh-100">
         @Body
     </div>
