@@ -1,203 +1,204 @@
 ﻿@inject IGraphService GraphService
+@inject IToastService toastService
 @inherits GraphInternalUI
 @if (GraphService.CurrentGraphModel != null)
 {
-<Modal @ref="ModalDirectional" Title="In ungerichteten Graphen umwandeln">
-    <p>Vorsicht, Wenn Sie mit fortfahren wird gehen Mehrfachkanten verloren und gerichtete kanten weden zu ungerichteten</p>
-    <button class="btn btn-success" @onclick="RemoveBidirectional">umwandeln</button>
-</Modal>
-<h3><span class="oi oi-graph" aria-hidden="true"></span> Graphdaten bearbeiten</h3>
-<EditForm Model="@GraphService.CurrentGraphModel">
-    <CollapseToggle Classes="ml-4 btn-outline-danger" Target="grapheditform" Title=" " IconClass="oi oi-x" />
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">@GraphService.CurrentGraphModel.Name</h5>
-
-            <div class="form-group form-inline">
-                <div class="col">
-                    <p>
-                        Ist <b>@(GraphService.CurrentGraphModel.IsDirectional?"ein":"kein") gerichteter Graph</b><br />
-                        @if (GraphService.CurrentGraphModel.IsBidirectional)
-                        {
-                            <b>besitzt Mehrfachkanten</b><br />
-                        }
-                        <b>@GraphService.CurrentGraphModel.Nodes.Count Knoten </b><br />
-                        <b>@GraphService.CurrentGraphModel.Edges.Count @(GraphService.CurrentGraphModel.Edges.Count == 1?"Kante":"Kanten") </b><br />
-                    </p>
-                </div>
-                <div class="col">
-                    <button class="btn btn-outline-danger" @onclick="@ModalDirectional.Show">in ungerichteten Graphen umwandeln</button>
-                </div>
-                
-            </div>
-            <div class="form-group form-inline">
-                <label for="GraphName" class="col-form-label text-right mr-4">Dateipfad:</label>
-                <InputText id="GraphName" class="form-control col" @bind-Value="@GraphService.CurrentGraphModel.Path"></InputText>
-            </div>
-
-        </div>
-    </div>
-
-    @if (GraphService.CurrentGraphModel.ActiveNode != null)
-    {<div class="card">
+    <Modal @ref="ModalDirectional" Title="In ungerichteten Graphen umwandeln">
+        <p>Vorsicht, Wenn Sie mit fortfahren wird gehen Mehrfachkanten verloren und gerichtete kanten weden zu ungerichteten</p>
+        <button class="btn btn-success" @onclick="RemoveBidirectional">Umwandeln</button>
+    </Modal>
+    <Modal @ref="ModalSave" Title="Graph Speichern">
+        <p>Vorsicht, wenn Sie fortfahren wird die Datei "@graphService.CurrentGraphModel.Name" überschrieben</p>
+        <button class="btn btn-success" @onclick="SaveGraph">Speichern</button>
+    </Modal>
+    <h3><span class="oi oi-graph" aria-hidden="true"></span> Graphdaten bearbeiten</h3>
+    <EditForm Model="@GraphService.CurrentGraphModel">
+        <CollapseToggle Classes="ml-4 btn-outline-danger" Target="grapheditform" Title=" " IconClass="oi oi-x" />
+        <div class="card">
             <div class="card-body">
-                <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Aktiver Knoten</h5>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>Pos X:</td>
-                            <td>
-                                <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.X" id="ActiveNodeX" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                            </td>
-                            <td>Pos Y:</td>
-                            <td>
-                                <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.Y" id="ActiveNodeY" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                            </td>
-                            <td>Name</td>
-                            <td>
-                                <InputText id="ActiveNodeName" class="form-control" @bind-Value="@GraphService.CurrentGraphModel.ActiveNode.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h5 class="card-title">@GraphService.CurrentGraphModel.Name</h5>
+
+                <div class="form-group form-inline">
+                    <div class="col">
+                        <p>
+                            Ist <b>@(GraphService.CurrentGraphModel.IsDirectional?"ein":"kein") gerichteter Graph</b><br />
+                            @if (GraphService.CurrentGraphModel.IsMultigraph)
+                            {
+                                <b>besitzt Mehrfachkanten</b><br />
+                            }
+                            <b>@GraphService.CurrentGraphModel.Nodes.Count Knoten </b><br />
+                            <b>@GraphService.CurrentGraphModel.Edges.Count @(GraphService.CurrentGraphModel.Edges.Count == 1?"Kante":"Kanten") </b><br />
+                        </p>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-outline-danger" @onclick="@ModalDirectional.Show">in ungerichteten Graphen umwandeln</button>
+                    </div>
+
+                </div>
+                <div class="form-group form-inline">
+                    <label for="GraphName" class="col-form-label text-right mr-4">Dateipfad:</label>
+                    <InputText id="GraphName" class="form-control col" @bind-Value="@GraphService.CurrentGraphModel.Path"></InputText>
+                </div>
+
             </div>
         </div>
-    }
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"><span class="legend-node" aria-hidden="true"></span> Knoten bearbeiten</h5>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Pos X</th>
-                        <th>Pos Y</th>
-                        <th>Name</th>
-                        <th>Löschen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var node in GraphService.CurrentGraphModel.Nodes)
-                    {
+        @if (GraphService.CurrentGraphModel.ActiveNode != null)
+        {<div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Aktiver Knoten</h5>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>Pos X:</td>
+                                <td>
+                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.X" id="ActiveNodeX" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+                                <td>Pos Y:</td>
+                                <td>
+                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.Y" id="ActiveNodeY" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+                                <td>Name</td>
+                                <td>
+                                    <InputText id="ActiveNodeName" class="form-control" @bind-Value="@GraphService.CurrentGraphModel.ActiveNode.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
 
-                        var idstring1 = $"NodeX_{node.Id}";
-                        var idstring2 = $"NodeY_{node.Id}";
-                        var idstring3 = $"NodeName_{node.Id}";
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><span class="legend-node" aria-hidden="true"></span> Knoten bearbeiten</h5>
+                <table>
+                    <thead>
                         <tr>
-                            <td><span class="form-control">@node.Id:</span></td>
-                            <td>
-                                <input type="number" @bind="@node.Pos.X" id="@idstring1" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                            </td>
-                            <td>
-                                <input type="number" @bind="@node.Pos.Y" id="@idstring2" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                            </td>
-                            <td>
-                                <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
-                            </td>
-                            <td>
-                                <button type="button"
-                                    class="form-control oi oi-delete btn btn-outline-danger"
-                                    @onclick="async (args)=>
+                            <th>Id</th>
+                            <th>Pos X</th>
+                            <th>Pos Y</th>
+                            <th>Name</th>
+                            <th>Löschen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var node in GraphService.CurrentGraphModel.Nodes)
+                        {
+
+                            var idstring1 = $"NodeX_{node.Id}";
+                            var idstring2 = $"NodeY_{node.Id}";
+                            var idstring3 = $"NodeName_{node.Id}";
+                            <tr>
+                                <td><span class="form-control">@node.Id:</span></td>
+                                <td>
+                                    <input type="number" @bind="@node.Pos.X" id="@idstring1" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+                                <td>
+                                    <input type="number" @bind="@node.Pos.Y" id="@idstring2" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+                                <td>
+                                    <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
+                                </td>
+                                <td>
+                                    <button type="button"
+                                            class="form-control oi oi-delete btn btn-outline-danger"
+                                            @onclick="async (args)=>
                                     {
                                         GraphService.CurrentGraphModel.Edges.RemoveAll( x=> node.Edges.Contains(x));
                                         GraphService.CurrentGraphModel.Nodes.Remove(node);
                                         await GraphService.Rerender();
                                     }">
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Knoten Hinzufügen</button>
-            <hr />
-            <h5 class="card-title"><span class="legend-edge" aria-hidden="true"></span> Kanten bearbeiten</h5>
-            @if (GraphService.CurrentGraphModel.Edges.Count > 0)
-            {
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Start- Knoten</th>
-                            <th>End- Knoten </th>
-                            <th>Kanten- Gewicht</th>
-                            <th>Distanz</th>
-                            <th>Löschen</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var edge in GraphService.CurrentGraphModel.Edges)
-                        {
-                            <tr>
-                                <td><span class="form-control">@edge.Id:</span></td>
-                                <td>
-
-                                    <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
-                                        @if (edge.StartNode == null)
-                                        {
-                                            <option default selected="selected">Startknoten wählen</option>
-                                        }
-                                        @foreach (var node in GraphService.CurrentGraphModel.Nodes)
-                                        {
-                                            if (node == edge.EndNode) continue;
-                                            if (edge.StartNode == node)
-                                            {
-                                                <option value="@node.Id" selected="selected">@($"Id:{node.Id}; Name:{node.Name}")</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@node.Id">@($"Id:{node.Id}; Name:{node.Name}")</option>
-                                            }
-                                        }
-                                    </select>
+                                    </button>
                                 </td>
-                                <td>
-                                    <select class="form-control" @onchange="(args) => { ChangedEndEdge(edge, args); }">
-
-                                        @if (edge.EndNode == null)
-                                        {
-                                            <option default selected="selected">Endknoten wählen</option>
-                                        }
-                                        else
-                                        {
-                                            <option default>Endknoten wählen</option>
-                                        }
-                                        @foreach (var node in GraphService.CurrentGraphModel.Nodes)
-                                        {
-                                            if (node == edge.StartNode) continue;
-                                            if (edge.EndNode == node)
-                                            {
-                                                <option value="@node.Id" selected="selected">@($"Id:{node.Id}; Name:{node.Name}")</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@node.Id">@($"Id:{node.Id}; Name:{node.Name}")</option>
-                                            }
-                                        }
-                                    </select>
-                                </td>
-                                <td>
-                                    <InputNumber class="form-control" @bind-Value="@edge.Weight"></InputNumber>
-                                </td>
-                                <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" /></td>
-                                <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphService.CurrentGraphModel.Edges.Remove(edge); }"></button></td>
-
                             </tr>
                         }
                     </tbody>
                 </table>
-            }
-            <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Kante hinzufügen</button>
-            <hr />
-            <button type="button" class="btn btn-outline-info" @onclick="@SaveGraph"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
-        </div>
-    </div>
-</EditForm>
+                <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Knoten Hinzufügen</button>
+                <hr />
+                <h5 class="card-title"><span class="legend-edge" aria-hidden="true"></span> Kanten bearbeiten</h5>
+                @if (GraphService.CurrentGraphModel.Edges.Count > 0)
+                {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Start- Knoten</th>
+                                <th>End- Knoten </th>
+                                <th>Kanten- Gewicht</th>
+                                <th>Distanz</th>
+                                <th>Löschen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var edge in GraphService.CurrentGraphModel.Edges)
+                            {
+                                <tr>
+                                    <td><span class="form-control">@edge.Id:</span></td>
+                                    <td>
 
-<Skriptloader GraphModel="@GraphService.CurrentGraphModel" />
-<hr />
-<GraphConsole Graph="@GraphService.CurrentGraphModel" />
+                                        <select class="form-control" @onchange="(args) => { ChangedStartEdge(edge, args); }">
+                                            @if (edge.StartNode == null)
+                                            {
+                                                <option default selected="selected">Startknoten wählen</option>
+                                            }
+                                            @foreach (var node in GraphService.CurrentGraphModel.Nodes)
+                                            {
+                                                if (node == edge.EndNode) continue;
+                                                if (edge.StartNode == node)
+                                                {
+                                                    <option value="@node.Id" selected="selected">@($"Id:{node.Id}; Name:{node.Name}")</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@node.Id">@($"Id:{node.Id}; Name:{node.Name}")</option>
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-control" @onchange="(args) => { ChangedEndEdge(edge, args); }">
+
+                                            @if (edge.EndNode == null)
+                                            {
+                                                <option default selected="selected">Endknoten wählen</option>
+                                            }
+                                            else
+                                            {
+                                                <option default>Endknoten wählen</option>
+                                            }
+                                            @foreach (var node in GraphService.CurrentGraphModel.Nodes)
+                                            {
+                                                if (node == edge.StartNode) continue;
+                                                if (edge.EndNode == node)
+                                                {
+                                                    <option value="@node.Id" selected="selected">@($"Id:{node.Id}; Name:{node.Name}")</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@node.Id">@($"Id:{node.Id}; Name:{node.Name}")</option>
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <InputNumber class="form-control" @bind-Value="@edge.Weight"></InputNumber>
+                                    </td>
+                                    <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" /></td>
+                                    <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphService.CurrentGraphModel.Edges.Remove(edge); }"></button></td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Kante hinzufügen</button>
+                <hr />
+                <button type="button" class="btn btn-outline-info" @onclick="@CheckExistsandOpenSaveGraphModal"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
+            </div>
+        </div>
+    </EditForm>
 }
 @code {
     public override IGraphService graphService => GraphService;
@@ -206,17 +207,17 @@
 
     private async void SaveGraph()
     {
-        var wrongEdges = GraphService.CurrentGraphModel.Edges.Where(x => x.StartNode.Id == -1 || x.EndNode.Id == -1).ToList();
-        var wrongNodes = GraphService.CurrentGraphModel.Nodes.Where(x => x.Id == -1).ToList();
-        foreach (var node in wrongNodes)
+        var issaved = await GraphService.SaveGraph(GraphService.CurrentGraphModel, GraphService.CurrentGraphModel.Name);
+        if (issaved)
         {
-            GraphService.CurrentGraphModel.Nodes.Remove(node);
+            toastService.ShowSuccess("Der Graph wurde erfolgreich gespeichert!");
         }
-        foreach (var edge in wrongEdges)
+        else
         {
-            GraphService.CurrentGraphModel.Edges.Remove(edge);
+            toastService.ShowError("Der Graph konnte nicht gespeichert werden!");
         }
-        await GraphService.SaveGraph(GraphService.CurrentGraphModel, GraphService.CurrentGraphModel.Name);
+
+
     }
 
     private async void AddNode()
@@ -287,5 +288,17 @@
             GraphService.CurrentGraphModel.Edges.Remove(edge);
         }
         GraphService.CurrentGraphModel.IsDirectional = !GraphService.CurrentGraphModel.IsDirectional;
+    }
+    private Modal ModalSave;
+    private async void CheckExistsandOpenSaveGraphModal()
+    {
+        if ((await graphService.GetGraphFilenames()).Contains(GraphService.CurrentGraphModel.Name))
+        {
+            ModalSave.Show();
+        }
+        else
+        {
+            SaveGraph();
+        }
     }
 }

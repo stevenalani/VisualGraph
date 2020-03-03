@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace VisualGraph.Data.Additional.Models
 {
     public class SvgDisplay
-
     {
+        public static BrowserSizes BrowserSizes { get; set; }
         public static double ZoomStep { get; set; }
         public static double MaxZoomLevel { get; set; }
         private double GraphWidth { get; set; }
@@ -18,7 +18,7 @@ namespace VisualGraph.Data.Additional.Models
 
         public float Ratio => (float)(GraphWidth / GraphHeight);
         public float ParentContainerRatio => (float)(ParentWidth / ParentHeight);
-        public string RatioLimit { 
+        /*public string RatioLimit { 
             get { 
                 string result = string.Empty;
                 if(ParentWidth != 0 && 0 != ParentHeight)
@@ -46,7 +46,7 @@ namespace VisualGraph.Data.Additional.Models
                 }
                 return result;
             } 
-        }
+        }*/
 
         public Vector2 Center = new Vector2(0);
         private double ZoomLevel { get; set; } = 1.0;

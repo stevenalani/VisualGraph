@@ -6,39 +6,18 @@
 @using Microsoft.Msagl.Core.Geometry.Curves;
 @inject IGraphService graphService
 @inject IToastService toastService
+
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
         <h3 class="pr-2">Graphen betrachten</h3>
     </div>
     <div class="left-container">
-        @(graphService.GetRenderFragment().Result)
+        @(graphService.GetRenderFragment(withDefaultCallbacks:false).Result)
     </div>
 </div>
 
 @code {
-    public class SelectGraphModel
-    {
-        public string CurrentGraph { get; set; }
-        public VisualGraph.Data.Additional.Models.BasicGraphModel Graph { get; set; }
-    }
-    SelectGraphModel model = new SelectGraphModel();
-    public string[] graphFilenames { get; set; }
-    private string[] graphPathes { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var graphFilePathes = graphPathes = await graphService.GetGraphFilenames();
-        graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).OrderBy(x => Path.GetFileNameWithoutExtension(x)).ToArray();
-        if (graphFilenames.Length > 0)
-            model.CurrentGraph = graphFilenames[0];
-        base.OnInitialized();
-    }
-    public async void HandleSelectChange()
-    {
-        await graphService.LoadGraph(model.CurrentGraph);
-        StateHasChanged();
-
-    }
+    private string oldgraphName;
     private async Task LayoutGraph()
     {
         await graphService.LayoutGraph();
@@ -48,5 +27,16 @@
     {
         await graphService.Fit();
         await graphService.Center();
+    }
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(oldgraphName != graphService.CurrentGraphModel.Name)
+        {
+            graphService.CurrentGraph.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
+            oldgraphName = graphService.CurrentGraphModel.Name;
+        }
+
+
+        return base.OnAfterRenderAsync(firstRender);
     }
 }

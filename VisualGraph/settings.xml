@@ -6,14 +6,14 @@
   <NodeRadius>1.2</NodeRadius>
   <NodeStrokeColor>rgba(0, 79, 224, 0.9)</NodeStrokeColor>
   <NodeStrokeWidth>0.2</NodeStrokeWidth>
-  <NodeFill>rgba(0, 255, 175, 1)</NodeFill>
+  <NodeFill>rgba(0, 255, 125, 1)</NodeFill>
   <NodeActiveFill>rgba(0, 79, 224, 0.7)</NodeActiveFill>
-  <NodeStartFill>rgba(0, 255, 224, 1)</NodeStartFill>
+  <NodeStartFill>rgba(0, 255, 255, 1)</NodeStartFill>
   <NodeEndFill>rgba(79,0,224,1)</NodeEndFill>
   <EdgeStrokeColor>rgba(255,125,125,0.9)</EdgeStrokeColor>
   <EdgeWidth>0.2</EdgeWidth>
   <EdgeRouteColor>rgba(125,255,125,0.9)</EdgeRouteColor>
-  <EdgeRouteWidth>0.2</EdgeRouteWidth>
+  <EdgeRouteWidth>0.3</EdgeRouteWidth>
   <EdgeHighlitingColor>fuchsia</EdgeHighlitingColor>
   <EdgeHighlitingWidth>0.3</EdgeHighlitingWidth>
 </GraphStyleParametersPOCO>

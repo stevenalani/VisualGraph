@@ -7,19 +7,15 @@
 
 
 @code {
-    [Parameter]
-    public IRefreshableParent Parent { get; set; }
-    [Parameter]
-    public BasicGraphModel GraphModel { get; set; }
     private IFileListEntry file;
 
     private async void processScript(IFileListEntry[] files)
     {
         if (files.Length == 0) return;
         file = files.First();
-        GraphModel.Nodes = new List<Node>();
-        GraphModel.Edges = new List<Edge>();
-        var graphCP = new GraphCommandProcessor(GraphModel);
+        graphService.CurrentGraphModel.Nodes = new List<Node>();
+        graphService.CurrentGraphModel.Edges = new List<Edge>();
+        var graphCP = new GraphCommandProcessor(graphService.CurrentGraphModel);
         string line = string.Empty;
         System.IO.StreamReader filereader = new System.IO.StreamReader(file.Data);
         int linecnt = 0;
@@ -31,12 +27,12 @@
                 {
                     if (line.Contains("name:"))
                     {
-                        GraphModel.Path = line.Split(':')[1].Trim().Replace(" ", "_");
+                        graphService.CurrentGraphModel.Path = line.Split(':')[1].Trim().Replace(" ", "_");
                         continue;
                     }
                     else
                     {
-                        GraphModel.Path = file.Name;
+                        graphService.CurrentGraphModel.Path = file.Name;
                     }
                 }
                 graphCP.Process(line);

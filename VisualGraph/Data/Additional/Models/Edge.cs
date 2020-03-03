@@ -20,11 +20,4 @@ namespace VisualGraph.Data.Additional.Models
 
         public double Angle => Math.Acos((StartNode.Pos.X + EndNode.Pos.X) * (StartNode.Pos.Y + EndNode.Pos.Y) / Math.Sqrt((StartNode.Pos.X * StartNode.Pos.X) + (StartNode.Pos.Y * StartNode.Pos.Y)) * Math.Sqrt((EndNode.Pos.X * EndNode.Pos.X) + (EndNode.Pos.Y * EndNode.Pos.Y)));
     }
-
-    public interface ICSSProperties
-    {
-        public string ClassesProppertie => String.Join(' ', Classes );
-        public List<string> Classes { get; set; }
-        public int Id { get; set; }
-    }
 }

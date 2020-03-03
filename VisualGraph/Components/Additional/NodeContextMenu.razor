@@ -1,0 +1,81 @@
+﻿@inject IGraphService graphService
+@inject NavigationManager navigationManager
+@inherits ContextMenu
+@if (Node != null && visible)
+{
+    Node.IsActive = false;
+    <Modal @ref="modal" Title="Knoten aus Graph entfernen">
+        <p>Sie sind dabei einen Knoten zu entfernen.<br /> Dadurch werden alle seine Kanten entfernt</p>
+        <button class="btn btn-success" @onclick="DeleteNode">entfernen</button>
+    </Modal>
+    <Modal @ref="modalSetStart" Title="Als Startknoten festlegen">
+        <p>Sie sind dabei diesen Knoten als Start für Algorithmen festzulegen.</p>
+        <button class="btn btn-success" @onclick="SetStartNode">festlegen</button>
+    </Modal>
+    <Modal @ref="modalSetEnd" Title="Als Endknoten festlegen">
+        <p>Sie sind dabei diesen Knoten als Ende für die zu ermittelnde Route festzulegen.</p>
+        <button class="btn btn-success" @onclick="SetEndNode">festlegen</button>
+    </Modal>
+    <div class="card" style="position:absolute; left:@(PosX-5)px; top:@(PosY-5)px" onmouseover="window.reposctxmenu(this)">
+        <div class="card-header">
+            <h6>Knoten mit ID: @Node.Id<button type="button" @onclick="()=> { visible = false; }" class="close">x</button></h6>
+        </div>
+        <div class="card-body">
+            <EditForm Model="@Node">
+                <div class="form-group form-inline">
+                    <label for="nodename">Name:</label>
+                    <InputText class="form-control" id="nodename" @bind-Value="Node.Name" @oninput="@(async (args)=> { await graphService.Rerender();})"></InputText>
+                </div>
+                <div class="form-group form-inline">
+                    <label for="nodeposx">X: </label>
+                    <input type="number" maxlength="5" id="nodeposx" class="form-control" style="width:6em" @bind="Node.Pos.X" @oninput="@(async (args)=> { await graphService.Rerender();})" />
+                    <label for="nodeposy"> Y: </label>
+                    <input type="number" maxlength="5" id="nodeposy" class="form-control" style="width:6em" @bind="Node.Pos.Y" @oninput="@(async (args)=> { await graphService.Rerender();})" />
+                </div>
+                @if (navigationManager.Uri.Contains("/algorithm/"))
+                {
+                    <div class="form-group">
+                        <div class="btn-group">
+                            <button class="btn btn-primary" @onclick="modalSetStart.Show">Als Startknoten</button>
+                            <button class="btn btn-primary" @onclick="modalSetEnd.Show">Als Endknoten</button>
+                        </div>
+                    </div>
+                }
+                <button class="btn btn-outline-danger" @onclick="DeleteNode">entfernen</button>
+            </EditForm>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public Node Node { get; set; }
+    public Modal modal;
+    public Modal modalSetStart;
+    public Modal modalSetEnd;
+    private async void DeleteNode()
+    {
+        Node.Edges.ForEach(e => graphService.CurrentGraphModel.Edges.Remove(e));
+        graphService.CurrentGraphModel.Nodes.Remove(Node);
+        modal.Show();
+        visible = false;
+        await graphService.Rerender();
+    }
+
+    private async void SetStartNode()
+    {
+        graphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Classes.Remove(AlgorithmPage.StartNodeClass);
+        Node.Classes.Add(AlgorithmPage.StartNodeClass);
+        modalSetStart.Show();
+        visible = false;
+        await graphService.Rerender();
+    }
+
+    private async void SetEndNode()
+    {
+        graphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Classes.Remove(AlgorithmPage.EndNodeClass);
+        Node.Classes.Add(AlgorithmPage.EndNodeClass);
+        modalSetEnd.Show();
+        visible = false;
+        await graphService.Rerender();
+    }
+}

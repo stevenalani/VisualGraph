@@ -24,4 +24,10 @@ namespace VisualGraph.Data.Additional.Models
         public double CenterX { get; set; }
         public double CenterY { get; set; }
     }
+    public class BrowserSizes
+    {
+        public int Width { get; set; }
+        public int Height { get; set; }
+    }
+
 }

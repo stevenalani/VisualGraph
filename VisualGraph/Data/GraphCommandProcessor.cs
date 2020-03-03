@@ -48,7 +48,7 @@ namespace VisualGraph.Data
                     {"edgebyids",typeof(RemoveEdgeCommand)},
                     {"edgebynames",typeof(RemoveEdgeCommand)},
                 }
-            }
+            },
         };
         public GraphCommand InterpretCommand(string inputstring)
         {

@@ -30,22 +30,18 @@ namespace VisualGraph.Data.Additional.EventHandling
         }
         public static void DeactivateDragNode(object sender, MouseEventArgs args)
         {
-            Console.WriteLine("Callback Event");
             deactivateDragNode((BasicGraph)sender, null);
         }
         public static void DeactivateDragNode(object sender, GraphMouseEventArgs<Node> args)
         {
-            Console.WriteLine("Callback Event");
             deactivateDragNode((BasicGraph)sender,args.Target);
         }
         public static void DeactivateDragNode(object sender, GraphTouchEventArgs<Node> args)
         {
-            Console.WriteLine("Callback Event");
             deactivateDragNode((BasicGraph)sender, args.Target);
         }
         private static void deactivateDragNode(BasicGraph sender, Node target)
         {
-            Console.WriteLine("Callback Event Method");
             sender.NodeDragStarted = false;
             sender.EnablePan();   
         }
@@ -70,24 +66,20 @@ namespace VisualGraph.Data.Additional.EventHandling
         private static void toggleActiveStateNode(BasicGraph sender,Node node)
         {                
             var activeNode = sender.graphService.CurrentGraphModel.ActiveNode;
-            Console.WriteLine($"Active Node: {activeNode?.Name}" );
             if (activeNode != null)
             {
                 if (activeNode.Id == node.Id)
                 {
-                    Console.WriteLine($"deselected");
                     node.IsActive = false;
                 }
                 else
                 {
-                    Console.WriteLine($"switched");
                     activeNode.IsActive = false;
                     node.IsActive = true;
                 }
             }
             else
             {
-                Console.WriteLine("simple pick");
                 node.IsActive = true;
             }
         }

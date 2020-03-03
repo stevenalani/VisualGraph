@@ -1,9 +1,10 @@
 ﻿@inject IGraphService GraphService
 @inherits GraphInternalUI
+
 @if (graphService.CurrentGraphModel != null && SvgDisplay != null)
 {
     var activenode = graphService.CurrentGraphModel.ActiveNode;
-    <svg id="@(graphService.CurrentGraphModel.Name)" class="vssvg img-fluid" viewBox="@(SvgDisplay.ViewBox)" 
+    <svg id="@(graphService.CurrentGraphModel.Name)" class="vssvg img-fluid" viewBox="@(SvgDisplay.ViewBox)"
          @onclick="@OnSvgClick"
          @onmousemove="@OnSvgMouseMove"
          @onmouseup="@OnSvgMouseUp"
@@ -56,7 +57,8 @@
                                       y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
                                       x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
                                       y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
-                                      marker-end="url(#arrow)" />
+                                      marker-end="url(#arrow)"
+                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" />
                                 @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" >{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
                             }
                             else
@@ -68,7 +70,8 @@
                                 var testpos = lengthofVector * 0.1f + curvepoint;
                                 <path class="@(((ICSSProperties)edge).ClassesProppertie) edge"
                                       d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
-                                      marker-end="url(#arrow)" />
+                                      marker-end="url(#arrow)"
+                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" />
                                 @((MarkupString)$"<text x=\"{@testpos.X.ToString(CultureInfo.InvariantCulture)}\" y=\"{@testpos.Y.ToString(CultureInfo.InvariantCulture)}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
                             }
                         }
@@ -82,7 +85,8 @@
                                       x1="@((startPos.X).ToString(CultureInfo.InvariantCulture))"
                                       y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
                                       x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
-                                      y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))" />
+                                      y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
+                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" />
                                 @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" >{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
                             }
                         }
@@ -117,6 +121,8 @@
         <span class="legend-row"><a class="legend-edge"></a> Kante</span><br />
         <span class="legend-row"><a class="pathedge legend-edge"></a> Kante auf Route</span>
     </div>
+    <EdgeContextMenu @ref="edgeContextMenu" />
+    <NodeContextMenu @ref="nodeContextMenu" />
 }
 else
 {
@@ -126,7 +132,8 @@ else
 
 
 @code {
-
+        EdgeContextMenu edgeContextMenu;
+        NodeContextMenu nodeContextMenu;
     public SvgDisplay SvgDisplay;
 
     private DotNetObjectReference<BasicGraph> dotnetreference;
@@ -161,11 +168,11 @@ else
             dotnetreference = DotNetObjectReference.Create(this);
             await graphService.InitZoomPan(dotnetreference);
         }
-        if (oldGraphName != graphService.CurrentGraphModel.Name)
+        if (graphService.CurrentGraphModel != null && oldGraphName != graphService.CurrentGraphModel.Name)
         {
             oldGraphName = graphService.CurrentGraphModel.Name;
 
-            var displayinfo = await graphService.GetSvgContainerInformation(graphService.CurrentGraphModel.Name);
+            var displayinfo = await graphService.GetSvgContainerInformation();
             SvgDisplay.UpdateDisplaySettings(displayinfo);
 
             StateHasChanged();
@@ -206,7 +213,9 @@ else
 
     public event EventHandler<WheelEventArgs> NodeMouseWheel;
 
-    protected virtual async void OnSvgClick(MouseEventArgs e)
+    public event EventHandler<GraphMouseEventArgs<Edge>> EdgeMouseDown;
+
+    protected virtual void OnSvgClick(MouseEventArgs e)
     {
 
         EventHandler<MouseEventArgs> handler = SvgClick;
@@ -215,7 +224,7 @@ else
             handler(this, e);
         }
     }
-    protected virtual async void OnSvgMouseDown(MouseEventArgs e)
+    protected virtual void OnSvgMouseDown(MouseEventArgs e)
     {
         EventHandler<MouseEventArgs> handler = SvgMouseDown;
         if (handler != null)
@@ -224,7 +233,7 @@ else
 
         }
     }
-    protected virtual async void OnSvgMouseUp(MouseEventArgs e)
+    protected virtual void OnSvgMouseUp(MouseEventArgs e)
     {
         EventHandler<MouseEventArgs> handler = SvgMouseUp;
         if (handler != null)
@@ -233,7 +242,7 @@ else
 
         }
     }
-    protected virtual async void OnSvgMouseMove(MouseEventArgs e)
+    protected virtual void OnSvgMouseMove(MouseEventArgs e)
     {
         EventHandler<MouseEventArgs> handler = SvgMouseMove;
         if (handler != null)
@@ -242,7 +251,7 @@ else
 
         }
     }
-    protected virtual async void OnSvgMouseWheel(WheelEventArgs e)
+    protected virtual void OnSvgMouseWheel(WheelEventArgs e)
     {
         EventHandler<WheelEventArgs> handler = SvgMouseWheel;
         if (handler != null)
@@ -251,7 +260,7 @@ else
 
         }
     }
-    protected virtual async void OnSvgKeyDown(KeyboardEventArgs e)
+    protected virtual void OnSvgKeyDown(KeyboardEventArgs e)
     {
         EventHandler<KeyboardEventArgs> handler = SvgKeyDown;
         if (handler != null)
@@ -260,7 +269,7 @@ else
         }
     }
 
-    protected virtual async void OnSvgTouchMove(TouchEventArgs e)
+    protected virtual void OnSvgTouchMove(TouchEventArgs e)
     {
 
         EventHandler<TouchEventArgs> handler = SvgTouchMove;
@@ -271,7 +280,7 @@ else
     }
 
 
-    protected virtual async void OnNodeClick(MouseEventArgs e, Node node)
+    protected virtual void OnNodeClick(MouseEventArgs e, Node node)
     {
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeClick;
         if (handler != null)
@@ -279,7 +288,7 @@ else
             handler(this, new GraphMouseEventArgs<Node>(node, e));
         }
     }
-    protected virtual async void OnTouchStart(TouchEventArgs e, Node node)
+    protected virtual void OnTouchStart(TouchEventArgs e, Node node)
     {
         EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchStart;
         if (handler != null)
@@ -288,7 +297,7 @@ else
 
         }
     }
-    protected virtual async void OnTouchEnd(TouchEventArgs e, Node node)
+    protected virtual void OnTouchEnd(TouchEventArgs e, Node node)
     {
         EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchEnd;
         if (handler != null)
@@ -297,7 +306,7 @@ else
 
         }
     }
-    protected virtual async void OnTouchEnter(TouchEventArgs e, Node node)
+    protected virtual void OnTouchEnter(TouchEventArgs e, Node node)
     {
         EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchEnter;
         if (handler != null)
@@ -306,7 +315,7 @@ else
 
         }
     }
-    protected virtual async void OnNodeMouseDown(MouseEventArgs e, Node node)
+    protected virtual void OnNodeMouseDown(MouseEventArgs e, Node node)
     {
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeMouseDown;
         if (handler != null)
@@ -315,7 +324,7 @@ else
 
         }
     }
-    protected virtual async void OnNodeMouseUp(MouseEventArgs e, Node node)
+    protected virtual void OnNodeMouseUp(MouseEventArgs e, Node node)
     {
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeMouseUp;
         if (handler != null)
@@ -324,7 +333,7 @@ else
 
         }
     }
-    protected virtual async void OnNodeMouseMove(MouseEventArgs e, Node node)
+    protected virtual void OnNodeMouseMove(MouseEventArgs e, Node node)
     {
         EventHandler<GraphMouseEventArgs<Node>> handler = NodeMouseMove;
         if (handler != null)
@@ -333,7 +342,7 @@ else
 
         }
     }
-    protected virtual async void OnNodeMouseWheel(WheelEventArgs e)
+    protected virtual void OnNodeMouseWheel(WheelEventArgs e)
     {
         EventHandler<WheelEventArgs> handler = NodeMouseWheel;
         if (handler != null)
@@ -341,15 +350,23 @@ else
             handler(this, e);
         }
     }
+
+    protected virtual void OnEdgeMouseDown(MouseEventArgs e, Edge edge)
+    {
+        EventHandler<GraphMouseEventArgs<Edge>> handler = EdgeMouseDown;
+        if (handler != null)
+        {
+            handler(this, new GraphMouseEventArgs<Edge>(edge, e));
+        }
+    }
     #endregion
 
     public async Task<Point2> RequestTransformedEventPosition(double x, double y)
     {
-        return await graphService.GetTranslatedMousePos(graphService.CurrentGraphModel.Name, x, y);
+        return await graphService.GetTranslatedMousePos(x, y);
     }
 
     #region Defaut Callbacks
-
 
     public void RegisterDefaultCallbacks()
     {
@@ -363,6 +380,43 @@ else
         this.SvgTouchMove += DefaultCallbacks.MoveNode;
         this.SvgMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
+        this.EdgeMouseDown += async (sender, args) =>
+        {
+            if (args.MouseEventArgs.Button == 2)
+            {
+                await edgeContextMenu.SetParametersAsync(ParameterView.FromDictionary(
+                  new Dictionary<string, object>()
+                    {
+                        { "Edge", args.Target },
+                        { "PosX", args.MouseEventArgs.ClientX },
+                        { "PosY", args.MouseEventArgs.ClientY }
+                            }
+                  ));
+                edgeContextMenu.visible = true;
+            }
+        };
+        this.NodeMouseDown += async (sender, args) =>
+        {
+            if (args.MouseEventArgs.Button == 2)
+            {
+                await nodeContextMenu.SetParametersAsync(ParameterView.FromDictionary(
+                  new Dictionary<string, object>()
+                    {
+                        { "Node", args.Target },
+                        { "PosX", args.MouseEventArgs.ClientX },
+                        { "PosY", args.MouseEventArgs.ClientY }
+                            }
+                  ));
+                nodeContextMenu.visible = true;
+            }
+        };
+        SvgClick += async (sender, args) =>
+        {
+            Console.WriteLine("clicked svg");
+            edgeContextMenu.visible = false;
+            nodeContextMenu.visible = false;
+            await graphService.Rerender();
+        };
     }
     #endregion
 }

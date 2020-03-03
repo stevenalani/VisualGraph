@@ -1,6 +1,6 @@
 ﻿@inject IGraphService GraphService
 @inherits GraphInternalUI
-        <style type="text/css">
+    <style type="text/css">
 
         .vssvg g g text, .nodeText {
             font-size: @graphService.GraphStyleParameters.TextSizeText;
@@ -19,11 +19,11 @@
             fill: @graphService.GraphStyleParameters.NodeActiveFill;
         }
 
-        .vssvg circle.endnode {
+        .vssvg circle.@AlgorithmPage.EndNodeClass {
             fill: @graphService.GraphStyleParameters.NodeEndFill;
         }
 
-        .vssvg circle.startnode {
+        .vssvg circle.@AlgorithmPage.StartNodeClass {
             fill: @graphService.GraphStyleParameters.NodeStartFill;
         }
         .vssvg .edge {
@@ -52,18 +52,18 @@
             background-color:@graphService.GraphStyleParameters.NodeFill;
         }
 
-        .legend-node.startnode {
+        .legend-node.@AlgorithmPage.StartNodeClass {
             background-color: @graphService.GraphStyleParameters.NodeStartFill;
         }
 
-        .legend-node.endnode {
+        .legend-node.@AlgorithmPage.EndNodeClass {
             background-color: @graphService.GraphStyleParameters.NodeEndFill;
         }
 
         .legend-node.active {
             background-color: @graphService.GraphStyleParameters.NodeActiveFill;
         }
-</style>
+    </style>
 
 @code{ 
     public override IGraphService graphService => GraphService;

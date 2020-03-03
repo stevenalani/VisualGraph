@@ -103,11 +103,4 @@ namespace VisualGraph.Data
             return route;
         }        
     }
-
-    public interface IGraphAlgorithm
-    {
-        public List<Node> GetShortestRoute(int startnodeId, int endnodeId);
-        public int Iterate(bool auto = false);
-        public string Name { get; }
-    }
 }

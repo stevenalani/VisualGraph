@@ -23,7 +23,7 @@ namespace VisualGraph.Services.Interfaces
         public Task<BasicGraphModel> GetGraph(string filename);
 
         public Task<string[]> GetGraphFilenames();
-        public Task SaveGraph(BasicGraphModel graph, string filename = null);
+        public Task<bool> SaveGraph(BasicGraphModel graph, string filename = null);
         public Task InitZoomPan(DotNetObjectReference<BasicGraph> reference);
         public Task DestroyZoomPan();
         public Task DisablePan();
@@ -34,15 +34,15 @@ namespace VisualGraph.Services.Interfaces
         public Task Crop();
         public Task Resize();
        
-        public Task<SvgPanZoomInformation> GetSvgPanZoomInformation(string graphname);
-        public Task<SvgContainerInformation> GetSvgContainerInformation(string graphname);
-        public Task<Point2> GetTranslatedMousePos(string graphname, double x, double y);
+        public Task<SvgPanZoomInformation> GetSvgPanZoomInformation();
+        public Task<SvgContainerInformation> GetSvgContainerInformation();
+        public Task<Point2> GetTranslatedMousePos(double x, double y);
         public Task LayoutGraph();
 
+        public Task<BrowserSizes> GetBrowserSizes();
 
-
-        public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel);
-        public Task<RenderFragment> GetRenderFragment();
+        public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true);
+        public Task<RenderFragment> GetRenderFragment(bool withDefaultCallbacks = true);
         public Task<RenderFragment> GraphStyeTag();
         public Task<RenderFragment> GetSettingsRenderFragment();
         public Task<RenderFragment> GetEditFormRenderFragment();

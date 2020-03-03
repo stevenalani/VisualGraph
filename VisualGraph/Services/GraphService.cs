@@ -87,7 +87,7 @@ namespace VisualGraph.Services
         {
             return await GraphFileProvider.GetGraphFileNames();
         }
-        public async Task SaveGraph(BasicGraphModel graph, string filename = "")
+        public async Task<bool> SaveGraph(BasicGraphModel graph, string filename = "")
         {
             if (filename == "")
             {
@@ -97,17 +97,28 @@ namespace VisualGraph.Services
             }
             try
             {
-                await WriteGraph(graph, filename);
+                var wrongEdges = CurrentGraphModel.Edges.Where(x => x.StartNode.Id == -1 || x.EndNode.Id == -1).ToList();
+                var wrongNodes = CurrentGraphModel.Nodes.Where(x => x.Id == -1).ToList();
+                foreach (var node in wrongNodes)
+                {
+                    CurrentGraphModel.Nodes.Remove(node);
+                }
+                foreach (var edge in wrongEdges)
+                {
+                    CurrentGraphModel.Edges.Remove(edge);
+                }
+                return await WriteGraph(graph, filename);
 
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
+                return false;
             }
         }
-        private async Task WriteGraph(BasicGraphModel graph, string filename)
+        private async Task<bool> WriteGraph(BasicGraphModel graph, string filename)
         {
-            await GraphFileProvider.WriteToGraphMlFile(graph, filename);
+            return await GraphFileProvider.WriteToGraphMlFile(graph, filename);
         }
 
         public Task LayoutGraph()
@@ -132,7 +143,7 @@ namespace VisualGraph.Services
                     geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2) { Length = x.Weight, UserData = x.Id, Weight = (int)x.Weight });
                 });
 
-                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings() { RemoveOverlaps = true, IdealEdgeLength = new IdealEdgeLengthSettings() { } };
+                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings() { RemoveOverlaps = true, IdealEdgeLength = new IdealEdgeLengthSettings() {  } };
                 LayoutHelpers.CalculateLayout(geometryGraph, settings, null);
                 nodes.ForEach(x =>
                 {
@@ -161,21 +172,24 @@ namespace VisualGraph.Services
             await JSRuntime.InvokeVoidAsync("EnablePan");
         }
 
-        public async Task<SvgPanZoomInformation> GetSvgPanZoomInformation(string graphname)
+        public async Task<SvgPanZoomInformation> GetSvgPanZoomInformation()
         {
-            var svginfo = await JSRuntime.InvokeAsync<SvgPanZoomInformation>("GetPanZoomValues", new object[] { graphname });
+            var svginfo = await JSRuntime.InvokeAsync<SvgPanZoomInformation>("GetPanZoomValues", new object[] { CurrentGraphModel.Name });
             return svginfo;
         }
-        public async Task<SvgContainerInformation> GetSvgContainerInformation(string graphname)
+        public async Task<SvgContainerInformation> GetSvgContainerInformation()
         {
-            var svginfo = await JSRuntime.InvokeAsync<SvgContainerInformation>("GetSvgContainerSizes", new object[] { graphname });
+            var svginfo = await JSRuntime.InvokeAsync<SvgContainerInformation>("GetSvgContainerSizes", new object[] { CurrentGraphModel.Name });
             return svginfo;
         }
-
-        public async Task<Point2> GetTranslatedMousePos(string graphname, double x, double y)
+        public async Task<BrowserSizes> GetBrowserSizes()
         {
-            var svgInfo = await GetSvgPanZoomInformation(graphname);
-            var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = graphname, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } });
+            return await JSRuntime.InvokeAsync<BrowserSizes>("GetBrowserSizes");
+        }
+        public async Task<Point2> GetTranslatedMousePos(double x, double y)
+        {
+            var svgInfo = await GetSvgPanZoomInformation();
+            var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = CurrentGraphModel.Name, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } });
             return mousePos;
         }
         public async Task UpdateBBox()
@@ -235,15 +249,15 @@ namespace VisualGraph.Services
             }
             return Task.CompletedTask;
         }
-        public async Task<RenderFragment> GetRenderFragment()
+        public async Task<RenderFragment> GetRenderFragment(bool withDefaultCallbacks = true)
         {
             if(CurrentGraphModel != null)
             {
-                return await buildBasicGraphFragment(CurrentGraphModel);
+                return await buildBasicGraphFragment(CurrentGraphModel,withDefaultCallbacks);
             }
             return null;
         }
-        public Task<RenderFragment> GetRenderFragment(BasicGraphModel Graph)
+        public Task<RenderFragment> GetRenderFragment(BasicGraphModel Graph, bool withDefaultCallbacks = true)
         {
             var fragment = new RenderFragment(builder =>
             {
@@ -255,26 +269,31 @@ namespace VisualGraph.Services
                         inst =>
                         {
                             CurrentGraph = (BasicGraph)inst;
-                            CurrentGraph.RegisterDefaultCallbacks();
+                            if (withDefaultCallbacks)
+                            {
+                                CurrentGraph.RegisterDefaultCallbacks();
+                            }
                         });
                     builder.CloseComponent();
                 }
             });
             return Task.FromResult(fragment);
         }
-        private Task<RenderFragment> buildBasicGraphFragment(BasicGraphModel graphModel)
+        private Task<RenderFragment> buildBasicGraphFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true)
         {
             var fragment = new RenderFragment(builder =>
             {
                 if (graphModel != null)
                 {
                     builder.OpenComponent<BasicGraph>(0);
-                    //builder.AddAttribute(1, "GraphModel", graphModel);
                     builder.AddComponentReferenceCapture(1,
                         inst =>
                         {
                             CurrentGraph = (BasicGraph)inst;
-                            CurrentGraph.RegisterDefaultCallbacks();
+                            if (withDefaultCallbacks)
+                            {
+                                CurrentGraph.RegisterDefaultCallbacks();
+                            }
                         });
                     builder.CloseComponent();
                 }

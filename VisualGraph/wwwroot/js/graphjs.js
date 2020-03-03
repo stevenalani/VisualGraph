@@ -1,5 +1,22 @@
 ﻿window.VSSVG = null;
-window.getWindowSize = function () {
+window.reposctxmenu = function (sender) {
+    var animationSpeed = 100;
+    var diffRight = window.innerWidth - (sender.offsetLeft + sender.offsetWidth);
+    var diffBottom = window.innerHeight - (sender.offsetTop + sender.offsetHeight);
+    if (diffRight < 0 && diffBottom >= 0) {
+        jQuery(sender).animate({ left: (window.innerWidth - sender.offsetWidth - 50) + "px" }, animationSpeed)
+    }
+    else if (diffBottom < 0 && diffRight >= 0 ) {
+        jQuery(sender).animate({ top: (window.innerHeight - sender.offsetHeight - 50) + "px" }, animationSpeed)
+    }
+    else if (diffRight < 0 && diffBottom < 0) {
+        jQuery(sender).animate({
+            left: (window.innerWidth - sender.offsetWidth - 50) + "px",
+            top: (window.innerHeight - sender.offsetHeight - 50) + "px"
+        }, animationSpeed)
+    }
+}
+window.GetBrowserSizes = function () {
     return {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -144,5 +161,5 @@ window.GetTranslatedMousePos = function (args) {
     };
 }
 $(document).ready(() => {
-   //$(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
+   $(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
 });

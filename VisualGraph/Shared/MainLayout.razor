@@ -27,8 +27,10 @@
 
 <div class="main">
     <div class="top-row pl-4 navbar navbar-dark">
-        <LoadGraph></LoadGraph>
-        
+        @if (navigationManager.Uri != navigationManager.BaseUri)
+        {
+            <LoadGraph></LoadGraph>
+        }
         @if (navigationManager.Uri.Contains("creategraph"))
         {
             <div class="form-group">

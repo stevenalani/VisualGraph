@@ -80,10 +80,10 @@ namespace VisualGraph.Data
             
         }
 
-        internal static Task WriteToGraphMlFile(BasicGraphModel graph, string filename)
+        internal static Task<bool> WriteToGraphMlFile(BasicGraphModel graph, string filename)
         {
             if (filename == String.Empty)
-                return Task.FromException(new Exception("no filename was given"));
+                return Task.FromResult(false);
             filename = Path.Combine(_graphdir, filename + ".xml");
             TinkerGrapĥ tinkerGraph = new TinkerGrapĥ();
             
@@ -109,7 +109,7 @@ namespace VisualGraph.Data
             {
                 writer.OutputGraph(fos);
             }
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }

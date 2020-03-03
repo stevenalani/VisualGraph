@@ -1,53 +1,42 @@
-﻿@page "/dijkstra"
+﻿@page "/algorithm/dijkstra"
 @using System.IO
 @using VisualGraph.Data
 @using Blazored.Toast;
 @using Node = VisualGraph.Data.Additional.Models.Node
+@inherits AlgorithmPage
 @inject IGraphService GraphService
 @inject IJSRuntime JsRuntime
 @inject IToastService toastService
     <div class="flex-wrapper">
         <div class="flex-wrapper-title">
-            <h3>Run Dijkstra Algorithm</h3>
-            <EditForm class="form-inline" Model="@model" OnSubmit="@HandleSelectChange">
-                <div class="form-group">
-                    <InputSelect name="graphselect" id="graphselect" class="form-control" @bind-Value="@model.CurrentGraphPath">
-                        @foreach (var name in graphFilenames)
-                        {
-                            <option value="@name">@name</option>
-                        }
-                    </InputSelect>
-                    <button type="submit" class="btn btn-outline-primary"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
-                </div>
-                @if (basicGraph != null)
-                {
-                    <div class="form-group">
-                        <button class="btn btn-secondary" type="button" @onclick="@Crop">Graph zuschneiden und zentrieren</button>
-                        <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Graph layouten</button>
-                    </div>
-                    <div class="form-group ml-1">
-                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
-                        <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
-                    </div>
-                    <div class="form-group ml-1">
-                        <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Günstigste Route ermitteln</button>
-                    </div>
-                }
-            </EditForm>
-
+            <h3>Dijkstra Algorithmus</h3>
+            @if (GraphService.CurrentGraphModel != null)
+            {
+        <form class="form-inline">
+            <div class="form-group">
+                <button class="btn btn-secondary" type="button" @onclick="@Crop">Graph zuschneiden und zentrieren</button>
+                <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Graph layouten</button>
+            </div>
+            <div class="form-group ml-1">
+                <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
+                <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
+            </div>
+            <div class="form-group ml-1">
+                <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Günstigste Route ermitteln</button>
+            </div>
+        </form>
+            }
         </div>
         <hr />
         <div class="left-container">
-
-            @RenderGraph()
+            @GraphService.GetRenderFragment().Result
         </div>
         <div class="right-container">
         @if (DijkstraAlgorithmRunner?.Results != null)
         {
             <div class="card pb-5">
                 <div class="card-body">
-
-                    <VisualGraph.Components.DijkstraResultTable Results="@DijkstraAlgorithmRunner.Results" />
+                    <DijkstraResultTable Results="@DijkstraAlgorithmRunner.Results" />
                     <div>
                         @if (ShortestRouteToEndnode != null)
                         {
@@ -85,75 +74,40 @@
                             </table>
                         }
                     </div>
-                    
                 </div>
             </div>
         }
         </div>
     </div>
-
 @code {
-    public class SelectGraphModel
-    {
-        public string CurrentGraphPath { get; set; }
-        public VisualGraph.Data.Additional.Models.BasicGraphModel Graph { get; set; }
-    }
     DijkstraAlgorithm DijkstraAlgorithmRunner;
     List<Node> ShortestRouteToEndnode;
     double PathCost = 0;
     string vgpathclass = " vgpath";
-    string endnodeclass = "endnode";
-    string startnodeclass = "startnode";
-    SelectGraphModel model = new SelectGraphModel();
-    public string[] graphFilenames { get; set; }
-    private string[] graphPathes { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        var graphFilePathes = graphPathes = await GraphService.GetGraphFilenames();
-        graphFilenames = graphFilePathes.Select(x => new FileInfo(x).Name).OrderBy(x => Path.GetFileNameWithoutExtension(x)).ToArray();
-        model.CurrentGraphPath = graphFilenames[0];
-        base.OnInitialized();
-    }
-    protected override void OnAfterRender(bool firstRender)
-    {
-        basicGraph?.RegisterDefaultCallbacks();
-        base.OnAfterRender(firstRender);
-    }
-
-    public async void HandleSelectChange()
-    {
-        var graphmodel = await GraphService.GetGraph(model.CurrentGraphPath);
-        model.Graph = graphmodel;
-        DijkstraAlgorithmRunner = null;
-        ShortestRouteToEndnode = null;
-        StateHasChanged();
-    }
     private void LayoutGraph()
     {
         var resultGraph = GraphService.LayoutGraph();
     }
     private void Crop()
     {
-
         GraphService.Fit();
         GraphService.Center();
     }
-
 
     private void RunDikstra(bool autostep = false)
     {
         if (this.DijkstraAlgorithmRunner == null)
         {
-            var startNodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(startnodeclass))?.Id ?? -1;
+            var startNodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(StartNodeClass))?.Id ?? -1;
             if (startNodeId != -1)
             {
 
-                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startNodeId);
+                DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startNodeId);
             }
             else
             {
-                DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph);
+                DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel);
             }
         }
         if (DijkstraAlgorithmRunner.RemainingSteps > 0)
@@ -170,8 +124,8 @@
     private void DijkstraCheapestRoute()
     {
         PathCost = 0;
-        var startnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id??-1;
-        var endnodeId = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id??-1;
+        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id??-1;
+        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id??-1;
         if (startnodeId == -1 || endnodeId == -1)
         {
             toastService.ShowError("Es muss ein Start- und Endknoten per Rechtsklick gewählt werden.");
@@ -179,12 +133,13 @@
         }
         if (ShortestRouteToEndnode != null)
             clearRouteClasses();
-        DijkstraAlgorithmRunner = new DijkstraAlgorithm(model.Graph, startnodeId);
+        DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startnodeId);
 
         ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
         visualizeRoute();
         StateHasChanged();
     }
+
     private void visualizeRoute()
     {
         for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
@@ -199,7 +154,7 @@
                 var node1 = ShortestRouteToEndnode[nodeindex + 1];
                 if (!node1.Classes.Contains(vgpathclass))
                     node1.Classes.Add(vgpathclass);
-                var edge = node.Edges.FirstOrDefault(x => (x.EndNode == node1 && x.StartNode == node) || (x.EndNode == node && x.StartNode == node1));
+                var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
                 if (edge != null)
                 {
                     if (!edge.Classes.Contains(vgpathclass))
@@ -209,6 +164,7 @@
             }
         }
     }
+
     private void clearRouteClasses()
     {
         if (ShortestRouteToEndnode != null)
@@ -225,7 +181,7 @@
                     var node1 = ShortestRouteToEndnode[nodeindex + 1];
                     if (node1.Classes.Contains(vgpathclass))
                         node1.Classes.Remove(vgpathclass);
-                    var edge = node.Edges.FirstOrDefault(x => (x.EndNode == node1 && x.StartNode == node) || (x.EndNode == node && x.StartNode == node1));
+                    var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
                     if (edge != null)
                     {
                         if (edge.Classes.Contains(vgpathclass))
@@ -239,76 +195,6 @@
     {
         DijkstraAlgorithmRunner = null;
         ShortestRouteToEndnode = null;
-    }
-    BasicGraph basicGraph;
-    RenderFragment RenderGraph()
-    {
-        return new RenderFragment(builder =>
-        {
-            if (model.Graph != null)
-            {
-                builder.OpenComponent<BasicGraph>(0);
-                builder.AddAttribute(1, "GraphModel", model.Graph);
-                builder.AddComponentReferenceCapture(2,
-                    inst =>
-                    {
-
-                        basicGraph = (BasicGraph)inst;
-                        basicGraph.NodeMouseDown += (sender, args) =>
-                        {
-                            if (args.MouseEventArgs.Buttons == 2)
-                            {
-                                var currentStartNode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(startnodeclass));
-                                var currentEndnode = model.Graph.Nodes.FirstOrDefault(x => x.Classes.Contains(endnodeclass));
-                                if (currentStartNode == null && !args.Target.Classes.Contains(endnodeclass))
-                                {
-                                    args.Target.Classes.Add(startnodeclass);
-                                }
-                                else if (currentStartNode != null && currentStartNode == args.Target)
-                                {
-                                    args.Target.Classes.Remove(startnodeclass);
-                                }
-                                else if (currentEndnode == null && !args.Target.Classes.Contains(startnodeclass))
-                                {
-                                    args.Target.Classes.Add(endnodeclass);
-                                }
-                                else if (currentEndnode != null && currentEndnode == args.Target)
-                                {
-                                    args.Target.Classes.Remove(endnodeclass);
-                                }
-                            }
-                        };
-                        /*basicGraph.NodeClick += (sender, args) =>
-                        {
-                            BasicGraph graph = ((BasicGraph)sender);
-                            Data.Additional.Models.Node node = args.Target;
-                            if (graph.GraphModel.ActiveNode != null)
-                            {
-                                resetDijkstra();
-                                if (graph.GraphModel.ActiveNode.Id == node.Id)
-                                {
-                                    node.IsActive = false;
-                                }
-                                else
-                                {
-                                    graph.GraphModel.ActiveNode.IsActive = false;
-                                    node.IsActive = true;
-                                }
-                            }
-                            else
-                            {
-                                node.IsActive = true;
-                            }
-                            StateHasChanged();
-                        };*/
-
-
-                    });
-
-                builder.CloseComponent();
-            }
-
-        });
     }
 
 }

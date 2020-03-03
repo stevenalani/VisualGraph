@@ -1,9 +1,9 @@
 ﻿@inject IGraphService graphService
 
-<div class="graphconsole w-100">
+<div class="graphconsole">
     <h5>Befehle auf Graph ausführen</h5>
     <p>@introMessage</p>
-    <textarea rows="7" class="w-100" disabled>
+    <textarea rows="7" class=" w-100" disabled>
         @foreach(string s in OutputText)
         {
             @(s + "\n");

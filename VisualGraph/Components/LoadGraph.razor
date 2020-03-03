@@ -1,19 +1,32 @@
 ﻿@inject IGraphService GraphService
-
-        <div class="form-group form-inline">
-            <select class="form-control col mr-4" @bind="@FileToRead">
-                <option value="" default>Neuer Graph</option>
-                @foreach (var file in GraphService.GetGraphFilenames().Result)
-                {
-                    <option value="@file">@file</option>
-                }
-            </select>
-            <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
-        </div>
+    <Modal @ref="loadGraphModal" Title="Graph von Skript laden">
+        <Skriptloader />
+    </Modal>
+    <div class="form-group form-inline">
+        <select class="form-control col mr-4" @bind="@FileToRead">
+            <option value="" default>Neuer Graph</option>
+            <option value="">Graph von Skript laden</option>
+            @foreach (var file in GraphService.GetGraphFilenames().Result)
+            {
+                <option value="@file">@file</option>
+                
+            }
+        </select>
+        <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
+    </div>
 @code {
     private string FileToRead { get; set; }
+    private Modal loadGraphModal;
     private async void OpenFile()
     {
-        await GraphService.LoadGraph(FileToRead);
+        if(FileToRead == "Graph von Skript laden")
+        {
+            loadGraphModal.Show();
+        }
+        else
+        {
+            await GraphService.LoadGraph(FileToRead);
+        }
+
     }
 }

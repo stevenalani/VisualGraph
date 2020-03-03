@@ -18,7 +18,6 @@ html, body {
         display: flex;
         flex-direction: column;
         background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.01) 0%, rgba(0, 50, 70, 0.2) 70%);
-        
     }
 
     .top-row {
@@ -92,16 +91,16 @@ html, body {
         background-color: rgba(255,255,255,0.1);
         color: white;
     }
-.main .top-row {
-    background-color:rgba(5, 23, 61,1);
-}
-#overlay {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    background-color: rgba(0,0,0,0.9);
-    z-index: 1;
-}
+    .main .top-row {
+        background-color:rgba(5, 23, 61,1);
+    }
+    #overlay {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        background-color: rgba(0,0,0,0.9);
+        z-index: 1;
+    }
     .content {
         background-color:white;
     }
@@ -133,7 +132,6 @@ html, body {
     .left-container {
         height: calc(100vh - 100px) !important;
         flex: 1;
-        text-align: center;
         display:flex;
     }
     .right-container {
@@ -144,14 +142,18 @@ html, body {
     .right-flex-container form{
         padding:1em;
     }
-
-    .graphconsole{
-        position:fixed;
-        bottom:0;
-        z-index:20;
+    .contextMenu {
+        position: absolute;
+        z-index:10;
+    }
+    .graphconsole {
+        position: fixed;
+        bottom: 0;
+        z-index: 20;
     }
     #grapheditform{
         flex:1;
+        z-index:initial !important;
     }
     #legend {
         position: fixed;
@@ -217,10 +219,11 @@ html, body {
         border: 1px solid rgba(0,0,0,0);
         border-radius: 5px;
         border-width: 1px;
-        z-index: 10;
         flex: 1;
     }
-
+    svg g text{
+        z-index:5;
+    }
     svg g text .hovertext {
         visibility: hidden;
     }
