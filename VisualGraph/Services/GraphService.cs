@@ -14,6 +14,9 @@ using VisualGraph.Components;
 using VisualGraph.Services.Interfaces;
 using VisualGraph.Data.Additional.Models;
 using VisualGraph.Data;
+using Microsoft.Msagl.Core.Geometry;
+using Microsoft.Msagl.Layout.Layered;
+using Microsoft.Msagl.Core.Routing;
 
 namespace VisualGraph.Services
 {
@@ -126,7 +129,6 @@ namespace VisualGraph.Services
             try
             {
                 GeometryGraph geometryGraph = new GeometryGraph();
-
                 var nodes = CurrentGraphModel.Edges.Where(x => x.StartNode != null || x.EndNode != null).SelectMany(x =>
                 {
                     if (x.StartNode != null && x.EndNode != null) return new[] { x.StartNode, x.EndNode };
@@ -135,15 +137,18 @@ namespace VisualGraph.Services
                 }).ToList();
 
 
-                nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(CurveFactory.CreateCircle(1, new Microsoft.Msagl.Core.Geometry.Point()), x.Id)));
+                nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(new Ellipse(1, 1, new Point()), x.Id)));
                 CurrentGraphModel.Edges.ForEach(x =>
                 {
                     var node1 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.StartNode.Id);
                     var node2 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.EndNode.Id);
-                    geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2) { Length = x.Weight, UserData = x.Id, Weight = (int)x.Weight });
+                    geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2));
                 });
 
-                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings() { RemoveOverlaps = true, IdealEdgeLength = new IdealEdgeLengthSettings() {  } };
+                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
+                //settings.ScaleX = 1.2;
+                //settings.ScaleY = 1.2;
+                settings.AdjustScale = true;
                 LayoutHelpers.CalculateLayout(geometryGraph, settings, null);
                 nodes.ForEach(x =>
                 {
@@ -153,6 +158,7 @@ namespace VisualGraph.Services
                 });
             }
             catch { }
+            Console.WriteLine("Layouting done");
             return Task.CompletedTask;
         }
         public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference)

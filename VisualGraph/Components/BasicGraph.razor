@@ -132,8 +132,8 @@ else
 
 
 @code {
-        EdgeContextMenu edgeContextMenu;
-        NodeContextMenu nodeContextMenu;
+    EdgeContextMenu edgeContextMenu;
+    NodeContextMenu nodeContextMenu;
     public SvgDisplay SvgDisplay;
 
     private DotNetObjectReference<BasicGraph> dotnetreference;
@@ -174,7 +174,7 @@ else
 
             var displayinfo = await graphService.GetSvgContainerInformation();
             SvgDisplay.UpdateDisplaySettings(displayinfo);
-
+            await graphService.Crop();
             StateHasChanged();
             return;
         }

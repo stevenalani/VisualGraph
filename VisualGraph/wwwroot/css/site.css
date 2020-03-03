@@ -227,6 +227,11 @@ html, body {
     svg g text .hovertext {
         visibility: hidden;
     }
+    svg g g:hover text {
+        font-size:2px;
+        fill:red;
+        z-index:100;
+    }
 
     svg g g:hover .hovertext {
         visibility: visible;

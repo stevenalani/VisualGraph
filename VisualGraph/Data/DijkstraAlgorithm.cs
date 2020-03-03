@@ -80,24 +80,35 @@ namespace VisualGraph.Data
             }
             return Q.Count;
         }
-        public List<Node> GetShortestRoute(int startId = -1, int endId = -1)
+        public List<Tuple<Node, double>> GetShortestRoute(int startId = -1, int endId = -1)
         {
             if (startId == -1 || endId == -1) return null;
                 StartNode = Model.Nodes.FirstOrDefault(x => x.Id == startId);
                 Init(StartNode.Id);
                 Iterate(true);
 
-            List<Node> route = new List<Node>();
+            List<Tuple<Node,double>> route = new List<Tuple<Node, double>>();
             EndNode = Model.Nodes.FirstOrDefault(x => x.Id == endId);
             if (EndNode != null)
             {
                 Node currentNode = EndNode;
+                Node previousNode = null;
+                double edgeweight;
                 while(currentNode != null)
                 {
-                    route.Insert(0, currentNode);
-                    if (currentNode == StartNode)
-                        break;
-                    Previous.TryGetValue(currentNode,out currentNode);
+                    Previous.TryGetValue(currentNode, out previousNode);
+
+                    if (previousNode != null)
+                    {
+                        edgeweight = currentNode.Edges.FirstOrDefault(x => x.EndNode == currentNode && x.StartNode == previousNode).Weight;
+                    }
+                    else
+                    {
+                        edgeweight = 0.0;
+                    }
+                    route.Insert(0, new Tuple<Node,double>(currentNode, edgeweight));
+                    currentNode = previousNode; 
+
                 }
             }
             return route;

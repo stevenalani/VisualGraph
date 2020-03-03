@@ -40,14 +40,20 @@
                     <div>
                         @if (ShortestRouteToEndnode != null)
                         {
-                            <h5>The Shortest Route from @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) to @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
+                            if (ShortestRouteToEndnode.Count == 1)
+                            {
+                                <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) konnte nicht ermittelt werden </h5>
+                            }
+                            else
+                            {
+                            <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Node</th>
+                                        <th>Reihenfolge</th>
                                         @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
                                         {
-                                            <th>@(i+1)</th>
+                                            <th>@(i + 1)</th>
                                         }
                                     </tr>
                                 </thead>
@@ -56,22 +62,30 @@
                                         <th>ID</th>
                                         @foreach (var node in ShortestRouteToEndnode)
                                         {
-                                            <td>@node.Id</td>
+                                            <td>@node.Item1.Id</td>
                                         }
                                     </tr>
                                     <tr>
                                         <th>Name</th>
                                         @foreach (var node in ShortestRouteToEndnode)
                                         {
-                                            <td>@node.Name</td>
+                                            <td>@node.Item1.Name</td>
                                         }
                                     </tr>
                                     <tr>
-                                        <th>Total cost:</th>
+                                        <th>Kosten</th>
+                                        @foreach (var node in ShortestRouteToEndnode)
+                                        {
+                                            <td>@node.Item2</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <th>Gesamtkosten:</th>
                                         <td>@PathCost.ToString(CultureInfo.CurrentCulture)</td>
                                     </tr>
                                 </tbody>
                             </table>
+                            }
                         }
                     </div>
                 </div>
@@ -81,7 +95,7 @@
     </div>
 @code {
     DijkstraAlgorithm DijkstraAlgorithmRunner;
-    List<Node> ShortestRouteToEndnode;
+    List<Tuple<Node, double>> ShortestRouteToEndnode;
     double PathCost = 0;
     string vgpathclass = " vgpath";
 
@@ -121,7 +135,7 @@
         }
     }
 
-    private void DijkstraCheapestRoute()
+    private async void DijkstraCheapestRoute()
     {
         PathCost = 0;
         var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id??-1;
@@ -137,6 +151,7 @@
 
         ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
         visualizeRoute();
+        await GraphService.Rerender();
         StateHasChanged();
     }
 
@@ -144,14 +159,14 @@
     {
         for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
         {
-            var node = ShortestRouteToEndnode[nodeindex];
+            var node = ShortestRouteToEndnode[nodeindex].Item1;
 
             if (!node.Classes.Contains(vgpathclass))
                 node.Classes.Add(vgpathclass);
 
             if (nodeindex < ShortestRouteToEndnode.Count - 1)
             {
-                var node1 = ShortestRouteToEndnode[nodeindex + 1];
+                var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
                 if (!node1.Classes.Contains(vgpathclass))
                     node1.Classes.Add(vgpathclass);
                 var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
@@ -171,14 +186,14 @@
         {
             for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
             {
-                var node = ShortestRouteToEndnode[nodeindex];
+                var node = ShortestRouteToEndnode[nodeindex].Item1;
 
                 if (node.Classes.Contains(vgpathclass))
                     node.Classes.Remove(vgpathclass);
 
                 if (nodeindex < ShortestRouteToEndnode.Count - 1)
                 {
-                    var node1 = ShortestRouteToEndnode[nodeindex + 1];
+                    var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
                     if (node1.Classes.Contains(vgpathclass))
                         node1.Classes.Remove(vgpathclass);
                     var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
