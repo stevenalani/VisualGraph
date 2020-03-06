@@ -24,6 +24,7 @@ namespace VisualGraph.Data.Additional.Models
         public string NodeEndFill { get; set; }
         #endregion
         #region Edge
+        public string EdgeActiveStrokeColor { get; set; }
         public  string EdgeStrokeColor { get; set; }
         public  double EdgeWidth { get; set; }
         public string EdgeRouteColor { get; set; }
@@ -39,15 +40,17 @@ namespace VisualGraph.Data.Additional.Models
             NodeStrokeColor = GraphStyleParameters.NodeStrokeColor;
             NodeStrokeWidth = GraphStyleParameters.NodeStrokeWidth;
             NodeFill = GraphStyleParameters.NodeFill;
+            NodeActiveFill = GraphStyleParameters.NodeActiveFill;
+            NodeEndFill = GraphStyleParameters.NodeEndFill;
+            NodeStartFill = GraphStyleParameters.NodeStartFill;
+            EdgeActiveStrokeColor = GraphStyleParameters.EdgeActiveStrokeColor;
             EdgeStrokeColor = GraphStyleParameters.EdgeStrokeColor;
             EdgeWidth = GraphStyleParameters.EdgeWidth;
             EdgeRouteColor = GraphStyleParameters.EdgeRouteColor;
             EdgeRouteWidth = GraphStyleParameters.EdgeRouteWidth;
             EdgeHighlitingColor = GraphStyleParameters.EdgeHighlitingColor;
             EdgeHighlitingWidth = GraphStyleParameters.EdgeHighlitingWidth;
-            NodeActiveFill = GraphStyleParameters.NodeActiveFill;
-            NodeEndFill = GraphStyleParameters.NodeEndFill;
-            NodeStartFill = GraphStyleParameters.NodeStartFill;
+
         }
 
     }

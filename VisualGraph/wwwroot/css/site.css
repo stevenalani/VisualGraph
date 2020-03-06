@@ -157,9 +157,9 @@ html, body {
     }
     #legend {
         position: fixed;
-        text-align: left;
-        right: 10px;
+        margin-left:20px;
         bottom: 0;
+        text-align: left;
         background-color: white;
         z-index: 10;
     }

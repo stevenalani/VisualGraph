@@ -45,18 +45,8 @@ namespace VisualGraph.Data.Additional.EventHandling
             sender.NodeDragStarted = false;
             sender.EnablePan();   
         }
-        public static void DeactivateDragNode(object sender, TouchEventArgs args)
-        {
-            if (((BasicGraph)sender).graphService.CurrentGraphModel.ActiveNode != null)
-            {
-                ((BasicGraph)sender).NodeDragStarted = false;
-                ((BasicGraph)sender).EnablePan();
-            }
-        }
-
         public static void ToggleActiveStateNode(object sender, GraphMouseEventArgs<Node>args)
         {
-
             toggleActiveStateNode((BasicGraph)sender, args.Target);
         }
         public static void ToggleActiveStateNode(object sender, GraphTouchEventArgs<Node> args)
@@ -64,7 +54,9 @@ namespace VisualGraph.Data.Additional.EventHandling
             toggleActiveStateNode((BasicGraph)sender, args.Target);
         }
         private static void toggleActiveStateNode(BasicGraph sender,Node node)
-        {                
+        {
+            if(sender.graphService.CurrentGraphModel.ActiveEdge != null)
+                sender.graphService.CurrentGraphModel.ActiveEdge.IsActive = false;
             var activeNode = sender.graphService.CurrentGraphModel.ActiveNode;
             if (activeNode != null)
             {
@@ -83,25 +75,76 @@ namespace VisualGraph.Data.Additional.EventHandling
                 node.IsActive = true;
             }
         }
-        public static void MoveNode(object sender, MouseEventArgs args)
+        public static void ToggleActiveStateEdge(object sender, GraphMouseEventArgs<Edge> args)
         {
-            moveNode((BasicGraph)sender, args.ClientX, args.ClientY);
+            toggleActiveStateEdge((BasicGraph)sender, args.Target);
         }
-        public static void MoveNode(object sender, TouchEventArgs args)
+        public static void ToggleActiveStateEdge(object sender, GraphTouchEventArgs<Edge> args)
         {
-            moveNode((BasicGraph)sender, args.Touches.First().ClientX, args.Touches.First().ClientY);
+            toggleActiveStateEdge((BasicGraph)sender, args.Target);
+        }
+        private static void toggleActiveStateEdge(BasicGraph sender, Edge edge)
+        {
+            if(sender.graphService.CurrentGraphModel.ActiveNode != null)
+                sender.graphService.CurrentGraphModel.ActiveNode.IsActive = false;
+            var activeEdge = sender.graphService.CurrentGraphModel.ActiveEdge;
+            if (activeEdge != null)
+            {
+                if (activeEdge.Id == edge.Id)
+                {
+                    edge.IsActive = false;
+                }
+                else
+                {
+                    activeEdge.IsActive = false;
+                    edge.IsActive = true;
+                }
+            }
+            else
+            {
+                edge.IsActive = true;
+            }
+        }
+        public static void MoveNodeOrEdge(object sender, MouseEventArgs args)
+        {
+            var _sender = (BasicGraph)sender;
+            if (_sender.NodeDragStarted && _sender.graphService.CurrentGraphModel.ActiveNode != null)
+            {
+                moveNode((BasicGraph)sender, args.ClientX, args.ClientY);
+            }
+        }
+        public static void MoveNodeOrEdge(object sender, TouchEventArgs args)
+        {
+            var _sender = (BasicGraph)sender;
+            if (_sender.NodeDragStarted)
+            {
+                if(_sender.graphService.CurrentGraphModel.ActiveNode != null)
+                    moveNode((BasicGraph)sender, args.Touches.First().ClientX, args.Touches.First().ClientY);
+                if (_sender.graphService.CurrentGraphModel.ActiveEdge != null)
+                    moveEdge((BasicGraph)sender, args.Touches.First().ClientX, args.Touches.First().ClientY);
+            }
         }
         private static async void moveNode(BasicGraph sender,double x, double y) 
         {
-            if (sender.NodeDragStarted && sender.graphService.CurrentGraphModel.ActiveNode != null)
-            {
+            
                 try
                 {
                     Point2 coords = await sender.RequestTransformedEventPosition(x, y);
                     setNodePosition(((BasicGraph)sender).graphService.CurrentGraphModel.ActiveNode, coords);
                 }
                 catch { }
+            
+        }
+        private static async void moveEdge(BasicGraph sender, double x, double y)
+        {
+
+            try
+            {
+                Point2 coords = await sender.RequestTransformedEventPosition(x, y);
+                
             }
+            catch { }
+
         }
         private static void setNodePosition(Node node, Point2 coords)
         {             

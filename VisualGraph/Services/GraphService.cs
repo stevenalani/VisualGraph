@@ -124,7 +124,7 @@ namespace VisualGraph.Services
             return await GraphFileProvider.WriteToGraphMlFile(graph, filename);
         }
 
-        public Task LayoutGraph()
+        public Task LayoutGraph(double scalex = 2.2, double scaley = 2.2)
         {
             try
             {
@@ -145,10 +145,12 @@ namespace VisualGraph.Services
                     geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2));
                 });
 
-                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
-                //settings.ScaleX = 1.2;
-                //settings.ScaleY = 1.2;
-                settings.AdjustScale = true;
+                var settings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings
+                {
+                    ScaleX = scalex,
+                    ScaleY = scaley
+                };
+
                 LayoutHelpers.CalculateLayout(geometryGraph, settings, null);
                 nodes.ForEach(x =>
                 {
@@ -259,7 +261,7 @@ namespace VisualGraph.Services
         {
             if(CurrentGraphModel != null)
             {
-                return await buildBasicGraphFragment(CurrentGraphModel,withDefaultCallbacks);
+                return await BuildBasicGraphFragment(CurrentGraphModel,withDefaultCallbacks);
             }
             return null;
         }
@@ -285,7 +287,7 @@ namespace VisualGraph.Services
             });
             return Task.FromResult(fragment);
         }
-        private Task<RenderFragment> buildBasicGraphFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true)
+        private Task<RenderFragment> BuildBasicGraphFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true)
         {
             var fragment = new RenderFragment(builder =>
             {

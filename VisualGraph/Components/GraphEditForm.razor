@@ -48,20 +48,27 @@
                 <div class="card-body">
                     <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Aktiver Knoten</h5>
                     <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th class="col p-0">Name</th>
+                                <th>Pos X:</th>
+                                <th>Pos Y:</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             <tr>
-                                <td>Pos X:</td>
-                                <td>
-                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.X" id="ActiveNodeX" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                                </td>
-                                <td>Pos Y:</td>
-                                <td>
-                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.Y" id="ActiveNodeY" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                                </td>
-                                <td>Name</td>
-                                <td>
+                                <td><span class="form-control">@GraphService.CurrentGraphModel.ActiveNode.Id:</span></td>
+                                <td class="col p-0">
                                     <InputText id="ActiveNodeName" class="form-control" @bind-Value="@GraphService.CurrentGraphModel.ActiveNode.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
                                 </td>
+                                <td>
+                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.X" maxlength="6" size="6" style="width:6em;" id="ActiveNodeX" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+                                <td>
+                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.Y" maxlength="6" size="6" style="width:6em;" id="ActiveNodeY" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+
                             </tr>
                         </tbody>
                     </table>
@@ -76,9 +83,9 @@
                     <thead>
                         <tr>
                             <th>Id</th>
+                            <th class="col p-0">Name</th>
                             <th>Pos X</th>
                             <th>Pos Y</th>
-                            <th>Name</th>
                             <th>Löschen</th>
                         </tr>
                     </thead>
@@ -89,29 +96,30 @@
                             var idstring1 = $"NodeX_{node.Id}";
                             var idstring2 = $"NodeY_{node.Id}";
                             var idstring3 = $"NodeName_{node.Id}";
-                            <tr>
-                                <td><span class="form-control">@node.Id:</span></td>
-                                <td>
-                                    <input type="number" @bind="@node.Pos.X" id="@idstring1" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                                </td>
-                                <td>
-                                    <input type="number" @bind="@node.Pos.Y" id="@idstring2" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                                </td>
-                                <td>
-                                    <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
-                                </td>
-                                <td>
-                                    <button type="button"
-                                            class="form-control oi oi-delete btn btn-outline-danger"
-                                            @onclick="async (args)=>
+                        <tr>
+                            <td><span class="form-control">@node.Id:</span></td>
+                            <td class="col p-0">
+                                <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
+                            </td>
+                            <td>
+                                <input type="number" @bind="@node.Pos.X" maxlength="6" size="6" style="width:6em;" id="@idstring1" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                            </td>
+                            <td>
+                                <input type="number" @bind="@node.Pos.Y" maxlength="6" size="6" style="width:6em;" id="@idstring2" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                            </td>
+
+                            <td>
+                                <button type="button"
+                                        class="form-control oi oi-delete btn btn-outline-danger"
+                                        @onclick="async (args)=>
                                     {
                                         GraphService.CurrentGraphModel.Edges.RemoveAll( x=> node.Edges.Contains(x));
                                         GraphService.CurrentGraphModel.Nodes.Remove(node);
                                         await GraphService.Rerender();
                                     }">
-                                    </button>
-                                </td>
-                            </tr>
+                                </button>
+                            </td>
+                        </tr>
                         }
                     </tbody>
                 </table>
@@ -124,9 +132,9 @@
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Start- Knoten</th>
-                                <th>End- Knoten </th>
-                                <th>Kanten- Gewicht</th>
+                                <th >Start- Knoten</th>
+                                <th >End- Knoten </th>
+                                <th>Gewicht</th>
                                 <th>Distanz</th>
                                 <th>Löschen</th>
                             </tr>
@@ -183,9 +191,9 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <InputNumber class="form-control" @bind-Value="@edge.Weight"></InputNumber>
+                                        <InputNumber class="form-control" @bind-Value="@edge.Weight" maxlength="6" size="6" style="width:6em;"></InputNumber>
                                     </td>
-                                    <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" /></td>
+                                    <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" maxlength="6" size="6" style="width:6em;" /></td>
                                     <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphService.CurrentGraphModel.Edges.Remove(edge); }"></button></td>
 
                                 </tr>

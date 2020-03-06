@@ -3,20 +3,22 @@
 
 @if (graphService.CurrentGraphModel != null && SvgDisplay != null)
 {
+
     var activenode = graphService.CurrentGraphModel.ActiveNode;
     <svg id="@(graphService.CurrentGraphModel.Name)" class="vssvg img-fluid" viewBox="@(SvgDisplay.ViewBox)"
-         @onclick="@OnSvgClick"
-         @onmousemove="@OnSvgMouseMove"
-         @onmouseup="@OnSvgMouseUp"
-         @onmousedown="@OnSvgMouseDown"
-         @onmousewheel="@OnSvgMouseWheel"
-         @onkeydown="@OnSvgKeyDown"
-         @ontouchmove="@OnSvgTouchMove">
+         @onclick="@OnSvgClick" @onclick:stopPropagation="true"
+         @onmousemove="@OnSvgMouseMove" @onmousemove:stopPropagation="true"
+         @onmouseup="@OnSvgMouseUp" @onmouseup:stopPropagation="true"
+         @onmousedown="@OnSvgMouseDown" @onmousedown:stopPropagation="true"
+         @onmousewheel="@OnSvgMouseWheel" @onmousewheel:stopPropagation="true"
+         @onkeydown="@OnSvgKeyDown" @onkeydown:stopPropagation="true"
+         @ontouchmove="@OnSvgTouchMove" @ontouchmove:stopPropagation="true"> 
         <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
                     markerWidth="6" markerHeight="6"
                     orient="auto-start-reverse">
                 <path d="M 0 0 L 9 5 L 0 10 z"
+                      fill="@graphService.GraphStyleParameters.EdgeStrokeColor"
                       stroke="@graphService.GraphStyleParameters.EdgeStrokeColor"
                       stroke-width="@graphService.GraphStyleParameters.EdgeWidthText" />
             </marker>
@@ -52,27 +54,38 @@
                             if (reverseEdge == null)
                             {
 
-                                <line class="@(((ICSSProperties)edge).ClassesProppertie) edge"
+                                <line class="@(((ICSSProperties)edge).ClassesProppertie) edge @edge.Activeclass"
                                       x1="@((startPos.X).ToString(CultureInfo.InvariantCulture))"
                                       y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
                                       x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
                                       y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
                                       marker-end="url(#arrow)"
-                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" />
+                                      @onclick="(args) => { OnEdgeClick(args, edge); }" @onclick:stopPropagation="true"
+                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" @onmousedown:stopPropagation="true"
+                                      @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }" @onmouseup:stopPropagation="true"
+                                      @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }" @ontouchstart:stopPropagation="true"
+                                      @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }" @ontouchenter:stopPropagation="true"
+                                      @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" @ontouchend:stopPropagation="true" />
                                 @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" >{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
                             }
                             else
                             {
-                                var curvepoint = startPos + dir * ((endPos - startPos).Length() / 2);
+                                <EdgeComponent Edge="edge" Graph="this"/>
+                                /*var curvepoint = startPos + dir * ((endPos - startPos).Length() / 2);
                                 var rotatedDir = Vector2.Transform(dir, Matrix3x2.CreateRotation(MathF.PI / 2));
                                 var lengthofVector = rotatedDir * (curvepoint - startPos).Length();
-                                var disiredPoint = lengthofVector * 0.2f + curvepoint;
-                                var testpos = lengthofVector * 0.1f + curvepoint;
-                                <path class="@(((ICSSProperties)edge).ClassesProppertie) edge"
+                                var disiredPoint = lengthofVector * edge.curveScale + curvepoint;
+                                var textpos = lengthofVector * 0.1f + curvepoint;
+                                <path class="@(((ICSSProperties)edge).ClassesProppertie) edge @edge.Activeclass"
                                       d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
                                       marker-end="url(#arrow)"
-                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" />
-                                @((MarkupString)$"<text x=\"{@testpos.X.ToString(CultureInfo.InvariantCulture)}\" y=\"{@testpos.Y.ToString(CultureInfo.InvariantCulture)}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
+                                      @onclick="(args) => { OnEdgeClick(args, edge); }" @onclick:stopPropagation="true"
+                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" @onmousedown:stopPropagation="true"
+                                      @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }" @onmouseup:stopPropagation="true"
+                                      @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }" @ontouchstart:stopPropagation="true"
+                                      @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }" @ontouchenter:stopPropagation="true"
+                                      @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" @ontouchend:stopPropagation="true" />
+                                @((MarkupString)$"<text x=\"{textpos.X.ToString(CultureInfo.InvariantCulture)}\" y=\"{textpos.Y.ToString(CultureInfo.InvariantCulture)}\">{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")*/
                             }
                         }
                         else
@@ -81,12 +94,17 @@
                             var endPos = edge.EndNode.Pos;
                             if (reverseEdge == null)
                             {
-                                <line class="@(((ICSSProperties)edge).ClassesProppertie) edge"
+                                <line class="@(((ICSSProperties)edge).ClassesProppertie) edge @edge.Activeclass"
                                       x1="@((startPos.X).ToString(CultureInfo.InvariantCulture))"
                                       y1="@((startPos.Y).ToString(CultureInfo.InvariantCulture))"
                                       x2="@((endPos.X).ToString(CultureInfo.InvariantCulture))"
                                       y2="@((endPos.Y).ToString(CultureInfo.InvariantCulture))"
-                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" />
+                                      @onclick="(args) => { OnEdgeClick(args, edge); }" @onclick:stopPropagation="true"
+                                      @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }" @onmousedown:stopPropagation="true"
+                                      @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }" @onmouseup:stopPropagation="true"
+                                      @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }" @ontouchstart:stopPropagation="true"
+                                      @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }" @ontouchenter:stopPropagation="true"
+                                      @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" @ontouchend:stopPropagation="true"/>
                                 @((MarkupString)$"<text x=\"{@halfwayx}\" y=\"{@halfwayy}\" >{String.Format("{0:0.00}", @edge.Weight)} <tspan class=\"hovertext\">Distanz: {String.Format("{0:0.00}", @edge.AutoWeight)}</tspan></text>")
                             }
                         }
@@ -105,12 +123,12 @@
                         cx="@node.PosXText"
                         cy="@(node.PosYText)"
                         r="@graphService.GraphStyleParameters.NodeRadiusText"
-                        @onclick="(args) => { OnNodeClick(args, node); }" onclick:event.stopPropagation
-                        @onmousedown="(args) => { OnNodeMouseDown(args, node); }" onmousedown:event.stopPropagation
-                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" onmouseup:event.stopPropagation
-                        @ontouchstart="(args) => { OnTouchStart(args, node); }" ontouchstart:event.stopPropagation
-                        @ontouchenter="(args) => { OnTouchEnter(args, node); }" ontouchenter:event.stopPropagation
-                        @ontouchend="(args) => { OnTouchEnd(args, node); }" ontouchend:event.stopPropagation>
+                        @onclick="(args) => { OnNodeClick(args, node); }" @onclick:stopPropagation="true"
+                        @onmousedown="(args) => { OnNodeMouseDown(args, node); }" @onmousedown:stopPropagation="true"
+                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" @onmouseup:stopPropagation="true"
+                        @ontouchstart="(args) => { OnNodeTouchStart(args, node); }" @ontouchstart:stopPropagation="true"
+                        @ontouchenter="(args) => { OnNodeTouchEnter(args, node); }" @ontouchenter:stopPropagation="true"
+                        @ontouchend="(args) => { OnNodeTouchEnd(args, node); }" @ontouchend:stopPropagation="true">
                 </circle>
             }
     </svg>
@@ -119,10 +137,12 @@
         <span class="legend-row"><a class="endnode legend-node"></a> Endknoten</span><br />
         <span class="legend-row"><a class="active legend-node"></a> Aktiver Knoten</span><br />
         <span class="legend-row"><a class="legend-edge"></a> Kante</span><br />
+        <span class="legend-row"><a class="acvive legend-edge"></a> aktive Kante</span><br />
         <span class="legend-row"><a class="pathedge legend-edge"></a> Kante auf Route</span>
     </div>
     <EdgeContextMenu @ref="edgeContextMenu" />
     <NodeContextMenu @ref="nodeContextMenu" />
+    <GraphContextMenu @ref="graphContextMenu" />
 }
 else
 {
@@ -132,6 +152,7 @@ else
 
 
 @code {
+    GraphContextMenu graphContextMenu;
     EdgeContextMenu edgeContextMenu;
     NodeContextMenu nodeContextMenu;
     public SvgDisplay SvgDisplay;
@@ -213,7 +234,13 @@ else
 
     public event EventHandler<WheelEventArgs> NodeMouseWheel;
 
+    public event EventHandler<GraphMouseEventArgs<Edge>> EdgeClick;
     public event EventHandler<GraphMouseEventArgs<Edge>> EdgeMouseDown;
+    public event EventHandler<GraphMouseEventArgs<Edge>> EdgeMouseUp;
+    public event EventHandler<GraphMouseEventArgs<Edge>> EdgeMouseMove;
+    public event EventHandler<GraphTouchEventArgs<Edge>> EdgeTouchStart;
+    public event EventHandler<GraphTouchEventArgs<Edge>> EdgeTouchEnd;
+    public event EventHandler<GraphTouchEventArgs<Edge>> EdgeTouchEnter;
 
     protected virtual void OnSvgClick(MouseEventArgs e)
     {
@@ -288,7 +315,7 @@ else
             handler(this, new GraphMouseEventArgs<Node>(node, e));
         }
     }
-    protected virtual void OnTouchStart(TouchEventArgs e, Node node)
+    protected virtual void OnNodeTouchStart(TouchEventArgs e, Node node)
     {
         EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchStart;
         if (handler != null)
@@ -297,7 +324,7 @@ else
 
         }
     }
-    protected virtual void OnTouchEnd(TouchEventArgs e, Node node)
+    protected virtual void OnNodeTouchEnd(TouchEventArgs e, Node node)
     {
         EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchEnd;
         if (handler != null)
@@ -306,7 +333,7 @@ else
 
         }
     }
-    protected virtual void OnTouchEnter(TouchEventArgs e, Node node)
+    protected virtual void OnNodeTouchEnter(TouchEventArgs e, Node node)
     {
         EventHandler<GraphTouchEventArgs<Node>> handler = NodeTouchEnter;
         if (handler != null)
@@ -350,13 +377,55 @@ else
             handler(this, e);
         }
     }
-
+    protected virtual void OnEdgeClick(MouseEventArgs e, Edge edge)
+    {
+        EventHandler<GraphMouseEventArgs<Edge>> handler = EdgeClick;
+        if (handler != null)
+        {
+            handler(this, new GraphMouseEventArgs<Edge>(edge, e));
+        }
+    }
     protected virtual void OnEdgeMouseDown(MouseEventArgs e, Edge edge)
     {
         EventHandler<GraphMouseEventArgs<Edge>> handler = EdgeMouseDown;
         if (handler != null)
         {
             handler(this, new GraphMouseEventArgs<Edge>(edge, e));
+        }
+    }
+    protected virtual void OnEdgeMouseUp(MouseEventArgs e, Edge edge)
+    {
+        EventHandler<GraphMouseEventArgs<Edge>> handler = EdgeMouseUp;
+        if (handler != null)
+        {
+            handler(this, new GraphMouseEventArgs<Edge>(edge, e));
+        }
+    }
+    protected virtual void OnEdgeTouchStart(TouchEventArgs e, Edge node)
+    {
+        EventHandler<GraphTouchEventArgs<Edge>> handler = EdgeTouchStart;
+        if (handler != null)
+        {
+            handler(this, new GraphTouchEventArgs<Edge>(node, e));
+
+        }
+    }
+    protected virtual void OnEdgeTouchEnd(TouchEventArgs e, Edge node)
+    {
+        EventHandler<GraphTouchEventArgs<Edge>> handler = EdgeTouchEnd;
+        if (handler != null)
+        {
+            handler(this, new GraphTouchEventArgs<Edge>(node, e));
+
+        }
+    }
+    protected virtual void OnEdgeTouchEnter(TouchEventArgs e, Edge node)
+    {
+        EventHandler<GraphTouchEventArgs<Edge>> handler = EdgeTouchEnter;
+        if (handler != null)
+        {
+            handler(this, new GraphTouchEventArgs<Edge>(node, e));
+
         }
     }
     #endregion
@@ -376,12 +445,14 @@ else
         this.NodeTouchStart += DefaultCallbacks.ActivateDragNode;
         this.NodeMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeTouchEnd += DefaultCallbacks.DeactivateDragNode;
-        this.SvgMouseMove += DefaultCallbacks.MoveNode;
-        this.SvgTouchMove += DefaultCallbacks.MoveNode;
+        this.SvgMouseMove += DefaultCallbacks.MoveNodeOrEdge;
+        this.SvgTouchMove += DefaultCallbacks.MoveNodeOrEdge;
         this.SvgMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
+        this.EdgeClick += DefaultCallbacks.ToggleActiveStateEdge;
         this.EdgeMouseDown += async (sender, args) =>
         {
+            
             if (args.MouseEventArgs.Button == 2)
             {
                 await edgeContextMenu.SetParametersAsync(ParameterView.FromDictionary(
@@ -390,9 +461,9 @@ else
                         { "Edge", args.Target },
                         { "PosX", args.MouseEventArgs.ClientX },
                         { "PosY", args.MouseEventArgs.ClientY }
-                            }
+                    }
                   ));
-                edgeContextMenu.visible = true;
+                edgeContextMenu.Show();
             }
         };
         this.NodeMouseDown += async (sender, args) =>
@@ -405,16 +476,33 @@ else
                         { "Node", args.Target },
                         { "PosX", args.MouseEventArgs.ClientX },
                         { "PosY", args.MouseEventArgs.ClientY }
-                            }
+                                }
                   ));
-                nodeContextMenu.visible = true;
+                nodeContextMenu.Show();
             }
         };
-        SvgClick += async (sender, args) =>
+        this.SvgMouseDown += async (sender, args) =>
         {
-            Console.WriteLine("clicked svg");
-            edgeContextMenu.visible = false;
-            nodeContextMenu.visible = false;
+            if (args.Button == 2)
+            {
+                await graphContextMenu.SetParametersAsync(ParameterView.FromDictionary(
+                    new Dictionary<string, object>()
+                    {
+                        { "PosX", args.ClientX },
+                        { "PosY", args.ClientY }
+                    }));
+                graphContextMenu.Show();
+            }
+        };
+        this.SvgClick += async (sender, args) =>
+        {
+            Console.WriteLine("SvgClick triggered");
+            if (edgeContextMenu.IsVisible)
+                edgeContextMenu.Show();
+            if (nodeContextMenu.IsVisible)
+                nodeContextMenu.Show();
+            if (graphContextMenu.IsVisible)
+                graphContextMenu.Show();
             await graphService.Rerender();
         };
     }

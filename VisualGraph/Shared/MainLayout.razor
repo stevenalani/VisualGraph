@@ -18,7 +18,7 @@
 </div>
 @if (navigationManager.Uri.Contains("creategraph"))
 {
-    <div id="grapheditform" class="navmenu-collapse collapse vh-100 mh-100">
+    <div id="grapheditform" class="navmenu-collapse collapse show vh-100 mh-100">
         <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
             @graphService.GetEditFormRenderFragment().Result
         </div>
@@ -39,6 +39,7 @@
                     Target="grapheditform" 
                     Title="Editor Formular"
                     IconClass="oi oi-spreadsheet"
+                    IsToggled="true"
                     OpenText="öffnen"
                     CloseText="schließen"            />
 

@@ -37,7 +37,7 @@ namespace VisualGraph.Services.Interfaces
         public Task<SvgPanZoomInformation> GetSvgPanZoomInformation();
         public Task<SvgContainerInformation> GetSvgContainerInformation();
         public Task<Point2> GetTranslatedMousePos(double x, double y);
-        public Task LayoutGraph();
+        public Task LayoutGraph(double scalex = 2.2, double scaley = 2.2);
 
         public Task<BrowserSizes> GetBrowserSizes();
 

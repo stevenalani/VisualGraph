@@ -31,6 +31,7 @@ namespace VisualGraph.Data.Additional.Models
 
         #endregion
         #region Edge
+        public string EdgeActiveStrokeColor { get; set; } = "rgba(0, 79, 224, 0.7)";
         public  string EdgeStrokeColor { get; set; } = "#d966ff";
         public  double EdgeWidth { get; set; } = 0.2;
         public  string EdgeWidthText => EdgeWidth.ToString(CultureInfo.InvariantCulture) + "px";

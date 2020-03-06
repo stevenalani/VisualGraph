@@ -161,5 +161,5 @@ window.GetTranslatedMousePos = function (args) {
     };
 }
 $(document).ready(() => {
-   //$(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
+   $(document).on("contextmenu", (e) => { e.preventDefault(); return false; });
 });

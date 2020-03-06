@@ -13,6 +13,12 @@ namespace VisualGraph.Components.Additional
         [Parameter]
         public double PosY { get; set; }
 
-        public bool visible = false;
+        protected bool visible = false;
+        public bool IsVisible { get { return visible; } }
+        public void Show()
+        {
+            visible = !visible;
+            StateHasChanged();
+        }
     }
 }

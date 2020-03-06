@@ -26,10 +26,15 @@
         .vssvg circle.@AlgorithmPage.StartNodeClass {
             fill: @graphService.GraphStyleParameters.NodeStartFill;
         }
-        .vssvg .edge {
+        .vssvg .edge.active {
             fill:transparent;
-            stroke:@graphService.GraphStyleParameters.EdgeStrokeColor;
-            stroke-width:@graphService.GraphStyleParameters.EdgeWidthText
+            stroke:@graphService.GraphStyleParameters.EdgeActiveStrokeColor;
+            stroke-width:@graphService.GraphStyleParameters.EdgeActiveStrokeColor
+        }
+        .vssvg .edge {
+            fill: transparent;
+            stroke: @graphService.GraphStyleParameters.EdgeStrokeColor;
+            stroke-width: @graphService.GraphStyleParameters.EdgeWidthText
         }
         .vssvg .edge.vgpath {
             stroke:@graphService.GraphStyleParameters.EdgeRouteColor;
@@ -42,7 +47,9 @@
         .legend-edge {
             background-color: @graphService.GraphStyleParameters.EdgeStrokeColor;
         }
-
+        .legend-edge.active {
+            background-color: @graphService.GraphStyleParameters.EdgeActiveStrokeColor;
+        }
         .legend-edge.pathedge {
             background-color: @graphService.GraphStyleParameters.EdgeRouteColor;
         }

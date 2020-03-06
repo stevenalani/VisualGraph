@@ -3,7 +3,7 @@
 @inject NavigationManager navigationManager
 @inherits GraphInternalUI
 <EditForm Model="@graphService.GraphStyleParameters" OnValidSubmit="SaveSettings" 
-          @oninput="@(async ()=>{ Console.WriteLine("input"); await graphService.Rerender(); })">
+          @oninput="@(async ()=>{ await graphService.Rerender(); })">
 
     <h3>Einstellungen</h3>
 
@@ -22,8 +22,8 @@
         </div>
         <div class="form-group form-inline">
             <label for="textcolor" class="input-sm col-sm-12 col-md-3">Farbe</label>
-            <InputText class="form-control input-sm col-sm-11 col-md-8" id="textcolor" @bind-Value="@graphService.GraphStyleParameters.TextColor"></InputText>
-            <div class="colorpreview col-1" style="background-color:@graphService.GraphStyleParameters.TextColor"></div>
+            <InputText class="form-control input-sm col" id="textcolor" @bind-Value="@graphService.GraphStyleParameters.TextColor"></InputText>
+            <div class="colorpreview " style="background-color:@graphService.GraphStyleParameters.TextColor"></div>
         </div>
     </div>
     <div class="card">
@@ -72,6 +72,11 @@
             <label for="edgeStrokeColor" class="col-sm-3 col-form-label text-right">Farbe</label>
             <InputText class="form-control input-sm col" id="edgeStrokeColor" @bind-Value="@graphService.GraphStyleParameters.EdgeStrokeColor"></InputText>
             <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeStrokeColor"></div>
+        </div>
+        <div class="form-group form-inline">
+            <label for="EdgeActiveStrokeColor" class="col-sm-3 col-form-label text-right">Farbe aktive Kante</label>
+            <InputText class="form-control input-sm col" id="EdgeActiveStrokeColor" @bind-Value="@graphService.GraphStyleParameters.EdgeActiveStrokeColor"></InputText>
+            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeActiveStrokeColor"></div>
         </div>
         <div class="form-group form-inline">
             <label for="EdgeRouteColor" class="col-sm-3 col-form-label text-right">Pfad Farbe</label>

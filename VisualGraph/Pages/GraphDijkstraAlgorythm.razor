@@ -7,31 +7,36 @@
 @inject IGraphService GraphService
 @inject IJSRuntime JsRuntime
 @inject IToastService toastService
-    <div class="flex-wrapper">
-        <div class="flex-wrapper-title">
-            <h3>Dijkstra Algorithmus</h3>
-            @if (GraphService.CurrentGraphModel != null)
-            {
-        <form class="form-inline">
-            <div class="form-group">
-                <button class="btn btn-secondary" type="button" @onclick="@Crop">Graph zuschneiden und zentrieren</button>
-                <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Graph layouten</button>
-            </div>
-            <div class="form-group ml-1">
-                <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
-                <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
-            </div>
-            <div class="form-group ml-1">
-                <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Günstigste Route ermitteln</button>
-            </div>
-        </form>
-            }
-        </div>
-        <hr />
-        <div class="left-container">
-            @GraphService.GetRenderFragment().Result
-        </div>
-        <div class="right-container">
+
+    <Modal @ref="ModalLayoutPrarmeters">
+        <AutoLayoutForm OnSubmit="async () => { ModalLayoutPrarmeters.Show();await GraphService.Rerender(); }" />
+    </Modal>
+
+<div class="flex-wrapper">
+    <div class="flex-wrapper-title">
+        <h3>Dijkstra Algorithmus</h3>
+        @if (GraphService.CurrentGraphModel != null)
+        {
+            <form class="form-inline">
+                <div class="form-group">
+                    <button class="btn btn-secondary" type="button" @onclick="@Crop">Graph zuschneiden und zentrieren</button>
+                    <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Graph layouten</button>
+                </div>
+                <div class="form-group ml-1">
+                    <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
+                    <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
+                </div>
+                <div class="form-group ml-1">
+                    <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Günstigste Route ermitteln</button>
+                </div>
+            </form>
+        }
+    </div>
+    <hr />
+    <div class="left-container">
+        @GraphService.GetRenderFragment().Result
+    </div>
+    <div class="right-container">
         @if (DijkstraAlgorithmRunner?.Results != null)
         {
             <div class="card pb-5">
@@ -46,67 +51,67 @@
                             }
                             else
                             {
-                            <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Reihenfolge</th>
-                                        @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
-                                        {
-                                            <th>@(i + 1)</th>
-                                        }
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th>ID</th>
-                                        @foreach (var node in ShortestRouteToEndnode)
-                                        {
-                                            <td>@node.Item1.Id</td>
-                                        }
-                                    </tr>
-                                    <tr>
-                                        <th>Name</th>
-                                        @foreach (var node in ShortestRouteToEndnode)
-                                        {
-                                            <td>@node.Item1.Name</td>
-                                        }
-                                    </tr>
-                                    <tr>
-                                        <th>Kosten</th>
-                                        @foreach (var node in ShortestRouteToEndnode)
-                                        {
-                                            <td>@node.Item2</td>
-                                        }
-                                    </tr>
-                                    <tr>
-                                        <th>Gesamtkosten:</th>
-                                        <td>@PathCost.ToString(CultureInfo.CurrentCulture)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Reihenfolge</th>
+                                            @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
+                                            {
+                                                <th>@(i + 1)</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>ID</th>
+                                            @foreach (var node in ShortestRouteToEndnode)
+                                            {
+                                                <td>@node.Item1.Id</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Name</th>
+                                            @foreach (var node in ShortestRouteToEndnode)
+                                            {
+                                                <td>@node.Item1.Name</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Kosten</th>
+                                            @foreach (var node in ShortestRouteToEndnode)
+                                            {
+                                                <td>@node.Item2</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Gesamtkosten:</th>
+                                            <td>@PathCost.ToString(CultureInfo.CurrentCulture)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             }
                         }
                     </div>
                 </div>
             </div>
         }
-        </div>
     </div>
+</div>
 @code {
+    Modal ModalLayoutPrarmeters { get; set; }
     DijkstraAlgorithm DijkstraAlgorithmRunner;
     List<Tuple<Node, double>> ShortestRouteToEndnode;
     double PathCost = 0;
     string vgpathclass = " vgpath";
-
     private void LayoutGraph()
     {
-        var resultGraph = GraphService.LayoutGraph();
+        ModalLayoutPrarmeters.Show();
     }
-    private void Crop()
+    private async void Crop()
     {
-        GraphService.Fit();
-        GraphService.Center();
+        await GraphService.Fit();
+        await GraphService.Center();
     }
 
     private void RunDikstra(bool autostep = false)
@@ -138,8 +143,8 @@
     private async void DijkstraCheapestRoute()
     {
         PathCost = 0;
-        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id??-1;
-        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id??-1;
+        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id ?? -1;
+        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id ?? -1;
         if (startnodeId == -1 || endnodeId == -1)
         {
             toastService.ShowError("Es muss ein Start- und Endknoten per Rechtsklick gewählt werden.");
