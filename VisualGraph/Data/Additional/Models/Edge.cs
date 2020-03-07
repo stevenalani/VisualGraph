@@ -22,16 +22,10 @@ namespace VisualGraph.Data.Additional.Models
         public int Id { get; set; }
         public List<string> Classes { get; set; } = new List<string>();
         public float curveScale = 0.3f;
+        public float curveScaleLowerBound = 0f;
+        public float curveScaleUpperBound = 10f;
         public Vector2 Direction => Vector2.Normalize(EndNode.Pos - StartNode.Pos);
-        public Vector2 CurveAnchorPosition { get;set; }
-        public Vector2 TextAnchorPosition { get; set; }
-        private void calcInitialAnchors()
-        {
-            var halfway = StartNode.Pos + Direction * ((EndNode.Pos - StartNode.Pos).Length() / 2);
-            var rotatedDir = Vector2.Transform(Direction, Matrix3x2.CreateRotation(MathF.PI / 2));
-            var lengthofVector = rotatedDir * (halfway - StartNode.Pos).Length();
-            CurveAnchorPosition = lengthofVector * curveScale + halfway;
-            TextAnchorPosition = lengthofVector * 0.1f + halfway;
-        }
+        public Vector2 Edgemiddle => (StartNode.Pos + Direction * ((EndNode.Pos - StartNode.Pos).Length() / 2));
+
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using VisualGraph.Components;
 using VisualGraph.Data.Additional.EventHandling;
@@ -75,6 +76,39 @@ namespace VisualGraph.Data.Additional.EventHandling
                 node.IsActive = true;
             }
         }
+        public static void ActivateDragEdge(object sender, GraphMouseEventArgs<Edge> args)
+        {
+            activateDragEdge((BasicGraph)sender, args.Target);
+        }
+        public static void ActivateDragEdge(object sender, GraphTouchEventArgs<Edge> args)
+        {
+            activateDragEdge((BasicGraph)sender, args.Target);
+        }
+        private static void activateDragEdge(BasicGraph sender, Edge target)
+        {
+            if (((BasicGraph)sender).graphService.CurrentGraphModel.ActiveEdge != null && target.IsActive)
+            {
+                sender.EdgeDragStarted = true;
+                sender.DisablePan();
+            }
+        }
+        public static void DeactivateDragEdge(object sender, MouseEventArgs args)
+        {
+            deactivateDragEdge((BasicGraph)sender, null);
+        }
+        public static void DeactivateDragEdge(object sender, GraphMouseEventArgs<Edge> args)
+        {
+            deactivateDragEdge((BasicGraph)sender, args.Target);
+        }
+        public static void DeactivateDragEdge(object sender, GraphTouchEventArgs<Edge> args)
+        {
+            deactivateDragEdge((BasicGraph)sender, args.Target);
+        }
+        private static void deactivateDragEdge(BasicGraph sender, Edge target)
+        {
+            sender.EdgeDragStarted = false;
+            sender.EnablePan();
+        }
         public static void ToggleActiveStateEdge(object sender, GraphMouseEventArgs<Edge> args)
         {
             toggleActiveStateEdge((BasicGraph)sender, args.Target);
@@ -108,9 +142,12 @@ namespace VisualGraph.Data.Additional.EventHandling
         public static void MoveNodeOrEdge(object sender, MouseEventArgs args)
         {
             var _sender = (BasicGraph)sender;
-            if (_sender.NodeDragStarted && _sender.graphService.CurrentGraphModel.ActiveNode != null)
+            if (_sender.NodeDragStarted || _sender.EdgeDragStarted)
             {
-                moveNode((BasicGraph)sender, args.ClientX, args.ClientY);
+                if (_sender.graphService.CurrentGraphModel.ActiveNode != null)
+                    moveNode((BasicGraph)sender, args.ClientX, args.ClientY);
+                if (_sender.graphService.CurrentGraphModel.ActiveEdge != null)
+                    moveEdge((BasicGraph)sender, args.ClientX, args.ClientY);
             }
         }
         public static void MoveNodeOrEdge(object sender, TouchEventArgs args)
@@ -130,7 +167,7 @@ namespace VisualGraph.Data.Additional.EventHandling
                 try
                 {
                     Point2 coords = await sender.RequestTransformedEventPosition(x, y);
-                    setNodePosition(((BasicGraph)sender).graphService.CurrentGraphModel.ActiveNode, coords);
+                    setNodePosition(sender.graphService.CurrentGraphModel.ActiveNode, coords);
                 }
                 catch { }
             
@@ -141,7 +178,22 @@ namespace VisualGraph.Data.Additional.EventHandling
             try
             {
                 Point2 coords = await sender.RequestTransformedEventPosition(x, y);
-                
+                Edge edge = sender.graphService.CurrentGraphModel.ActiveEdge;
+                var diff = edge.Edgemiddle - new Vector2((float)coords.X, (float)coords.Y);
+                var dir = Vector2.Normalize(diff);
+                var dirdiff = dir - edge.Direction;
+                var dot = Vector2.Dot(edge.Direction, dir);
+                if (dot > 0)
+                {
+                    if (edge.curveScale < edge.curveScaleUpperBound)
+                    {
+                        edge.curveScale += 0.1f;
+                    }
+                }
+                else if (edge.curveScale > edge.curveScaleLowerBound)
+                {
+                    edge.curveScale -= 0.1f;
+                }
             }
             catch { }
 

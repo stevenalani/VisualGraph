@@ -10,31 +10,33 @@
             font-size:@((graphService.GraphStyleParameters.TextSize / 2).ToString(CultureInfo.InvariantCulture) + "px") ;
 
         }
-        .vssvg circle{
-            fill:@graphService.GraphStyleParameters.NodeFill;
-            stroke:@graphService.GraphStyleParameters.NodeStrokeColor;
-            stroke-width:@graphService.GraphStyleParameters.NodeStrokeWidthText;
+        .vssvg .node {
+            fill: @graphService.GraphStyleParameters.NodeFill;
+            stroke: @graphService.GraphStyleParameters.NodeStrokeColor;
+            stroke-width: @graphService.GraphStyleParameters.NodeStrokeWidthText;
         }
-        .vssvg circle.active {
+        .vssvg .node.active {
             fill: @graphService.GraphStyleParameters.NodeActiveFill;
         }
 
-        .vssvg circle.@AlgorithmPage.EndNodeClass {
+        .vssvg .node.@AlgorithmPage.EndNodeClass {
             fill: @graphService.GraphStyleParameters.NodeEndFill;
         }
 
-        .vssvg circle.@AlgorithmPage.StartNodeClass {
+        .vssvg .node.@AlgorithmPage.StartNodeClass {
             fill: @graphService.GraphStyleParameters.NodeStartFill;
         }
-        .vssvg .edge.active {
-            fill:transparent;
-            stroke:@graphService.GraphStyleParameters.EdgeActiveStrokeColor;
-            stroke-width:@graphService.GraphStyleParameters.EdgeActiveStrokeColor
-        }
+
         .vssvg .edge {
             fill: transparent;
             stroke: @graphService.GraphStyleParameters.EdgeStrokeColor;
             stroke-width: @graphService.GraphStyleParameters.EdgeWidthText
+        }
+        .vssvg .edge.active {
+            z-index:10;
+            fill:transparent;
+            stroke:@graphService.GraphStyleParameters.EdgeActiveStrokeColor;
+            stroke-width:@graphService.GraphStyleParameters.EdgeHighlitingWidthText;
         }
         .vssvg .edge.vgpath {
             stroke:@graphService.GraphStyleParameters.EdgeRouteColor;

@@ -13,9 +13,15 @@
     </div>
     <div class="card-body">
         <EditForm Model="@Edge">
-            <div class="form-group form-inline">    
+            <div class="form-group form-inline">
                 <label for="edgeweigth">Gewicht: </label>
-                <InputNumber class="form-control" @bind-Value="Edge.Weight"></InputNumber>
+                <InputNumber class="form-control" @bind-Value="Edge.Weight" @oninput="@graphService.Rerender"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="curvescale">Kurven Weite: </label>
+                <input type="range" min="@(Edge.curveScaleLowerBound*100)" max="@(Edge.curveScaleUpperBound*100)" class="form-control-range" @bind="@inputval" @oninput="calcDecimalStep" />
+                <span @onchange="graphService.Rerender" class="form-control">@Edge.curveScale</span>
+                <span class="form-control">@inputval</span>
             </div>
             <button type="button" class="btn btn-outline-danger" @onclick="ModalDelete.Show">entfernen</button>
         </EditForm> 
@@ -26,6 +32,21 @@
     [Parameter]
     public Edge Edge { get; set; }
     public Modal ModalDelete;
+    private int inputval;
+
+    protected override void OnParametersSet()
+    {
+        if(Edge != null)
+        inputval = (int)(Edge.curveScale * 100f);
+        Console.WriteLine("params set");
+    }
+
+    private async void calcDecimalStep()
+    {
+        Edge.curveScale = inputval / 100f;
+        await graphService.Rerender();
+    }
+
     private void DeleteEdge()
     {
         Edge.EndNode.Edges.Remove(Edge);
