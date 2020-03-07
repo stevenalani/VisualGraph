@@ -1,27 +1,19 @@
 ﻿@inject IGraphService graphService
-<g>
+<g class="@Edge.Activeclass">
     <path class="@(((ICSSProperties)Edge).ClassesProppertie) edge @Edge.Activeclass"
-            d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
-            marker-end="@(IsDirected?Edge.IsActive?"url(#arrowactive)":"url(#arrow)":"")"
+          d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) 
+          Q @disiredPoint.X.ToString(CultureInfo.InvariantCulture) @disiredPoint.Y.ToString(CultureInfo.InvariantCulture) 
+          , @endPos.X.ToString(CultureInfo.InvariantCulture) @endPos.Y.ToString(CultureInfo.InvariantCulture)"
+            marker-end="@(IsDirected?Edge.IsActive?"url(#arrowactive)":Edge.Classes.Contains(AlgorithmPage.RouteClass)?"url(#arrowroute)":"url(#arrow)":"")"
             @onclick="onclick" @onclick:stopPropagation="true"
             @onmousedown="onmousedown" @onmousedown:stopPropagation="true"
             @onmouseup="onmouseup" @onmouseup:stopPropagation="true"
             @ontouchstart="ontouchstart" @ontouchstart:stopPropagation="true"
             @ontouchenter="ontouchenter" @ontouchenter:stopPropagation="true"
             @ontouchend="ontouchend" @ontouchend:stopPropagation="true" />
-    <text x="@textpos.X.ToString(CultureInfo.InvariantCulture)" y="@textpos.Y.ToString(CultureInfo.InvariantCulture)">
+    <text text-anchor="middle" x="@textpos.X.ToString(CultureInfo.InvariantCulture)" y="@textpos.Y.ToString(CultureInfo.InvariantCulture)">
         @String.Format("{0:0.00}", Edge.Weight)
-        <tspan class="hovertext">Distanz: @String.Format("{0:0.00}", @Edge.AutoWeight)}</tspan>
     </text>
-    @if (Edge.IsActive)
-    {
-        var moverstart = rotatedDirection * 1.1f + textpos;
-        var moverend = -rotatedDirection * 1.1f + textpos;
-        <circle cx="@textpos.X.ToString(CultureInfo.InvariantCulture)" cy="@textpos.Y.ToString(CultureInfo.InvariantCulture)" r="0.5" fill="rgba(0,0,0,0.5)" stroke="none"></circle>
-        <line stroke="rgba(0,0,0,0.5)" stroke-width="0.1" x1="@(moverstart.X.ToString(CultureInfo.InvariantCulture))" y1="@(moverstart.Y.ToString(CultureInfo.InvariantCulture))"
-                x2="@(moverend.X.ToString(CultureInfo.InvariantCulture))" y2="@(moverend.Y.ToString(CultureInfo.InvariantCulture))"
-                marker-start="url(#axisarrow)" marker-end="url(#axisarrow)" />
-    }
 </g>
 
 
@@ -37,8 +29,8 @@
     public bool IsDirected { get; set; } = false;
 
     private Vector2 textpos => rotatedDirection * (0.5f * lengthOfLot) + Edge.Edgemiddle;
-    private Vector2 startPos => Edge.StartNode.Pos + Edge.Direction * ((float)graphService.GraphStyleParameters.NodeRadius);
-    private Vector2 endPos => Edge.EndNode.Pos - Edge.Direction * ((float)graphService.GraphStyleParameters.NodeRadius);
+    private Vector2 startPos => Edge.StartNode.Pos + Edge.Direction * ((float)graphService.GraphStyleParameters.NodeRadius - (float)graphService.GraphStyleParameters.NodeStrokeWidth);
+    private Vector2 endPos => Edge.EndNode.Pos - Edge.Direction * ((float)graphService.GraphStyleParameters.NodeRadius + (float)graphService.GraphStyleParameters.NodeStrokeWidth);
     private Vector2 disiredPoint => rotatedDirection * lengthOfLot + Edge.Edgemiddle;
     private Vector2 rotatedDirection => Vector2.Transform(Edge.Direction, Matrix3x2.CreateRotation(MathF.PI / 2));
     private float lengthOfLot => (Edge.Edgemiddle - startPos).Length() * Edge.curveScale;

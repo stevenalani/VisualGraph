@@ -8,12 +8,11 @@
         <button class="btn btn-success" @onclick="RemoveBidirectional">Umwandeln</button>
     </Modal>
     <Modal @ref="ModalSave" Title="Graph Speichern">
-        <p>Vorsicht, wenn Sie fortfahren wird die Datei "@graphService.CurrentGraphModel.Name" überschrieben</p>
+        <p>Vorsicht, wenn Sie fortfahren wird die Datei "@GraphService.CurrentGraphModel.Name" überschrieben</p>
         <button class="btn btn-success" @onclick="SaveGraph">Speichern</button>
     </Modal>
     <h3><span class="oi oi-graph" aria-hidden="true"></span> Graphdaten bearbeiten</h3>
     <EditForm Model="@GraphService.CurrentGraphModel">
-        <CollapseToggle Classes="ml-4 btn-outline-danger" Target="grapheditform" Title=" " IconClass="oi oi-x" />
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">@GraphService.CurrentGraphModel.Name</h5>
@@ -96,30 +95,30 @@
                             var idstring1 = $"NodeX_{node.Id}";
                             var idstring2 = $"NodeY_{node.Id}";
                             var idstring3 = $"NodeName_{node.Id}";
-                        <tr>
-                            <td><span class="form-control">@node.Id:</span></td>
-                            <td class="col p-0">
-                                <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
-                            </td>
-                            <td>
-                                <input type="number" @bind="@node.Pos.X" maxlength="6" size="6" style="width:6em;" id="@idstring1" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                            </td>
-                            <td>
-                                <input type="number" @bind="@node.Pos.Y" maxlength="6" size="6" style="width:6em;" id="@idstring2" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                            </td>
+                            <tr>
+                                <td><span class="form-control">@node.Id:</span></td>
+                                <td class="col p-0">
+                                    <InputText id="@idstring3" class="form-control" @bind-Value="@node.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
+                                </td>
+                                <td>
+                                    <input type="number" @bind="@node.Pos.X" maxlength="6" size="6" style="width:6em;" id="@idstring1" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
+                                <td>
+                                    <input type="number" @bind="@node.Pos.Y" maxlength="6" size="6" style="width:6em;" id="@idstring2" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
+                                </td>
 
-                            <td>
-                                <button type="button"
-                                        class="form-control oi oi-delete btn btn-outline-danger"
-                                        @onclick="async (args)=>
+                                <td>
+                                    <button type="button"
+                                            class="form-control oi oi-delete btn btn-outline-danger"
+                                            @onclick="async (args)=>
                                     {
                                         GraphService.CurrentGraphModel.Edges.RemoveAll( x=> node.Edges.Contains(x));
                                         GraphService.CurrentGraphModel.Nodes.Remove(node);
                                         await GraphService.Rerender();
                                     }">
-                                </button>
-                            </td>
-                        </tr>
+                                    </button>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
@@ -132,8 +131,8 @@
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th >Start- Knoten</th>
-                                <th >End- Knoten </th>
+                                <th>Start- Knoten</th>
+                                <th>End- Knoten </th>
                                 <th>Gewicht</th>
                                 <th>Distanz</th>
                                 <th>Löschen</th>
@@ -209,9 +208,6 @@
     </EditForm>
 }
 @code {
-    public override IGraphService graphService => GraphService;
-
-
 
     private async void SaveGraph()
     {
@@ -300,7 +296,7 @@
     private Modal ModalSave;
     private async void CheckExistsandOpenSaveGraphModal()
     {
-        if ((await graphService.GetGraphFilenames()).Contains(GraphService.CurrentGraphModel.Name))
+        if ((await GraphService.GetGraphFilenames()).Contains(GraphService.CurrentGraphModel.Name))
         {
             ModalSave.Show();
         }

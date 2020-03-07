@@ -25,7 +25,5 @@ namespace VisualGraph.Components.Additional
             if (firstRender) { isRendered = true; }
             return base.OnAfterRenderAsync(firstRender);
         }
-
-        public abstract IGraphService graphService { get; }
     }
 }

@@ -55,6 +55,7 @@ namespace VisualGraph.Data.Additional.Models
             NodeEndFill = styleParametersPOCO.NodeEndFill;
             NodeActiveFill = styleParametersPOCO.NodeActiveFill;
             NodeStartFill = styleParametersPOCO.NodeStartFill;
+            EdgeActiveStrokeColor = styleParametersPOCO.EdgeActiveStrokeColor;
             EdgeStrokeColor = styleParametersPOCO.EdgeStrokeColor;
             EdgeWidth = styleParametersPOCO.EdgeWidth;
             EdgeRouteColor = styleParametersPOCO.EdgeRouteColor;

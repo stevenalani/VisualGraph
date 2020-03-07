@@ -103,7 +103,6 @@
     DijkstraAlgorithm DijkstraAlgorithmRunner;
     List<Tuple<Node, double>> ShortestRouteToEndnode;
     double PathCost = 0;
-    string vgpathclass = " vgpath";
     private void LayoutGraph()
     {
         ModalLayoutPrarmeters.Show();
@@ -143,8 +142,8 @@
     private async void DijkstraCheapestRoute()
     {
         PathCost = 0;
-        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("startnode"))?.Id ?? -1;
-        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains("endnode"))?.Id ?? -1;
+        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Id ?? -1;
+        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Id ?? -1;
         if (startnodeId == -1 || endnodeId == -1)
         {
             toastService.ShowError("Es muss ein Start- und Endknoten per Rechtsklick gewählt werden.");
@@ -166,19 +165,19 @@
         {
             var node = ShortestRouteToEndnode[nodeindex].Item1;
 
-            if (!node.Classes.Contains(vgpathclass))
-                node.Classes.Add(vgpathclass);
+            if (!node.Classes.Contains(AlgorithmPage.RouteClass))
+                node.Classes.Add(AlgorithmPage.RouteClass);
 
             if (nodeindex < ShortestRouteToEndnode.Count - 1)
             {
                 var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
-                if (!node1.Classes.Contains(vgpathclass))
-                    node1.Classes.Add(vgpathclass);
+                if (!node1.Classes.Contains(AlgorithmPage.RouteClass))
+                    node1.Classes.Add(AlgorithmPage.RouteClass);
                 var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
                 if (edge != null)
                 {
-                    if (!edge.Classes.Contains(vgpathclass))
-                        edge.Classes.Add(vgpathclass);
+                    if (!edge.Classes.Contains(AlgorithmPage.RouteClass))
+                        edge.Classes.Add(AlgorithmPage.RouteClass);
                     PathCost += edge.Weight;
                 }
             }
@@ -193,19 +192,19 @@
             {
                 var node = ShortestRouteToEndnode[nodeindex].Item1;
 
-                if (node.Classes.Contains(vgpathclass))
-                    node.Classes.Remove(vgpathclass);
+                if (node.Classes.Contains(AlgorithmPage.RouteClass))
+                    node.Classes.Remove(AlgorithmPage.RouteClass);
 
                 if (nodeindex < ShortestRouteToEndnode.Count - 1)
                 {
                     var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
-                    if (node1.Classes.Contains(vgpathclass))
-                        node1.Classes.Remove(vgpathclass);
+                    if (node1.Classes.Contains(AlgorithmPage.RouteClass))
+                        node1.Classes.Remove(AlgorithmPage.RouteClass);
                     var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
                     if (edge != null)
                     {
-                        if (edge.Classes.Contains(vgpathclass))
-                            edge.Classes.Remove(vgpathclass);
+                        if (edge.Classes.Contains(AlgorithmPage.RouteClass))
+                            edge.Classes.Remove(AlgorithmPage.RouteClass);
                     }
                 }
             }

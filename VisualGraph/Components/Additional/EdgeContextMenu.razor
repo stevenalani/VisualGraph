@@ -19,7 +19,7 @@
             </div>
             <div class="form-group form-inline">
                 <label for="curvescale">Kurven Weite: </label>
-                <input type="range" min="@(Edge.curveScaleLowerBound*100)" max="@(Edge.curveScaleUpperBound*100)" class="form-control-range" @bind="@inputval" @oninput="calcDecimalStep" />
+                <input type="range" min="@(Edge.curveScaleLowerBound*100)" max="@(Edge.curveScaleUpperBound*100)" class="form-control-range" @onchange="calcDecimalStep" @oninput="calcDecimalStep" />
                 <span @onchange="graphService.Rerender" class="form-control">@Edge.curveScale</span>
                 <span class="form-control">@inputval</span>
             </div>
@@ -38,12 +38,12 @@
     {
         if(Edge != null)
         inputval = (int)(Edge.curveScale * 100f);
-        Console.WriteLine("params set");
     }
 
-    private async void calcDecimalStep()
+    private async void calcDecimalStep(ChangeEventArgs args)
     {
-        Edge.curveScale = inputval / 100f;
+        Edge.curveScale = Convert.ToInt32(args.Value) / 100f;
+        Console.WriteLine(Edge.curveScale);
         await graphService.Rerender();
     }
 

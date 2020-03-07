@@ -14,7 +14,7 @@
          @onkeydown="@OnSvgKeyDown" @onkeydown:stopPropagation="true"
          @ontouchmove="@OnSvgTouchMove" @ontouchmove:stopPropagation="true">
         <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5"
                     markerWidth="6" markerHeight="6"
                     orient="auto-start-reverse">
                 <path d="M 0 0 L 9 5 L 0 10 z"
@@ -22,13 +22,21 @@
                       stroke="@graphService.GraphStyleParameters.EdgeStrokeColor"
                       stroke-width="@graphService.GraphStyleParameters.EdgeWidthText" />
             </marker>
-            <marker id="arrowactive" viewBox="0 0 10 10" refX="5" refY="5"
+            <marker id="arrowactive" viewBox="0 0 10 10" refX="8" refY="5"
                     markerWidth="6" markerHeight="6"
                     orient="auto-start-reverse">
                 <path d="M 0 0 L 9 5 L 0 10 z"
                       fill="@graphService.GraphStyleParameters.EdgeActiveStrokeColor"
                       stroke="@graphService.GraphStyleParameters.EdgeActiveStrokeColor"
                       stroke-width="@graphService.GraphStyleParameters.EdgeWidthText" />
+            </marker>
+            <marker id="arrowroute" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+                <path d="M 0 0 L 9 5 L 0 10 z"
+                      fill="@graphService.GraphStyleParameters.EdgeRouteColor"
+                      stroke="@graphService.GraphStyleParameters.EdgeRouteColor"
+                      stroke-width="@graphService.GraphStyleParameters.EdgeRouteWidthText" />
             </marker>
             <marker id="axisarrow" viewBox="0 0 10 10" refX="5" refY="5"
                     markerWidth="10" markerHeight="10"
@@ -97,30 +105,21 @@
         }
         @foreach (var node in graphService.CurrentGraphModel.Nodes)
         {
-            var name = node.Name;
-            @((MarkupString)$"<text class=\"nodeText\" text-anchor=\"middle\" x=\"{ @node.PosXText }\" y=\"{ (@node.Pos.Y + 2 *graphService.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\">{@node.Name}</text>");
-            if (node.IsActive)
-                @((MarkupString)$"<text class=\"nodeText\" text-anchor=\"middle\" x=\"{ (@node.Pos.X).ToString(CultureInfo.InvariantCulture)}\" y=\"{(@node.Pos.Y + 2 *graphService.GraphStyleParameters.NodeRadius +graphService.GraphStyleParameters.TextSize * 0.9).ToString(CultureInfo.InvariantCulture)}\"> { String.Format("P( {0,0:0.00} ; {1,0:0.00} )", @node.Pos.X, @node.Pos.Y)}</text>")
-                <circle id="@($"node-{ node.Id}")"
-                        class="node @node.Activeclass @(((ICSSProperties)node).ClassesProppertie)"
-                        cx="@node.PosXText"
-                        cy="@(node.PosYText)"
-                        r="@graphService.GraphStyleParameters.NodeRadiusText"
-                        @onclick="(args) => { OnNodeClick(args, node); }" @onclick:stopPropagation="true"
-                        @onmousedown="(args) => { OnNodeMouseDown(args, node); }" @onmousedown:stopPropagation="true"
-                        @onmouseup="(args) => { OnNodeMouseUp(args, node); }" @onmouseup:stopPropagation="true"
-                        @ontouchstart="(args) => { OnNodeTouchStart(args, node); }" @ontouchstart:stopPropagation="true"
-                        @ontouchenter="(args) => { OnNodeTouchEnter(args, node); }" @ontouchenter:stopPropagation="true"
-                        @ontouchend="(args) => { OnNodeTouchEnd(args, node); }" @ontouchend:stopPropagation="true">
-                </circle>
-            }
+            <NodeComponent Node="node" 
+                            @onclick="(args) => { OnNodeClick(args, node); }"
+                            @onmousedown="(args) => { OnNodeMouseDown(args, node); }"
+                            @onmouseup="(args) => { OnNodeMouseUp(args, node); }"
+                            @ontouchstart="(args) => { OnNodeTouchStart(args, node); }"
+                            @ontouchenter="(args) => { OnNodeTouchEnter(args, node); }"
+                            @ontouchend="(args) => { OnNodeTouchEnd(args, node); }" />
+        }
     </svg>
     <div id="legend">
         <span class="legend-row"><a class="startnode legend-node"></a> Startknoten</span><br />
         <span class="legend-row"><a class="endnode legend-node"></a> Endknoten</span><br />
         <span class="legend-row"><a class="active legend-node"></a> Aktiver Knoten</span><br />
         <span class="legend-row"><a class="legend-edge"></a> Kante</span><br />
-        <span class="legend-row"><a class="acvive legend-edge"></a> aktive Kante</span><br />
+        <span class="legend-row"><a class="active legend-edge"></a> aktive Kante</span><br />
         <span class="legend-row"><a class="pathedge legend-edge"></a> Kante auf Route</span>
     </div>
     <EdgeContextMenu @ref="edgeContextMenu" />
@@ -135,6 +134,7 @@ else
 
 
 @code {
+    public IGraphService graphService => GraphService;
     GraphContextMenu graphContextMenu;
     EdgeContextMenu edgeContextMenu;
     NodeContextMenu nodeContextMenu;
@@ -142,7 +142,6 @@ else
 
     private DotNetObjectReference<BasicGraph> dotnetreference;
 
-    public override IGraphService graphService => GraphService;
 
     [JSInvokable("UpdateDisplay")]
     public Task<bool> UpdateDisplay(SvgPanZoomInformation svgInformation)
@@ -439,18 +438,16 @@ else
         this.NodeMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeTouchEnd += DefaultCallbacks.DeactivateDragNode;
         this.SvgMouseMove += DefaultCallbacks.MoveNodeOrEdge;
-        //this.SvgTouchMove += DefaultCallbacks.MoveNodeOrEdge;
         this.SvgMouseUp += DefaultCallbacks.DeactivateDragNode;
-        //this.SvgMouseUp += DefaultCallbacks.DeactivateDragEdge;
         this.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
-        //this.EdgeClick += DefaultCallbacks.ToggleActiveStateEdge;
-        //this.EdgeMouseDown += DefaultCallbacks.ActivateDragEdge;
-        //this.EdgeMouseUp += DefaultCallbacks.DeactivateDragEdge;
+        this.EdgeClick += DefaultCallbacks.ToggleActiveStateEdge;
+
         this.EdgeMouseDown += async (sender, args) =>
         {
 
             if (args.MouseEventArgs.Button == 2)
             {
+                await hideOtherContextMenus(edgeContextMenu);
                 await edgeContextMenu.SetParametersAsync(ParameterView.FromDictionary(
                   new Dictionary<string, object>()
                     {
@@ -466,6 +463,7 @@ else
         {
             if (args.MouseEventArgs.Button == 2)
             {
+                await hideOtherContextMenus(nodeContextMenu);
                 await nodeContextMenu.SetParametersAsync(ParameterView.FromDictionary(
                   new Dictionary<string, object>()
                     {
@@ -481,6 +479,7 @@ else
         {
             if (args.Button == 2)
             {
+                await hideOtherContextMenus(graphContextMenu);
                 await graphContextMenu.SetParametersAsync(ParameterView.FromDictionary(
                     new Dictionary<string, object>()
                     {
@@ -492,15 +491,40 @@ else
         };
         this.SvgClick += async (sender, args) =>
         {
+            await hideOtherContextMenus();
+        };
+    }
+    #endregion
+    private async Task hideOtherContextMenus(ContextMenu activatedMenu = null)
+    {
+        if (activatedMenu == null) {
             if (edgeContextMenu.IsVisible)
                 edgeContextMenu.Show();
             if (nodeContextMenu.IsVisible)
                 nodeContextMenu.Show();
             if (graphContextMenu.IsVisible)
                 graphContextMenu.Show();
-            await graphService.Rerender();
-        };
+        }
+        else if(activatedMenu is GraphContextMenu)
+        {
+            if (edgeContextMenu.IsVisible)
+                edgeContextMenu.Show();
+            if (nodeContextMenu.IsVisible)
+                nodeContextMenu.Show();
+        }
+        else if (activatedMenu is NodeContextMenu) {
+            if (edgeContextMenu.IsVisible)
+                edgeContextMenu.Show();
+            if (graphContextMenu.IsVisible)
+                graphContextMenu.Show();
+        }
+        else if (activatedMenu is EdgeContextMenu) {
+            if (nodeContextMenu.IsVisible)
+                nodeContextMenu.Show();
+            if (graphContextMenu.IsVisible)
+                graphContextMenu.Show();
+        }
+        await graphService.Rerender();
     }
-    #endregion
 }
 

@@ -1,9 +1,10 @@
-﻿@inject IGraphService GraphService 
+﻿@inject IGraphService graphService 
 @inject IToastService toastService
 @inject NavigationManager navigationManager
 @inherits GraphInternalUI
-<EditForm Model="@graphService.GraphStyleParameters" OnValidSubmit="SaveSettings" 
-          @oninput="@(async ()=>{ await graphService.Rerender(); })">
+
+<EditForm class="pb-4" Model="@graphService.GraphStyleParameters" OnValidSubmit="SaveSettings"
+            @oninput="@(async ()=>{ await graphService.Rerender(); })">
 
     <h3>Einstellungen</h3>
 
@@ -99,20 +100,19 @@
     </div>
     <button class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
 </EditForm>
+
 @code {
-    public override IGraphService graphService => GraphService;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
     }
-
+    
     private void SaveSettings()
     {
 
         graphService.SaveGraphStyleParameters();
         graphService.LoadGraphStyleParameters();
         graphService.Rerender();
-        //navigationManager.NavigateTo(navigationManager.Uri, true);
     }
 }

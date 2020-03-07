@@ -11,12 +11,13 @@
 <div class="sidebar">
     <NavMenu />
 </div>
+
 <div id="settings" class="navmenu-collapse collapse vh-100 mh-100">
     <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
         @graphService.GetSettingsRenderFragment().Result
     </div>
-</div>
-@if (navigationManager.Uri.Contains("creategraph"))
+</div>  
+@if (navigationManager.Uri.Contains("create"))
 {
     <div id="grapheditform" class="navmenu-collapse collapse show vh-100 mh-100">
         <div class="col-sm-12" style="overflow:hidden auto; max-height:100%;">
@@ -31,21 +32,20 @@
         {
             <LoadGraph></LoadGraph>
         }
-        @if (navigationManager.Uri.Contains("creategraph"))
+        @if (navigationManager.Uri.Contains("create"))
         {
             <div class="form-group">
-                <CollapseToggle 
-                    Classes="btn-outline-primary ml-4" 
-                    Target="grapheditform" 
-                    Title="Editor Formular"
-                    IconClass="oi oi-spreadsheet"
-                    IsToggled="true"
-                    OpenText="öffnen"
-                    CloseText="schließen"            />
+                <CollapseToggle Classes="btn-outline-primary ml-4"
+                                Target="grapheditform"
+                                Title="Editor Formular"
+                                IconClass="oi oi-spreadsheet"
+                                IsToggled="true"
+                                OpenText="öffnen"
+                                CloseText="schließen" />
 
             </div>
-    }
-</div>
+        }
+    </div>
     <div class="content vh-100">
         @Body
     </div>
