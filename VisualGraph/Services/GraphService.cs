@@ -67,12 +67,12 @@ namespace VisualGraph.Services
         {
             var nodes = new System.Collections.Generic.List<Data.Additional.Models.Node>{
                 new Data.Additional.Models.Node() {
-                    Id = 0,
+                    Id = "0",
                     Pos = new System.Numerics.Vector2(-10,10),
                     Name = "Knoten A"
                 },
                 new Data.Additional.Models.Node() {
-                    Id = 1,
+                    Id = "1",
                     Pos = new System.Numerics.Vector2(10,-10),
                     Name = "Knoten B"
 
@@ -82,7 +82,7 @@ namespace VisualGraph.Services
             var graphmodel = new BasicGraphModel()
             {
                 Nodes = nodes,
-                Path = "Unbenannter-Graph"
+                Name = "Unbenannter-Graph"
             };
             return graphmodel;
         }
@@ -100,8 +100,8 @@ namespace VisualGraph.Services
             }
             try
             {
-                var wrongEdges = CurrentGraphModel.Edges.Where(x => x.StartNode.Id == -1 || x.EndNode.Id == -1).ToList();
-                var wrongNodes = CurrentGraphModel.Nodes.Where(x => x.Id == -1).ToList();
+                var wrongEdges = CurrentGraphModel.Edges.Where(x => x.StartNode.Id == "-1" || x.EndNode.Id == "-1").ToList();
+                var wrongNodes = CurrentGraphModel.Nodes.Where(x => x.Id == "-1").ToList();
                 foreach (var node in wrongNodes)
                 {
                     CurrentGraphModel.Nodes.Remove(node);
@@ -140,8 +140,8 @@ namespace VisualGraph.Services
                 nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(new Ellipse(1, 1, new Point()), x.Id)));
                 CurrentGraphModel.Edges.ForEach(x =>
                 {
-                    var node1 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.StartNode.Id);
-                    var node2 = geometryGraph.Nodes.FirstOrDefault(n => (int)n.UserData == x.EndNode.Id);
+                    var node1 = geometryGraph.Nodes.FirstOrDefault(n => n.UserData.ToString() == x.StartNode.Id);
+                    var node2 = geometryGraph.Nodes.FirstOrDefault(n => n.UserData.ToString() == x.EndNode.Id);
                     geometryGraph.Edges.Add(new Microsoft.Msagl.Core.Layout.Edge(node1, node2));
                 });
 

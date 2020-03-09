@@ -117,8 +117,8 @@
     {
         if (this.DijkstraAlgorithmRunner == null)
         {
-            var startNodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(StartNodeClass))?.Id ?? -1;
-            if (startNodeId != -1)
+            var startNodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(StartNodeClass))?.Id ?? "-1";
+            if (startNodeId != "-1")
             {
 
                 DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startNodeId);
@@ -142,9 +142,9 @@
     private async void DijkstraCheapestRoute()
     {
         PathCost = 0;
-        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Id ?? -1;
-        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Id ?? -1;
-        if (startnodeId == -1 || endnodeId == -1)
+        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Id ?? "-1";
+        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Id ?? "-1";
+        if (startnodeId == "-1" || endnodeId == "-1")
         {
             toastService.ShowError("Es muss ein Start- und Endknoten per Rechtsklick gewählt werden.");
             return;

@@ -27,12 +27,12 @@
                 {
                     if (line.Contains("name:"))
                     {
-                        graphService.CurrentGraphModel.Path = line.Split(':')[1].Trim().Replace(" ", "_");
+                        graphService.CurrentGraphModel.Name = line.Split(':')[1].Trim().Replace(" ", "_");
                         continue;
                     }
                     else
                     {
-                        graphService.CurrentGraphModel.Path = file.Name;
+                        graphService.CurrentGraphModel.Name = file.Name;
                     }
                 }
                 graphCP.Process(line);

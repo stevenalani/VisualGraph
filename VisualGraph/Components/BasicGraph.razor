@@ -58,9 +58,9 @@
             if (edge.StartNode != null && edge.EndNode != null)
             {
 
-             
+
                 var reverseEdge = graphService.CurrentGraphModel.Edges.FirstOrDefault(x => x.StartNode == edge.EndNode && x.EndNode == edge.StartNode);
-                if (graphService.CurrentGraphModel.IsDirectional)
+                if (graphService.CurrentGraphModel.IsDirected)
                 {
 
                     if (reverseEdge == null)

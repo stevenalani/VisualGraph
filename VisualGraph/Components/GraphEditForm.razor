@@ -20,7 +20,7 @@
                 <div class="form-group form-inline">
                     <div class="col">
                         <p>
-                            Ist <b>@(GraphService.CurrentGraphModel.IsDirectional?"ein":"kein") gerichteter Graph</b><br />
+                            Ist <b>@(GraphService.CurrentGraphModel.IsDirected?"ein":"kein") gerichteter Graph</b><br />
                             @if (GraphService.CurrentGraphModel.IsMultigraph)
                             {
                                 <b>besitzt Mehrfachkanten</b><br />
@@ -35,8 +35,8 @@
 
                 </div>
                 <div class="form-group form-inline">
-                    <label for="GraphName" class="col-form-label text-right mr-4">Dateipfad:</label>
-                    <InputText id="GraphName" class="form-control col" @bind-Value="@GraphService.CurrentGraphModel.Path"></InputText>
+                    <label for="GraphName" class="col-form-label text-right mr-4">Graph- Name:</label>
+                    <InputText id="GraphName" class="form-control col" @bind-Value="@GraphService.CurrentGraphModel.Name"></InputText>
                 </div>
 
             </div>
@@ -122,7 +122,7 @@
                         }
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-outline-success" @onclick="@AddNode">Knoten Hinzufügen</button>
+                <button type="button" class="btn btn-outline-success mt-4" @onclick="@AddNode">Knoten Hinzufügen</button>
                 <hr />
                 <h5 class="card-title"><span class="legend-edge" aria-hidden="true"></span> Kanten bearbeiten</h5>
                 @if (GraphService.CurrentGraphModel.Edges.Count > 0)
@@ -134,7 +134,6 @@
                                 <th>Start- Knoten</th>
                                 <th>End- Knoten </th>
                                 <th>Gewicht</th>
-                                <th>Distanz</th>
                                 <th>Löschen</th>
                             </tr>
                         </thead>
@@ -192,7 +191,6 @@
                                     <td>
                                         <InputNumber class="form-control" @bind-Value="@edge.Weight" maxlength="6" size="6" style="width:6em;"></InputNumber>
                                     </td>
-                                    <td><input readonly="readonly" class="form-control" value="@edge.AutoWeight" maxlength="6" size="6" style="width:6em;" /></td>
                                     <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphService.CurrentGraphModel.Edges.Remove(edge); }"></button></td>
 
                                 </tr>
@@ -200,7 +198,7 @@
                         </tbody>
                     </table>
                 }
-                <button type="button" class="btn btn-outline-success" @onclick="@AddEdge">Kante hinzufügen</button>
+                <button type="button" class="btn btn-outline-success mt-4" @onclick="@AddEdge">Kante hinzufügen</button>
                 <hr />
                 <button type="button" class="btn btn-outline-info" @onclick="@CheckExistsandOpenSaveGraphModal"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
             </div>
@@ -245,7 +243,7 @@
     {
         Edge newEdge = new Edge
         {
-            Id = GraphService.CurrentGraphModel.Edges.Count > 0 ? GraphService.CurrentGraphModel.Edges.Max(x => x.Id) + 1 : 0,
+            Id = GraphService.CurrentGraphModel.Edges.Count.ToString(),
             StartNode = null,
             EndNode = null,
             Weight = 0,
@@ -258,7 +256,7 @@
     {
         try
         {
-            edge.EndNode = GraphService.CurrentGraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+            edge.EndNode = GraphService.CurrentGraphModel.Nodes.First(x => x.Id == args.Value.ToString());
         }
         catch
         {
@@ -271,7 +269,7 @@
     {
         try
         {
-            edge.StartNode = GraphService.CurrentGraphModel.Nodes.First(x => x.Id == Convert.ToInt32(args.Value));
+            edge.StartNode = GraphService.CurrentGraphModel.Nodes.First(x => x.Id == args.Value.ToString());
         }
         catch
         {
@@ -291,7 +289,7 @@
             edge.EndNode.Edges.Remove(edge);
             GraphService.CurrentGraphModel.Edges.Remove(edge);
         }
-        GraphService.CurrentGraphModel.IsDirectional = !GraphService.CurrentGraphModel.IsDirectional;
+        GraphService.CurrentGraphModel.IsDirected = !GraphService.CurrentGraphModel.IsDirected;
     }
     private Modal ModalSave;
     private async void CheckExistsandOpenSaveGraphModal()

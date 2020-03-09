@@ -15,16 +15,13 @@ using System.Numerics;
 
 namespace VisualGraph.Data.Additional.Models
 {
-    public class BasicGraphModel : IGraphFile
+    public class BasicGraphModel
     {
-        public bool IsAxisShown { get; set; } = true;
-
         public static int sequence = 0;
 
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string Name { get; set; }
         public List<Node> Nodes { get; set; } = new List<Node>();
         public List<Edge> Edges { get; set; } = new List<Edge>();
-        public string Path { get; set; }
         public Node ActiveNode => Nodes.FirstOrDefault(x => x.IsActive);
         public Edge ActiveEdge => Edges.FirstOrDefault(x => x.IsActive);
         float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X));
@@ -33,8 +30,8 @@ namespace VisualGraph.Data.Additional.Models
         float minY => Nodes.Min(x => (int)Math.Ceiling(x.Pos.Y));
         public Vector2[] ConvexHull => new[] { new Vector2(minX, minY), new Vector2(maxX, maxY) };
 
-        public bool IsDirectional { get; set; } = true;
-        public bool IsMultigraph => IsDirectional && Edges.Where( x=> x.StartNode != null && x.EndNode != null).Count(x => Edges.FirstOrDefault(y => y.EndNode == x.StartNode)?.StartNode == x.EndNode ) > 0;
+        public bool IsDirected { get; set; } = true;
+        public bool IsMultigraph => IsDirected && Edges.Where( x=> x.StartNode != null && x.EndNode != null).Count(x => Edges.FirstOrDefault(y => y.EndNode == x.StartNode)?.StartNode == x.EndNode ) > 0;
 
         public BasicGraphModel Clone()
         {

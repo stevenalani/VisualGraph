@@ -16,7 +16,7 @@
         <p>Sie sind dabei diesen Knoten als Ende für die zu ermittelnde Route festzulegen.</p>
         <button class="btn btn-success" @onclick="SetEndNode">festlegen</button>
     </Modal>
-    <div class="card" style="position:absolute; left:@(PosX-5)px; top:@(PosY-5)px" onmouseover="window.reposctxmenu(this)">
+    <div class="card contextMenu" style="position:absolute; left:@(PosX-5)px; top:@(PosY-5)px" onmouseover="window.reposctxmenu(this)">
         <div class="card-header">
             <h6>Knoten mit ID: @Node.Id<button type="button" @onclick="()=> { visible = false; }" class="close">x</button></h6>
         </div>
@@ -26,11 +26,30 @@
                     <label for="nodename">Name:</label>
                     <InputText class="form-control" id="nodename" @bind-Value="Node.Name" @oninput="@(async (args)=> { await graphService.Rerender();})"></InputText>
                 </div>
-                <div class="form-group form-inline">
-                    <label for="nodeposx">X: </label>
-                    <input type="number" maxlength="5" id="nodeposx" class="form-control" style="width:6em" @bind="Node.Pos.X" @oninput="@(async (args)=> { await graphService.Rerender();})" />
-                    <label for="nodeposy"> Y: </label>
-                    <input type="number" maxlength="5" id="nodeposy" class="form-control" style="width:6em" @bind="Node.Pos.Y" @oninput="@(async (args)=> { await graphService.Rerender();})" />
+                <div class="form-group">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="4">Position</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><label for="nodeposx">X: </label></td>
+                                <td>
+                                    <input type="number" maxlength="5" id="nodeposx" class="form-control" style="width:6em" @bind="Node.Pos.X" @oninput="@(async (args)=> { await graphService.Rerender();})" />
+                                </td>
+                                <td><label for="nodeposy"> Y: </label></td>
+                                <td>
+                                    <input type="number" maxlength="5" id="nodeposy" class="form-control" style="width:6em" @bind="Node.Pos.Y" @oninput="@(async (args)=> { await graphService.Rerender();})" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    
+                    
+                    
                 </div>
                 @if (navigationManager.Uri.Contains("/algorithm/"))
                 {

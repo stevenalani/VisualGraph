@@ -19,7 +19,7 @@ namespace VisualGraph.Data.Additional.Models
         public Node EndNode { get; set; }
         public double Weight { get; set; }
         public double AutoWeight => (EndNode - StartNode).Distance;
-        public int Id { get; set; }
+        public string Id { get; set; }
         public List<string> Classes { get; set; } = new List<string>();
         public float curveScale = 0.3f;
         public float curveScaleLowerBound = 0f;

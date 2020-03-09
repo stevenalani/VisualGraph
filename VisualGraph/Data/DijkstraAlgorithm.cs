@@ -22,12 +22,12 @@ namespace VisualGraph.Data
 
         public string Name => "Dijkstra Algorithm";
 
-        public DijkstraAlgorithm( BasicGraphModel model,int startNodeId = -1)
+        public DijkstraAlgorithm( BasicGraphModel model,string startNodeId = "-1")
         {
             this.Model = model;
             Init(startNodeId);
         }
-        private void Init(int startNodeId = -1)
+        private void Init(string startNodeId = "-1")
         {
             Results = new List<DijkstraResultTuple>();
             distances = new Dictionary<Node, double>();
@@ -35,7 +35,7 @@ namespace VisualGraph.Data
             Results = new List<DijkstraResultTuple>();
             StepCount = 0;
             Q = Model.Nodes.OrderBy(x => x.Id).ToList();
-            StartNode = currentNode = (startNodeId != -1) ? Q.First(x => x.Id == startNodeId) : Q[0];
+            StartNode = currentNode = (startNodeId != "-1") ? Q.First(x => x.Id == startNodeId) : Q[0];
             foreach (var node in Q)
             {
                 if (node != currentNode)
@@ -49,7 +49,7 @@ namespace VisualGraph.Data
         private void Update(Node neighbour)
         {
             var distanceCurrent = distances[currentNode];
-            var edgeWeight = Model.IsDirectional? neighbour.Edges.First(x => x.StartNode == currentNode).Weight : neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
+            var edgeWeight = Model.IsDirected? neighbour.Edges.First(x => x.StartNode == currentNode).Weight : neighbour.Edges.First(x => x.StartNode == currentNode || x.EndNode == currentNode).Weight;
             var alt = distanceCurrent + edgeWeight;
             
             if(alt < distances[neighbour])
@@ -66,7 +66,7 @@ namespace VisualGraph.Data
                 var minval = distances.Where( d=> Q.Contains(d.Key)).Min(d => d.Value);
                 currentNode = Q.First(x => x == distances.FirstOrDefault(d => d.Value == minval && d.Key == x).Key);
                 Q.Remove(currentNode);
-                var neighbours = currentNode.Neighbours(Model.IsDirectional);
+                var neighbours = currentNode.Neighbours(Model.IsDirected);
                 foreach (var neighbour in neighbours)
                 {
                     if (Q.Contains(neighbour))
@@ -80,9 +80,9 @@ namespace VisualGraph.Data
             }
             return Q.Count;
         }
-        public List<Tuple<Node, double>> GetShortestRoute(int startId = -1, int endId = -1)
+        public List<Tuple<Node, double>> GetShortestRoute(string startId = "-1", string endId = "-1")
         {
-            if (startId == -1 || endId == -1) return null;
+            if (startId == "-1" || endId == "-1") return null;
                 StartNode = Model.Nodes.FirstOrDefault(x => x.Id == startId);
                 Init(StartNode.Id);
                 Iterate(true);

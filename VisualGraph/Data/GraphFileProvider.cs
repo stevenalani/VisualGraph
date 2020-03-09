@@ -3,7 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.WebSockets;
 using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Frontenac.Blueprints;
@@ -11,6 +15,7 @@ using Frontenac.Blueprints.Impls.TG;
 using Frontenac.Blueprints.Util.IO.GraphML;
 using Frontenac.Gremlinq;
 using Microsoft.AspNetCore.Mvc;
+using VisualGraph.Components;
 using VisualGraph.Data.Additional.Models;
 
 namespace VisualGraph.Data
@@ -18,7 +23,8 @@ namespace VisualGraph.Data
 
     internal static class GraphFileProvider
     {
-
+        private static string _graphMlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+        private static string _graphMlClosingTag = "</graphml>";
         private static string _graphdir = Path.GetFullPath("./Graphs");
         private static GraphFactory _graphFactory = new GraphFactory();
 
@@ -63,7 +69,7 @@ namespace VisualGraph.Data
                 filepath += ".xml";
             var tinkergraph = await ReadGraphMl(filepath);
             var graph = _graphFactory.ConvertToBasicGraph(tinkergraph);
-            graph.Path = filepath;
+            graph.Name = Path.GetFileNameWithoutExtension(filepath);
             return graph;   
         }
         internal static async Task<TinkerGrapĥ> ReadGraphMl(string filepath)
@@ -74,7 +80,7 @@ namespace VisualGraph.Data
             using (StreamReader streamReader = new StreamReader(filepath))
             {
                 TinkerGrapĥ g = new TinkerGrapĥ();
-                GraphMlReader.InputGraph(g, streamReader.BaseStream);
+                GraphMlReader.InputGraph(g,streamReader.BaseStream);
                 return g;
             }
             
@@ -89,7 +95,7 @@ namespace VisualGraph.Data
             
             foreach(var node in graph.Nodes)
             {
-                var vertex = tinkerGraph.AddVertex((int)node.Id);
+                var vertex = tinkerGraph.AddVertex(node.Id);
                 vertex.SetProperty("posx", node.Pos.X);
                 vertex.SetProperty("posy", node.Pos.Y);
                 vertex.SetProperty("name", node.Name!=null?node.Name:" ");
@@ -97,12 +103,12 @@ namespace VisualGraph.Data
             }
             foreach (var edge in graph.Edges)
             {
-                IVertex start = tinkerGraph.GetVertex((int)edge.StartNode.Id);
-                IVertex end = tinkerGraph.GetVertex((int)edge.EndNode.Id);
-                var edge_ = tinkerGraph.AddEdge((int)edge.Id, start, end , $"{edge.Weight}");
+                IVertex start = tinkerGraph.GetVertex(edge.StartNode.Id);
+                IVertex end = tinkerGraph.GetVertex(edge.EndNode.Id);
+                var edge_ = tinkerGraph.AddEdge(edge.Id, start, end , $"{edge.Weight}");
                 edge_.SetProperty("weight", edge.Weight);
                 edge_.SetProperty("vgid", edge.Id);
-                edge_.SetProperty("isdirected", graph.IsDirectional);
+                edge_.SetProperty("isdirected", graph.IsDirected);
             }
             GraphMlWriter writer = new GraphMlWriter(tinkerGraph);
             using (var fos = File.Open(filename, FileMode.Create))
@@ -110,6 +116,79 @@ namespace VisualGraph.Data
                 writer.OutputGraph(fos);
             }
             return Task.FromResult(true);
+        }
+        internal static async Task<BasicGraphToGraphMlMapping> LoadBasicGraphFromUrl(string url,string graphname)
+        {
+            if (!graphname.Contains(".xml"))
+                graphname += ".xml";
+            var tmpgraphpath = Path.Combine(_graphdir, "tmp_" + graphname);
+            var graphpath = Path.Combine(_graphdir, graphname);
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(url,tmpgraphpath);
+            }
+            await IsolateGraphInFile(tmpgraphpath,graphpath);
+            var tinkerGraph = await ReadGraphMl(graphpath);
+            BasicGraphModel graph = new BasicGraphModel();
+            graph.Name = graphname;
+            BasicGraphToGraphMlMapping graphToGraphMlMapping = new BasicGraphToGraphMlMapping(tinkerGraph,graph);
+            File.Delete(tmpgraphpath);
+            return graphToGraphMlMapping;
+        }
+        private static async Task IsolateGraphInFile(string tmpfilepath, string filepath)
+        {
+           
+            var fileContent = File.ReadAllText(tmpfilepath);
+
+            fileContent = fileContent.Replace("&lt;", "<").Replace("&gt;",">");
+            var graphbeginning = fileContent.IndexOf(_graphMlHeader);
+            fileContent = fileContent.Remove(0, graphbeginning);
+            var graphend = fileContent.IndexOf(_graphMlClosingTag);
+            fileContent = fileContent.Remove(graphend + _graphMlClosingTag.Length);
+            fileContent = await ensureEdgeIdsAreSet(fileContent);
+            fileContent = await ensureEdgeLabelsAreSet(fileContent);
+            fileContent = await ensureEdgedefaultIsDirected(fileContent);
+            fileContent = await ensureEndtagsAreSet(fileContent,"edge");
+            
+            File.WriteAllText(filepath, fileContent);
+        }
+        private static Task<string> ensureEdgeIdsAreSet(string fileContent) 
+        {
+            string regex = "<edge .*id=\".*/>";
+            if(!Regex.IsMatch(fileContent, regex))
+            {
+                int id = 0;
+                var result = Regex.Replace(fileContent, "edge ", m => string.Format("{0}id=\"{1}\" ", m.Value, id++), RegexOptions.IgnoreCase);
+                return Task.FromResult(result);
+            }
+            return Task.FromResult(fileContent);
+        }
+        private static Task<string> ensureEdgeLabelsAreSet(string fileContent)
+        {
+            string regex = "<edge .*label=\".*/>";
+            if (!Regex.IsMatch(fileContent, regex))
+            {
+                int labelno = 0;
+                var result = Regex.Replace(fileContent, "target=\".+\"", m => string.Format("{0} label=\"{1}\"", m.Value, labelno++), RegexOptions.IgnoreCase);
+                return Task.FromResult(result);
+            }
+            return Task.FromResult(fileContent);
+        }
+        private static Task<string> ensureEdgedefaultIsDirected(string fileContent)
+        {
+            string regex = "edgedefault=\"undirected\"";
+            if (Regex.IsMatch(fileContent, regex))
+            {
+                var result = fileContent.Replace(regex, regex.Replace("undirected", "directed"));
+                return Task.FromResult(result);
+            }
+            return Task.FromResult(fileContent);
+        }
+        private static Task<string> ensureEndtagsAreSet(string fileContent,string elementName)
+        {
+
+                var result = Regex.Replace(fileContent, $"(?<=<{elementName}.*)/>", m => string.Format("{1}", m.Value, $"></{elementName }>"), RegexOptions.IgnoreCase);
+                return Task.FromResult(result);
         }
     }
 }

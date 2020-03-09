@@ -7,7 +7,7 @@
     <p>Sie sind dabei eine Kante zu entfernen.</p>
     <button class="btn btn-success" @onclick="DeleteEdge">entfernen</button>
 </Modal>
-<div class="card" style="position:absolute; left:@(PosX-5)px; top:@(PosY-5)px" onmouseover="window.reposctxmenu(this)">
+<div class="card contextMenu" style="position:absolute; left:@(PosX-5)px; top:@(PosY-5)px" onmouseover="window.reposctxmenu(this)">
     <div class="card-header">
         <h6>Kante mit ID: @Edge.Id<button type="button" @onclick="()=> { visible = false; }" class="close">x</button></h6>
     </div>

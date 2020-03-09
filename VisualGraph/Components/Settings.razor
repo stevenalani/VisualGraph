@@ -2,112 +2,118 @@
 @inject IToastService toastService
 @inject NavigationManager navigationManager
 @inherits GraphInternalUI
+<Modal @ref="ReloadModal" >
+    <p>Die Änderungen werden gespeichert aber damit diese angezeigt werden, muss die Seite neu geladen werden</p>
+    <p class="text-danger">Stellen Sie sicher, dass der Graph gespeichert wurde, bevor Sie die Seite neu laden!</p>    
+</Modal>
+    <EditForm class="pb-4" Model="@graphService.GraphStyleParameters" OnValidSubmit="SaveSettings"
+              @oninput="@(async ()=>{ await graphService.Rerender(); })">
 
-<EditForm class="pb-4" Model="@graphService.GraphStyleParameters" OnValidSubmit="SaveSettings"
-            @oninput="@(async ()=>{ await graphService.Rerender(); })">
+        <h3>Einstellungen</h3>
 
-    <h3>Einstellungen</h3>
-
-    <div class="card">
-        <h4>SVG Container</h4>
-        <div class="form-group form-inline">
-            <label for="padding" class="col-sm-3 col-form-label text-right">Padding</label>
-            <InputNumber class="form-control input-sm col" id="padding" @bind-Value="@graphService.GraphStyleParameters.Padding"></InputNumber>
+        <div class="card">
+            <h4>SVG Container</h4>
+            <div class="form-group form-inline">
+                <label for="padding" class="col-sm-3 col-form-label text-right">Padding</label>
+                <InputNumber class="form-control input-sm col" id="padding" @bind-Value="@graphService.GraphStyleParameters.Padding"></InputNumber>
+            </div>
         </div>
-    </div>
-    <div class="card">
-        <h4>Text</h4>
-        <div class="form-group form-inline">
-            <label for="textsize" class="col-sm-12 col-md-3 col-form-label text-right">Größe</label>
-            <InputNumber class="form-control input-sm col-sm-12 col-md-9" id="textsize" @bind-Value="@graphService.GraphStyleParameters.TextSize"></InputNumber>
+        <div class="card">
+            <h4>Text</h4>
+            <div class="form-group form-inline">
+                <label for="textsize" class="col-sm-12 col-md-3 col-form-label text-right">Größe</label>
+                <InputNumber class="form-control input-sm col-sm-12 col-md-9" id="textsize" @bind-Value="@graphService.GraphStyleParameters.TextSize"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="textcolor" class="input-sm col-sm-12 col-md-3">Farbe</label>
+                <InputText class="form-control input-sm col" id="textcolor" @bind-Value="@graphService.GraphStyleParameters.TextColor"></InputText>
+                <div class="colorpreview " style="background-color:@graphService.GraphStyleParameters.TextColor"></div>
+            </div>
         </div>
-        <div class="form-group form-inline">
-            <label for="textcolor" class="input-sm col-sm-12 col-md-3">Farbe</label>
-            <InputText class="form-control input-sm col" id="textcolor" @bind-Value="@graphService.GraphStyleParameters.TextColor"></InputText>
-            <div class="colorpreview " style="background-color:@graphService.GraphStyleParameters.TextColor"></div>
+        <div class="card">
+            <h4>Knoten</h4>
+            <div class="form-group form-inline">
+                <label for="noderadius" class="col-sm-3 col-form-label text-right">Radius</label>
+                <InputNumber class="form-control input-sm col" id="noderadius" @bind-Value="@graphService.GraphStyleParameters.NodeRadius"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeFill" class="col-sm-3 col-form-label text-right">Farbe</label>
+                <InputText class="form-control input-sm col" id="nodeFill" @bind-Value="@graphService.GraphStyleParameters.NodeFill"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeStartFill" class="col-sm-3 col-form-label text-right">Farbe Startknoten</label>
+                <InputText class="form-control input-sm col" id="nodeStartFill" @bind-Value="@graphService.GraphStyleParameters.NodeStartFill"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeStartFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeEndFill" class="col-sm-3 col-form-label text-right">Farbe Endknoten</label>
+                <InputText class="form-control input-sm col" id="nodeEndFill" @bind-Value="@graphService.GraphStyleParameters.NodeEndFill"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeEndFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeActiveFill" class="col-sm-3 col-form-label text-right">Farbe aktiver Knoten</label>
+                <InputText class="form-control input-sm col" id="nodeActiveFill" @bind-Value="@graphService.GraphStyleParameters.NodeActiveFill"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeActiveFill"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeStrokeColor" class="col-sm-3 col-form-label text-right">Outline Farbe</label>
+                <InputText class="form-control input-sm col" id="nodeStrokeColor" @bind-Value="@graphService.GraphStyleParameters.NodeStrokeColor"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeStrokeColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="nodeStrokeWidth" class="col-sm-3 col-form-label text-right">Outline Stärke</label>
+                <InputNumber class="form-control input-sm col" id="nodeStrokeWidth" @bind-Value="@graphService.GraphStyleParameters.NodeStrokeWidth"></InputNumber>
+            </div>
         </div>
-    </div>
-    <div class="card">
-        <h4>Knoten</h4>
-        <div class="form-group form-inline">
-            <label for="noderadius" class="col-sm-3 col-form-label text-right">Radius</label>
-            <InputNumber class="form-control input-sm col" id="noderadius" @bind-Value="@graphService.GraphStyleParameters.NodeRadius"></InputNumber>
+        <div class="card">
+            <h4>Kanten</h4>
+            <div class="form-group form-inline">
+                <label for="edgeWidth" class="col-sm-3 col-form-label text-right">Stärke</label>
+                <InputNumber class="form-control input-sm col" id="edgeWidth" @bind-Value="@graphService.GraphStyleParameters.EdgeWidth"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeStrokeColor" class="col-sm-3 col-form-label text-right">Farbe</label>
+                <InputText class="form-control input-sm col" id="edgeStrokeColor" @bind-Value="@graphService.GraphStyleParameters.EdgeStrokeColor"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeStrokeColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="EdgeActiveStrokeColor" class="col-sm-3 col-form-label text-right">Farbe aktive Kante</label>
+                <InputText class="form-control input-sm col" id="EdgeActiveStrokeColor" @bind-Value="@graphService.GraphStyleParameters.EdgeActiveStrokeColor"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeActiveStrokeColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="EdgeRouteColor" class="col-sm-3 col-form-label text-right">Pfad Farbe</label>
+                <InputText class="form-control input-sm col" id="edgeRouteColor" @bind-Value="@graphService.GraphStyleParameters.EdgeRouteColor"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeRouteColor"></div>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeRouteWidth" class="col-sm-3 col-form-label text-right">Pfad Stärke</label>
+                <InputNumber class="form-control input-sm col" id="edgeRouteWidth" @bind-Value="@graphService.GraphStyleParameters.EdgeRouteWidth"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeHighlitingWidth" class="col-sm-3 col-form-label text-right">Highlight Stärke</label>
+                <InputNumber class="form-control input-sm col" id="edgeHighlitingWidth" @bind-Value="@graphService.GraphStyleParameters.EdgeHighlitingWidth"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="edgeHighlitingColor" class="col-sm-3 col-form-label text-right">Highlight Farbe</label>
+                <InputText class="form-control input-sm col" id="edgeHighlitingColor" @bind-Value="@graphService.GraphStyleParameters.EdgeHighlitingColor"></InputText>
+                <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeHighlitingColor"></div>
+            </div>
         </div>
-        <div class="form-group form-inline">
-            <label for="nodeFill" class="col-sm-3 col-form-label text-right">Farbe</label>
-            <InputText class="form-control input-sm col" id="nodeFill" @bind-Value="@graphService.GraphStyleParameters.NodeFill"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeFill"></div>
+        <div class="card">
+            <button class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
         </div>
-        <div class="form-group form-inline">
-            <label for="nodeStartFill" class="col-sm-3 col-form-label text-right">Farbe Startknoten</label>
-            <InputText class="form-control input-sm col" id="nodeStartFill" @bind-Value="@graphService.GraphStyleParameters.NodeStartFill"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeStartFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeEndFill" class="col-sm-3 col-form-label text-right">Farbe Endknoten</label>
-            <InputText class="form-control input-sm col" id="nodeEndFill" @bind-Value="@graphService.GraphStyleParameters.NodeEndFill"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeEndFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeActiveFill" class="col-sm-3 col-form-label text-right">Farbe aktiver Knoten</label>
-            <InputText class="form-control input-sm col" id="nodeActiveFill" @bind-Value="@graphService.GraphStyleParameters.NodeActiveFill"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeActiveFill"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeStrokeColor" class="col-sm-3 col-form-label text-right">Outline Farbe</label>
-            <InputText class="form-control input-sm col" id="nodeStrokeColor" @bind-Value="@graphService.GraphStyleParameters.NodeStrokeColor"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.NodeStrokeColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="nodeStrokeWidth" class="col-sm-3 col-form-label text-right">Outline Stärke</label>
-            <InputNumber class="form-control input-sm col" id="nodeStrokeWidth" @bind-Value="@graphService.GraphStyleParameters.NodeStrokeWidth"></InputNumber>
-        </div>
-    </div>
-    <div class="card">
-        <h4>Kanten</h4>
-        <div class="form-group form-inline">
-            <label for="edgeWidth" class="col-sm-3 col-form-label text-right">Stärke</label>
-            <InputNumber class="form-control input-sm col" id="edgeWidth" @bind-Value="@graphService.GraphStyleParameters.EdgeWidth"></InputNumber>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeStrokeColor" class="col-sm-3 col-form-label text-right">Farbe</label>
-            <InputText class="form-control input-sm col" id="edgeStrokeColor" @bind-Value="@graphService.GraphStyleParameters.EdgeStrokeColor"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeStrokeColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="EdgeActiveStrokeColor" class="col-sm-3 col-form-label text-right">Farbe aktive Kante</label>
-            <InputText class="form-control input-sm col" id="EdgeActiveStrokeColor" @bind-Value="@graphService.GraphStyleParameters.EdgeActiveStrokeColor"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeActiveStrokeColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="EdgeRouteColor" class="col-sm-3 col-form-label text-right">Pfad Farbe</label>
-            <InputText class="form-control input-sm col" id="edgeRouteColor" @bind-Value="@graphService.GraphStyleParameters.EdgeRouteColor"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeRouteColor"></div>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeRouteWidth" class="col-sm-3 col-form-label text-right">Pfad Stärke</label>
-            <InputNumber class="form-control input-sm col" id="edgeRouteWidth" @bind-Value="@graphService.GraphStyleParameters.EdgeRouteWidth"></InputNumber>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeHighlitingWidth" class="col-sm-3 col-form-label text-right">Highlight Stärke</label>
-            <InputNumber class="form-control input-sm col" id="edgeHighlitingWidth" @bind-Value="@graphService.GraphStyleParameters.EdgeHighlitingWidth"></InputNumber>
-        </div>
-        <div class="form-group form-inline">
-            <label for="edgeHighlitingColor" class="col-sm-3 col-form-label text-right">Highlight Farbe</label>
-            <InputText class="form-control input-sm col" id="edgeHighlitingColor" @bind-Value="@graphService.GraphStyleParameters.EdgeHighlitingColor"></InputText>
-            <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeHighlitingColor"></div>
-        </div>
-    </div>
-    <button class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
-</EditForm>
+    </EditForm>
 
 @code {
+    Modal ReloadModal;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
     }
-    
+
     private void SaveSettings()
     {
 

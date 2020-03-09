@@ -1,27 +1,36 @@
 ﻿@inject IGraphService GraphService
-    <Modal @ref="loadGraphModal" Title="Graph von Skript laden">
-        <Skriptloader />
-    </Modal>
-    <div class="form-group form-inline">
-        <select class="form-control col mr-4" @bind="@FileToRead">
-            <option value="" default>Neuer Graph</option>
-            <option value="">Graph von Skript laden</option>
-            @foreach (var file in GraphService.GetGraphFilenames().Result)
-            {
-                <option value="@file">@file</option>
-                
-            }
-        </select>
-        <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
-    </div>
+<Modal @ref="loadGraphModal" Title="Graph von Skript laden">
+    <Skriptloader />
+</Modal>
+<Modal @ref="loadGraphWebModal" Title="Graph aus Web laden">
+    <GraphMlWebLoader />
+</Modal>
+<div class="form-group form-inline">
+    <select class="form-control col mr-4" @bind="@FileToRead">
+        <option style="background-color:lightgreen" value="" default>Neuer Graph</option>
+        <option style="background-color:lightseagreen" value="">Graph von Skript laden</option>
+        <option style="background-color:lightskyblue" value="">Graph aus Web laden</option>
+        @foreach (var file in GraphService.GetGraphFilenames().Result)
+        {
+            <option value="@file">@file</option>
+
+        }
+    </select>
+    <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
+</div>
 @code {
     private string FileToRead { get; set; }
     private Modal loadGraphModal;
+    private Modal loadGraphWebModal;
     private async void OpenFile()
     {
-        if(FileToRead == "Graph von Skript laden")
+        if (FileToRead == "Graph von Skript laden")
         {
             loadGraphModal.Show();
+        }
+        else if (FileToRead == "Graph aus Web laden")
+        {
+            loadGraphWebModal.Show();
         }
         else
         {

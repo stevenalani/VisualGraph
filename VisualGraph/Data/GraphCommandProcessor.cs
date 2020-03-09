@@ -98,7 +98,7 @@ namespace VisualGraph.Data
 
     internal class AddEdgeCommand : GraphCommand
     {
-        public Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1, w, g) =>
+        public Action<string, string, double, BasicGraphModel> Action = new Action<string, string, double, BasicGraphModel>((n0, n1, w, g) =>
         {
             Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
             Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
@@ -106,7 +106,7 @@ namespace VisualGraph.Data
             {
                 StartNode = node,
                 EndNode = node1,
-                Id = g.Edges.Count > 0 ? g.Edges.Max(e => e.Id) + 1 : 1,
+                Id = g.Edges.Count.ToString(),
                 Weight = w,
             };
             node.Edges.Add(edge);
@@ -124,15 +124,15 @@ namespace VisualGraph.Data
 
         public override void Invoke(BasicGraphModel g)
         {
-            int n0id = (int)Parameters[typeof(int)][0];
-            int n1id = (int)Parameters[typeof(int)][1];
+            string n0id = (string)Parameters[typeof(string)][0];
+            string n1id = (string)Parameters[typeof(string)][1];
             double weight = (double)Parameters[typeof(double)][0];
             Action.Invoke(n0id, n1id, weight, g);
         }
     }
     internal class AddEdgeByNamesCommand : AddEdgeCommand
     {
-        public new Action<int, int, double, BasicGraphModel> Action = new Action<int, int, double, BasicGraphModel>((n0, n1, w, g) =>
+        public new Action<string, string, double, BasicGraphModel> Action = new Action<string, string, double, BasicGraphModel>((n0, n1, w, g) =>
         {
             Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
             Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
@@ -140,7 +140,7 @@ namespace VisualGraph.Data
             {
                 StartNode = node,
                 EndNode = node1,
-                Id = g.Edges.Count > 0 ? g.Edges.Max(e => e.Id) + 1 : 1,
+                Id = g.Edges.Count.ToString(),
                 Weight = w,
             };
             node.Edges.Add(edge);
@@ -161,8 +161,8 @@ namespace VisualGraph.Data
             string n0name = Parameters[typeof(string)][0].ToString().Trim();
             string n1name = Parameters[typeof(string)][1].ToString().Trim();
 
-            int n0id = g.Nodes.First(x => x.Name == n0name).Id;
-            int n1id = g.Nodes.First(x => x.Name == n1name).Id;
+            string n0id = g.Nodes.First(x => x.Name == n0name).Id;
+            string n1id = g.Nodes.First(x => x.Name == n1name).Id;
             double weight = (double)Parameters[typeof(double)][0];
             Action.Invoke(n0id, n1id, weight, g);
         }
@@ -175,7 +175,7 @@ namespace VisualGraph.Data
             {
                 Name = n,
                 Pos = new Vector2((float)x, (float)y),
-                Id = g.Nodes.Count > 0 ? g.Nodes.Max(nn => nn.Id) + 1 : 0,
+                Id = g.Nodes.Count.ToString(),
             };
             g.Nodes.Add(newnode);
         });
@@ -212,8 +212,8 @@ namespace VisualGraph.Data
         }
         public override void Invoke(BasicGraphModel g)
         {
-            Node node0 = g.Nodes.First(n => n.Id == (int)Parameters[typeof(int)][0]);
-            Node node1 = g.Nodes.First(n => n.Id == (int)Parameters[typeof(int)][1]);
+            Node node0 = g.Nodes.First(n => n.Id == (string)Parameters[typeof(string)][0]);
+            Node node1 = g.Nodes.First(n => n.Id == (string)Parameters[typeof(string)][1]);
             Action.Invoke(node0, node1, g);
         }
     }

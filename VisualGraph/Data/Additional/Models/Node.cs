@@ -23,12 +23,12 @@ namespace VisualGraph.Data.Additional.Models
         public string PosYText => Pos.Y.ToString(CultureInfo.InvariantCulture);
 
         public string Name { get; internal set; }
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         public List<string> Classes { get; set; }
         public string Activeclass => IsActive? "active":"";
         public static Node operator +(Node a,Node b) => new Node { 
-            Id = -1,
+            Id = "-1",
             Name = "valueonly",
             Pos = a.Pos + b.Pos,
         };
@@ -42,7 +42,7 @@ namespace VisualGraph.Data.Additional.Models
             }
             return new Node
             {
-                Id = -1,
+                Id = "-1",
                 Name = "valueonly",
                 Pos = a.Pos - b.Pos,
             };

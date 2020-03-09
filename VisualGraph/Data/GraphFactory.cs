@@ -26,7 +26,7 @@ namespace VisualGraph.Data
 
                 return new Node
                 {
-                    Id = Convert.ToInt32(v.Id),
+                    Id = v.Id.ToString(),
                     Name = nameProp.ToString(),
                     Pos = new Vector2(Convert.ToSingle(posxProp.ToString()), Convert.ToSingle(posyProp.ToString()))
                 };
@@ -34,12 +34,12 @@ namespace VisualGraph.Data
             }).ToList();
             bool directedGraph = true;
             var edges = iGraph.GetEdges().Select(e => {
-                var startnode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.Out).Id) == n.Id);
-                var endnode = nodes.FirstOrDefault(n => Convert.ToInt32(e.GetVertex(Direction.In).Id) == n.Id);
+                var startnode = nodes.FirstOrDefault(n => e.GetVertex(Direction.Out).Id.ToString() == n.Id);
+                var endnode = nodes.FirstOrDefault(n => e.GetVertex(Direction.In).Id.ToString() == n.Id);
                 try { directedGraph = Convert.ToBoolean(e.GetProperty("isdirected")); } catch { }
                 var edge = new Edge
                 {
-                    Id = Convert.ToInt32(e.GetProperty("vgid")),
+                    Id = e.GetProperty("vgid").ToString(),
                     StartNode = startnode,
                     EndNode = endnode,
                     Weight = Convert.ToDouble(e.GetProperty("weight"))
@@ -53,7 +53,7 @@ namespace VisualGraph.Data
             {
                 Nodes = nodes,
                 Edges = edges,
-                IsDirectional = directedGraph,
+                IsDirected = directedGraph,
             };
 
             return graph;

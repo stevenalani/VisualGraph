@@ -7,6 +7,6 @@ namespace VisualGraph.Data.Additional.Models
     {
         public string ClassesProppertie => String.Join(' ', Classes );
         public List<string> Classes { get; set; }
-        public int Id { get; set; }
+        public string Id { get; set; }
     }
 }
