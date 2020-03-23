@@ -8,10 +8,20 @@
 @inject IJSRuntime JsRuntime
 @inject IToastService toastService
 
-    <Modal @ref="ModalLayoutPrarmeters">
-        <AutoLayoutForm OnSubmit="async () => { ModalLayoutPrarmeters.Show();await GraphService.Rerender(); }" />
-    </Modal>
-
+<Modal @ref="ModalLayoutPrarmeters">
+    <AutoLayoutForm OnSubmit="async () => { ModalLayoutPrarmeters.Show();await GraphService.Rerender(); }" />
+</Modal>
+<Modal @ref="ModalNegativeEdgeWeigths">
+    <div class="card">
+        <div class="card-header">
+            <p class="card-title">Negative Kanten gefunden</p>
+        </div>
+        <div class="card-body">
+            <p class="card-text">Es wurden negative Kanten im Graph gefunden. Der Dijkstra - Algorithmus kann nicht mit negativen Kanten umgehen. Sollen diese Kanten korrigiert werden? Dadurch wird |@lowestvalue| auf alle Kanten- Gewichte addiert!</p>
+            <button class="btn btn-outline-success" @onclick="CorrectEdgeWeights">Kanten korrigieren</button>
+        </div>
+    </div>
+</Modal>
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
         <h3>Dijkstra Algorithmus</h3>
@@ -100,8 +110,10 @@
 </div>
 @code {
     Modal ModalLayoutPrarmeters { get; set; }
+    Modal ModalNegativeEdgeWeigths { get; set; }
     DijkstraAlgorithm DijkstraAlgorithmRunner;
     List<Tuple<Node, double>> ShortestRouteToEndnode;
+    double lowestvalue => GraphService.CurrentGraphModel.Edges.Min(x => x.Weight);
     double PathCost = 0;
     private void LayoutGraph()
     {
@@ -115,6 +127,10 @@
 
     private void RunDikstra(bool autostep = false)
     {
+        if(lowestvalue < 0) {
+            ModalNegativeEdgeWeigths.Show();
+            return;
+        }
         if (this.DijkstraAlgorithmRunner == null)
         {
             var startNodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(StartNodeClass))?.Id ?? "-1";
@@ -141,6 +157,11 @@
 
     private async void DijkstraCheapestRoute()
     {
+        if (lowestvalue < 0)
+        {
+            ModalNegativeEdgeWeigths.Show();
+            return;
+        }
         PathCost = 0;
         var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Id ?? "-1";
         var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Id ?? "-1";
@@ -214,6 +235,15 @@
     {
         DijkstraAlgorithmRunner = null;
         ShortestRouteToEndnode = null;
+    }
+    private async void CorrectEdgeWeights()
+    {
+        var absVal = Math.Abs(lowestvalue);
+        foreach(var edge in GraphService.CurrentGraphModel.Edges)
+        {
+            edge.Weight += absVal;
+        }
+        await GraphService.Rerender();
     }
 
 }

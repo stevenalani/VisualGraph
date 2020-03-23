@@ -160,6 +160,9 @@ window.GetTranslatedMousePos = function (args) {
         Y: svgDropPoint.y,
     };
 }
+window.SetCookie = function (cookie) {
+    document.cookie = cookie[0];
+}
 $(document).ready(() => {
     $(document).on("contextmenu", (e) => { if ($(e.target).prop("tagName") !== "INPUT") { e.preventDefault(); return false; } });
 });

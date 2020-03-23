@@ -11,8 +11,13 @@
             @ontouchstart="ontouchstart" @ontouchstart:stopPropagation="true"
             @ontouchenter="ontouchenter" @ontouchenter:stopPropagation="true"
             @ontouchend="ontouchend" @ontouchend:stopPropagation="true" />
-    <text text-anchor="middle" x="@textpos.X.ToString(CultureInfo.InvariantCulture)" y="@textpos.Y.ToString(CultureInfo.InvariantCulture)">
-        @String.Format("{0:0.00}", Edge.Weight)
+    <text @onclick="onclick" @onclick:stopPropagation="true"
+          @onmousedown="onmousedown" @onmousedown:stopPropagation="true"
+          @onmouseup="onmouseup" @onmouseup:stopPropagation="true"
+          @ontouchstart="ontouchstart" @ontouchstart:stopPropagation="true"
+          @ontouchenter="ontouchenter" @ontouchenter:stopPropagation="true"
+          @ontouchend="ontouchend" @ontouchend:stopPropagation="true" text-anchor="middle" x="@textpos.X.ToString(CultureInfo.InvariantCulture)" y="@textpos.Y.ToString(CultureInfo.InvariantCulture)">
+          @String.Format("{0:0.00}", Edge.Weight)
     </text>
 </g>
 
@@ -51,18 +56,12 @@
 
     protected override void OnInitialized()
     {
-        if (!HasReversedEdge)
+        if (HasReversedEdge)
         {
-            Edge.curveScale = 0f;
-            Edge.curveScaleLowerBound = -10f;
+            Edge.curveScale = 0.3f;
+            Edge.curveScaleLowerBound = 0f;
             Edge.curveScaleUpperBound = 10f;
         }
 
     }
-
-    private void MoveCurvePoint(DragEventArgs args)
-    {
-        Console.WriteLine(args.ClientX);
-    }
-
 }

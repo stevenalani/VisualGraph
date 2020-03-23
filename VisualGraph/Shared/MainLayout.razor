@@ -1,6 +1,7 @@
 ﻿@using Blazored.Toast.Configuration
+@using VisualGraph.Services
 @inherits LayoutComponentBase
-@inject VisualGraph.Services.Interfaces.IGraphService graphService
+@inject IGraphService graphService
 @inject NavigationManager navigationManager
 
 <BlazoredToasts Position="ToastPosition.TopLeft"
@@ -32,6 +33,7 @@
         {
             <LoadGraph></LoadGraph>
         }
+        <AccountMenuComponent/>
         @if (navigationManager.Uri.Contains("create"))
         {
             <div class="form-group">

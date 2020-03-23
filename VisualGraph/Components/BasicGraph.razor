@@ -441,7 +441,11 @@ else
         this.SvgMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
         this.EdgeClick += DefaultCallbacks.ToggleActiveStateEdge;
+        RegisterContextMenus();
 
+    }
+    public void RegisterContextMenus()
+    {
         this.EdgeMouseDown += async (sender, args) =>
         {
 

@@ -3,7 +3,7 @@
     <Skriptloader />
 </Modal>
 <Modal @ref="loadGraphWebModal" Title="Graph aus Web laden">
-    <GraphMlWebLoader />
+    <GraphMlWebLoader OnDone="(args)=> { loadGraphWebModal.Show(); }"/>
 </Modal>
 <div class="form-group form-inline">
     <select class="form-control col mr-4" @bind="@FileToRead">

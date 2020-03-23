@@ -12,7 +12,7 @@
                 <input type="text" @bind-value="graphName" />
             </div>
             <div class="form-group form-inline">
-                <label for="graphName">Graphname: </label>
+                <label for="graphName">Graph- URL: </label>
                 <input type="url" @bind-value="graphUrl" />
 
             </div>
@@ -67,6 +67,8 @@
     private string graphUrl { get; set; }
     private string graphName { get; set; }
     BasicGraphToGraphMlMapping graphToGraphMlMapping { get; set; }
+    [Parameter]
+    public EventCallback OnDone { get; set; }
     private async void LoadGraph()
     {
         graphToGraphMlMapping = await GraphFileProvider.LoadBasicGraphFromUrl(graphUrl, graphName);
@@ -75,7 +77,9 @@
     {
         graphToGraphMlMapping.ExecuteMappingOfValues();
         graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraph;
-        var issaved = await graphService.SaveGraph(graphService.CurrentGraphModel, graphService.CurrentGraphModel.Name);
+        await graphService.LayoutGraph();
+        await OnDone.InvokeAsync(null);
+        await graphService.SaveGraph();
         await graphService.Rerender();
     }
 }

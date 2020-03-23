@@ -159,6 +159,9 @@ html, body {
         flex:1;
         z-index:initial !important;
     }
+    #grapheditform .card-title span {
+        vertical-align:middle;
+    }
     #legend {
         position: fixed;
         margin-left:20px;

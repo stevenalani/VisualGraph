@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using System;
-using System.Threading.Tasks;
 using VisualGraph.Components;
 using VisualGraph.Data.Additional.Models;
 
-namespace VisualGraph.Services.Interfaces
+namespace VisualGraph.Services
 {
     public interface IGraphService
     {
@@ -23,7 +22,7 @@ namespace VisualGraph.Services.Interfaces
         public Task<BasicGraphModel> GetGraph(string filename);
 
         public Task<string[]> GetGraphFilenames();
-        public Task<bool> SaveGraph(BasicGraphModel graph, string filename = null);
+        public Task<bool> SaveGraph(string filename = null);
         public Task InitZoomPan(DotNetObjectReference<BasicGraph> reference);
         public Task DestroyZoomPan();
         public Task DisablePan();
@@ -38,7 +37,6 @@ namespace VisualGraph.Services.Interfaces
         public Task<SvgContainerInformation> GetSvgContainerInformation();
         public Task<Point2> GetTranslatedMousePos(double x, double y);
         public Task LayoutGraph(double scalex = 2.2, double scaley = 2.2);
-
         public Task<BrowserSizes> GetBrowserSizes();
 
         public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true);

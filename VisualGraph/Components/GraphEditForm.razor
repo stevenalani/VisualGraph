@@ -209,7 +209,7 @@
 
     private async void SaveGraph()
     {
-        var issaved = await GraphService.SaveGraph(GraphService.CurrentGraphModel, GraphService.CurrentGraphModel.Name);
+        var issaved = await GraphService.SaveGraph(GraphService.CurrentGraphModel.Name);
         if (issaved)
         {
             toastService.ShowSuccess("Der Graph wurde erfolgreich gespeichert!");
@@ -230,7 +230,7 @@
         }
         Node activenode = new Node
         {
-            Id = GraphService.CurrentGraphModel.Nodes.Max(x => x.Id) + 1,
+            Id = GraphService.CurrentGraphModel.Nodes.Count.ToString(),
             Pos = new Vector2(),
             IsActive = true,
         };

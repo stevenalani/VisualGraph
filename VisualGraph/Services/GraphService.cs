@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using VisualGraph.Components;
-using VisualGraph.Services.Interfaces;
 using VisualGraph.Data.Additional.Models;
 using VisualGraph.Data;
 using Microsoft.Msagl.Core.Geometry;
@@ -51,7 +50,7 @@ namespace VisualGraph.Services
         public async Task LoadGraph(string filename)
         {
             BasicGraphModel graph;
-            if (filename == "Neuer Graph")
+            if (filename == null || filename == "Neuer Graph")
             {
                 graph = CreateNewGraphModel();
             }
@@ -90,11 +89,11 @@ namespace VisualGraph.Services
         {
             return await GraphFileProvider.GetGraphFileNames();
         }
-        public async Task<bool> SaveGraph(BasicGraphModel graph, string filename = "")
+        public async Task<bool> SaveGraph(string filename = "")
         {
-            if (filename == "")
+            if (filename == "" || filename == null)
             {
-                filename = graph.Name;
+                filename = CurrentGraphModel.Name;
                 if (filename.Trim() == "")
                     filename = "untitledgraph" + DateTime.Now.Millisecond;
             }
@@ -110,7 +109,7 @@ namespace VisualGraph.Services
                 {
                     CurrentGraphModel.Edges.Remove(edge);
                 }
-                return await WriteGraph(graph, filename);
+                return await WriteGraph(CurrentGraphModel, filename);
 
             }
             catch (Exception e)
@@ -160,7 +159,6 @@ namespace VisualGraph.Services
                 });
             }
             catch { }
-            Console.WriteLine("Layouting done");
             return Task.CompletedTask;
         }
         public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference)

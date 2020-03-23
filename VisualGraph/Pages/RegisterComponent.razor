@@ -1,0 +1,47 @@
+﻿@page "/Account/Register/"
+@using System.Text.Json
+@using System.Text
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IHttpClientFactory HttpClientFactory;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<div class="card">
+    <div class="card-header">
+        <p class="card-title">Benutzer Registrieren</p>
+    </div>
+    <div class="card-body">
+        <EditForm Model="userModel" OnValidSubmit="Register">
+            <div class="form-group form-inline">
+                <label class="col-form-label">Vorname:</label><InputText class="form-control" type="text" @bind-Value="userModel.Firstname" />
+            </div>
+            <div class="form-group form-inline">
+                <label class="col-form-label">Nachname:</label><InputText class="form-control" type="text" @bind-Value="userModel.Name" />
+            </div>
+            <div class="form-group form-inline">
+                <label class="col-form-label">Benutzername:</label><InputText class="form-control" type="text" @bind-Value="userModel.Username" />
+            </div>
+            <div class="form-group form-inline">
+                <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="userModel.Password" />
+                <label class="col-form-label">Passwort Wiederholung:</label><input class="form-control" type="password" @bind="passwd" />
+            </div>
+            <button class="btn btn-success" type="submit">Register</button>
+        </EditForm>
+    </div>
+</div>
+@code {
+    private string passwd = "";
+    UserModel userModel = new UserModel();
+    private async Task Register()
+    {
+        if (passwd != userModel.Password)
+        {
+            return;
+        }
+        var client = HttpClientFactory.CreateClient("api");
+        var data = System.Text.Json.JsonSerializer.Serialize(userModel);
+        var content = new StringContent(data, Encoding.UTF8, "application/json");
+        var result = await client.PostAsync("api/account/register", content);
+        var rescntnt = await result.Content.ReadAsStringAsync();
+        var decryptJson = JsonConvert.DeserializeObject<UserModel>(rescntnt);
+    }
+
+}

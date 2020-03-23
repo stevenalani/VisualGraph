@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace VisualGraph.Data.Additional.Models
+namespace VisualGraph.Data.Additional.Interfaces
 {
     public interface ICSSProperties
     {

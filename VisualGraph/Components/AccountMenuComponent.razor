@@ -1,0 +1,39 @@
+﻿@using Newtonsoft.Json
+@inject IHttpClientFactory Http
+@if (!UserModel.IsAuth)
+{
+    <div class="dropdown">
+        <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="oi oi-person"></span> @(UserModel.Username != ""?UserModel.Username:"Gast")
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="/account/login"><span class="oi oi-account-login"></span>Login</a>
+        </div>
+    </div>
+    
+}
+else
+{
+    <div class="dropdown">
+        <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="oi oi-person"></span> @(UserModel.Username ?? "Gast")
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="/account/manage">Verwalten</a>
+            <a class="dropdown-item" href="/account/logout"><span class="oi oi-account-logout"></span> Abmelden</a>
+        </div>
+    </div>
+}
+@code {
+    UserModel UserModel = new UserModel();
+    override protected async Task OnInitializedAsync()
+    {
+        var HttpClient = Http.CreateClient("api");
+        var response = await HttpClient.GetAsync("api/account");
+        var responseData = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            UserModel = JsonConvert.DeserializeObject<UserModel>(responseData);
+        }
+    }
+}

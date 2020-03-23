@@ -1,17 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Blazored.Toast;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Security.Claims;
 using VisualGraph.Services;
-using VisualGraph.Services.Interfaces;
 
 namespace VisualGraph
 {
@@ -28,10 +28,34 @@ namespace VisualGraph
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBlazoredToast();
+            services.AddAuthentication( o => {
+                o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,configureOptions => {
+                configureOptions.Cookie.Name = "VisualGraphCookie";
+                configureOptions.Cookie.Path = "/";
+                configureOptions.Cookie.HttpOnly = false;
+            });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsVisualGraphMember", policyBuilder =>
+                {
+                    policyBuilder
+                        .RequireAuthenticatedUser()
+                        .RequireClaim(ClaimTypes.Name)
+                        .RequireClaim(ClaimTypes.GivenName)
+                        .RequireClaim(ClaimTypes.NameIdentifier)
+                        .Build();
+                });
+            });
+            services.AddControllers();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddScoped<IGraphService,GraphService>();
+            services.AddScoped<IGraphService, GraphService>();
+            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            services.AddBlazoredToast();
+            services.AddHttpClient("api",options => options.BaseAddress = new Uri("https://localhost:44362/"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,9 +76,12 @@ namespace VisualGraph
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseCookiePolicy();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

@@ -130,7 +130,7 @@ namespace VisualGraph.Data
             await IsolateGraphInFile(tmpgraphpath,graphpath);
             var tinkerGraph = await ReadGraphMl(graphpath);
             BasicGraphModel graph = new BasicGraphModel();
-            graph.Name = graphname;
+            graph.Name = Path.GetFileNameWithoutExtension(graphpath);
             BasicGraphToGraphMlMapping graphToGraphMlMapping = new BasicGraphToGraphMlMapping(tinkerGraph,graph);
             File.Delete(tmpgraphpath);
             return graphToGraphMlMapping;
