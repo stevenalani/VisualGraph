@@ -19,7 +19,14 @@ namespace VisualGraph.Data.Additional.Models
         [JsonIgnore]
         public bool HasError => ErrorMessage != string.Empty;
         public List<string> Roles { get; set; } = new List<string>();
+        [JsonIgnore]
         public bool IsAuth { get; set; } = false;
 
+
+    }
+    public class UserUpdateModel : UserModel
+    {
+        public string NewPassword { get; set; } = "";
+        public string RetypedPassword { get; set; } = "";
     }
 }

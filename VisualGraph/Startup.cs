@@ -36,6 +36,9 @@ namespace VisualGraph
                 configureOptions.Cookie.Name = "VisualGraphCookie";
                 configureOptions.Cookie.Path = "/";
                 configureOptions.Cookie.HttpOnly = false;
+                configureOptions.Cookie.SameSite = SameSiteMode.None;
+                configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                //configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(30);
             });
             services.AddAuthorization(options =>
             {
@@ -55,7 +58,7 @@ namespace VisualGraph
             services.AddScoped<IGraphService, GraphService>();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddBlazoredToast();
-            services.AddHttpClient("api",options => options.BaseAddress = new Uri("https://localhost:44362/"));
+            services.AddHttpClient("api",options => options.BaseAddress = new Uri("https://localhost:44362"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

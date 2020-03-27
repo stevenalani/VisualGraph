@@ -14,7 +14,9 @@ namespace VisualGraph.Components.Additional
         private bool isRendered;
         public Task ChangedState()
         {
-            StateHasChanged();
+            InvokeAsync(() => {
+                StateHasChanged();
+            });
             return Task.CompletedTask;
         }
 

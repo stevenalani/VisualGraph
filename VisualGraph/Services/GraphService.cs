@@ -270,7 +270,6 @@ namespace VisualGraph.Services
                 if (Graph != null)
                 {
                     builder.OpenComponent<BasicGraph>(0);
-                    //builder.AddAttribute(1, "GraphModel", Graph);
                     builder.AddComponentReferenceCapture(1,
                         inst =>
                         {
@@ -373,6 +372,29 @@ namespace VisualGraph.Services
 
             });
             return Task.FromResult(fragment);
+        }
+
+        public Task UseGraphModel(BasicGraphModel graphModel, bool withDefaultCallbacks = true)
+        {
+            CurrentGraphModel = graphModel;
+            var fragment = new RenderFragment(builder =>
+            {
+                if (graphModel != null)
+                {
+                    builder.OpenComponent<BasicGraph>(0);
+                    builder.AddComponentReferenceCapture(1,
+                        inst =>
+                        {
+                            CurrentGraph = (BasicGraph)inst;
+                            if (withDefaultCallbacks)
+                            {
+                                CurrentGraph.RegisterDefaultCallbacks();
+                            }
+                        });
+                    builder.CloseComponent();
+                }
+            });
+            return Task.CompletedTask;
         }
     }
 

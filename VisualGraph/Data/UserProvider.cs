@@ -22,9 +22,9 @@ namespace VisualGraph.Data
                 Directory.CreateDirectory(userdir);
             }
         }
-        string filepath(int length = 10){
+        public static string RandomString(int length = 10){
                     const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                    return "/" + new string (Enumerable.Repeat(chars, length)
+                    return new string (Enumerable.Repeat(chars, length)
                       .Select(s => s[random.Next(s.Length)]).ToArray());
                 }
         public async Task<UserModel> FindUser(string username)
@@ -76,20 +76,18 @@ namespace VisualGraph.Data
 
             if (!users.Contains(userModel.Username)) 
             { 
-                PasswordHasher<UserModel> passwordHasher = new PasswordHasher<UserModel>();
-                userModel.Password = passwordHasher.HashPassword(userModel, userModel.Password);
+                userModel.Id = RandomString();
                 var json = JsonSerializer.Serialize<UserModel>(userModel); //(typeof(UserModel));
-                userModel.Id = filepath();
-                await File.WriteAllTextAsync(userdir + userModel.Id + ".json", json);
+                await File.WriteAllTextAsync(userdir + "/" + userModel.Id + ".json", json);
                 
             }
             return userModel;
         }
 
-        internal async Task RenameUser(UserModel user)
-        { 
+        internal async Task UpdateUser(UserModel user)
+        {
             var json = JsonSerializer.Serialize<UserModel>(user); //(typeof(UserModel));
-            await File.WriteAllTextAsync(userdir + user.Id + ".json", json);
+            await File.WriteAllTextAsync(userdir + "/"+user.Id + ".json", json);
         }
 
         public async Task<UserModel> ChangePassword(UserModel userModel,string password)

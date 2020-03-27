@@ -24,9 +24,9 @@ namespace VisualGraph.Data.Additional.Models
         public Node ActiveNode => Nodes.FirstOrDefault(x => x.IsActive);
         public Edge ActiveEdge => Edges.FirstOrDefault(x => x.IsActive);
         float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X));
-        float minX => Nodes.Min(x => (int)Math.Ceiling(x.Pos.X));
+        float minX => Nodes.Min(x => (int)Math.Floor(x.Pos.X));
         float maxY => Nodes.Max(x => (int)Math.Ceiling(x.Pos.Y));
-        float minY => Nodes.Min(x => (int)Math.Ceiling(x.Pos.Y));
+        float minY => Nodes.Min(x => (int)Math.Floor(x.Pos.Y));
         public Vector2[] ConvexHull => new[] { new Vector2(minX, minY), new Vector2(maxX, maxY) };
 
         public bool IsDirected { get; set; } = true;

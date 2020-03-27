@@ -3,7 +3,7 @@
   <Padding>3</Padding>
   <TextSize>1</TextSize>
   <TextColor>#000000</TextColor>
-  <NodeRadius>1.2</NodeRadius>
+  <NodeRadius>2.2</NodeRadius>
   <NodeStrokeColor>rgba(0, 79, 224, 0.9)</NodeStrokeColor>
   <NodeStrokeWidth>0.2</NodeStrokeWidth>
   <NodeFill>rgba(0, 255, 125, 1)</NodeFill>
@@ -12,7 +12,7 @@
   <NodeEndFill>rgba(79,0,224,1)</NodeEndFill>
   <EdgeActiveStrokeColor>rgba(0, 79, 224, 1)</EdgeActiveStrokeColor>
   <EdgeStrokeColor>rgba(255,125,125,1)</EdgeStrokeColor>
-  <EdgeWidth>0.2</EdgeWidth>
+  <EdgeWidth>0.1</EdgeWidth>
   <EdgeRouteColor>rgba(125,255,125,1)</EdgeRouteColor>
   <EdgeRouteWidth>0.3</EdgeRouteWidth>
   <EdgeHighlitingColor>rgba(255,100,100,1)</EdgeHighlitingColor>

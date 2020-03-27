@@ -26,7 +26,6 @@ namespace VisualGraph.Data
         private static string _graphMlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         private static string _graphMlClosingTag = "</graphml>";
         private static string _graphdir = Path.GetFullPath("./Graphs");
-        private static GraphFactory _graphFactory = new GraphFactory();
 
         internal static Task<string[]> GetGraphFileNames()
         {
@@ -68,7 +67,7 @@ namespace VisualGraph.Data
             if (extension == string.Empty)
                 filepath += ".xml";
             var tinkergraph = await ReadGraphMl(filepath);
-            var graph = _graphFactory.ConvertToBasicGraph(tinkergraph);
+            var graph = GraphFactory.ConvertToBasicGraph(tinkergraph);
             graph.Name = Path.GetFileNameWithoutExtension(filepath);
             return graph;   
         }

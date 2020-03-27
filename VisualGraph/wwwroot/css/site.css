@@ -1,6 +1,7 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     overflow: hidden;
+    height:100%;
 }
 
     a, .btn-link {
@@ -143,6 +144,42 @@ html, body {
     .right-flex-container form{
         padding:1em;
     }
+    #introslider {
+        position: absolute;
+        padding:5%;
+    }
+    #introslider .carousel-inner {
+        padding: 5%;
+        height: 100%;
+        background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.01) 0%, rgba(0, 50, 70, 0.2) 70%);
+    }
+    #introslider .carousel-item{
+        height:100%;
+    }
+span.bannerhighlight {
+    width:0.8em;
+    font-size:1.3em;
+    margin-right:-0.2em;
+    background: -webkit-linear-gradient(90deg, rgb(5, 39, 103) 0%, #930000 95%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+    .introslider-banner {
+        display:inline-flex;
+        color: white;
+        font-weight: 800;
+        font-size:5em;
+        letter-spacing:-0.1em;
+        text-shadow: 20px 12px 20px rgba(0, 0, 0, 0.3);
+        margin:0 auto;
+        line-height:1em;
+        align-self:center;
+    }
+.introslider-title {
+    color: white;
+    text-shadow: 20px 12px 20px rgba(0, 0, 0, 0.3);
+    font-size:4em;
+}
     .modal{
         color:black;
     }
@@ -228,6 +265,8 @@ html, body {
         border-radius: 5px;
         border-width: 1px;
         flex: 1;
+        max-width:100%;
+        max-height:100%;
     }
     svg g text{
         z-index:5;

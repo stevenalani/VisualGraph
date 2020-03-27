@@ -3,9 +3,9 @@
 @using Newtonsoft.Json
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
-@using System.Text
+
 @inject IHttpClientFactory HttpClientFactory
-@inject IJSRuntime JsRuntime;
+@inject IJSRuntime JsRuntime
 @inject NavigationManager NavManager
 <AuthorizeView>
     <Authorized>
@@ -15,7 +15,6 @@
         nein
     </NotAuthorized>
 </AuthorizeView>
-<button class="btn btn-link" @onclick="Logout">Log out</button>
 
 <div class="card">
     <div class="card-header">
@@ -42,10 +41,7 @@
 
     public string username = "";
     private string passwd = "";
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-    }
+
     private async Task Login()
     {
         UserModel userModel = new UserModel()
@@ -61,21 +57,7 @@
         var decryptJson = JsonConvert.DeserializeObject<UserModel>(resultData);
         IEnumerable<string> vals;
         result.Headers.TryGetValues("Set-Cookie", out vals);
-        await JsRuntime.InvokeVoidAsync("SetCookie", vals.FirstOrDefault());
-        //NavManager.NavigateTo("/", true);
-    }
-    private async Task Logout()
-    {
-        UserModel userModel = new UserModel()
-        {
-            Username = username,
-            Password = passwd,
-        };
-        var client = HttpClientFactory.CreateClient("api");
-        var result = client.GetAsync("api/account/logout").Result;
-        var resultData = result.Content.ReadAsStringAsync().Result;//await result.Content.ReadAsStreamAsync();
-        var decryptJson = JsonConvert.DeserializeObject<UserModel>(resultData);
+        await JsRuntime.InvokeVoidAsync("SetCookie", vals.LastOrDefault());
         NavManager.NavigateTo("/", true);
     }
-
 }

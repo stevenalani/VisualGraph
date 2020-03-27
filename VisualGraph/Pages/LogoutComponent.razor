@@ -1,11 +1,15 @@
 ﻿@page "/Account/Logout"
 @inject NavigationManager navigatorionManager
-<h3>LogoutComponent</h3>
-
-@code { 
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JsRuntime
+@code {
     public string returnurl { get; set; }
     override protected async Task OnInitializedAsync()
     {
-        navigatorionManager.NavigateTo("api/accont/logout");
+        var client = HttpClientFactory.CreateClient("api");
+        var result = await client.GetAsync("api/account/logout");
+        var resultData = await result.Content.ReadAsStringAsync();
+        await JsRuntime.InvokeVoidAsync("ClearCookie");
+        navigatorionManager.NavigateTo("/", true);
     }
 }

@@ -8,20 +8,22 @@ using VisualGraph.Data.Additional.Models;
 
 namespace VisualGraph.Data
 {
-    public class GraphFactory
+    public static class GraphFactory
     {
-        public BasicGraphModel ConvertToBasicGraph(IGraph iGraph)
+        
+        public static BasicGraphModel ConvertToBasicGraph(IGraph iGraph)
         {
             var nodeCnt = 0;
             var posxdefault = 0;
             var posydefault = 0;
-            var nodes = iGraph.GetVertices().Select(v => {
+            var nodes = iGraph.GetVertices().Select(v =>
+            {
                 var nameProp = v.GetProperty("name");
                 var posxProp = v.GetProperty("posx");
                 var posyProp = v.GetProperty("posy");
                 var idProp = v.GetProperty("vgid");
                 if (nameProp == null) nameProp = v.Id;
-                if (posxProp == null) posxProp = nodeCnt++ % 3 == 0? posxdefault = 0: posxdefault += 10;
+                if (posxProp == null) posxProp = nodeCnt++ % 3 == 0 ? posxdefault = 0 : posxdefault += 10;
                 if (posyProp == null) posyProp = nodeCnt++ % 3 == 0 ? posydefault += 10 : posydefault;
 
                 return new Node
@@ -33,7 +35,8 @@ namespace VisualGraph.Data
 
             }).ToList();
             bool directedGraph = true;
-            var edges = iGraph.GetEdges().Select(e => {
+            var edges = iGraph.GetEdges().Select(e =>
+            {
                 var startnode = nodes.FirstOrDefault(n => e.GetVertex(Direction.Out).Id.ToString() == n.Id);
                 var endnode = nodes.FirstOrDefault(n => e.GetVertex(Direction.In).Id.ToString() == n.Id);
                 try { directedGraph = Convert.ToBoolean(e.GetProperty("isdirected")); } catch { }
@@ -57,6 +60,52 @@ namespace VisualGraph.Data
             };
 
             return graph;
+        }
+
+        public static BasicGraphModel CreateRandomGraph(string Graphname, int nodeCount, int edgeCount =  35, double UpperBound = 50, double LowerBound = -50)
+        {
+            Random random = new Random();
+            BasicGraphModel GraphModel = new BasicGraphModel() { Name = Graphname };
+            
+            for (int i = 0; i < nodeCount; i++)
+            {
+                GraphModel.Nodes.Add(new Node()
+                {
+                    Id = i.ToString(),
+                    Pos = new Vector2((float)(random.NextDouble() * (UpperBound - LowerBound) + LowerBound), (float)(random.NextDouble() * (UpperBound - LowerBound) + LowerBound)),
+                });
+            }
+            for (int i = 0; i < edgeCount; i++)
+            {
+                Node node1,node2;
+                
+                node1 = GraphModel.Nodes.FirstOrDefault(x => x.Edges.Count == 0);
+                node2 = GraphModel.Nodes.FirstOrDefault(x => x.Edges.Count == 0 && x != node1);
+                if(node1 == null)
+                {
+                   var index = random.Next(0, nodeCount - 1);
+                   node1 = GraphModel.Nodes[index];
+                }
+                if (node2 == null)
+                {
+                    var index = random.Next(0, nodeCount - 1);
+                    node2 = GraphModel.Nodes[index];
+                }
+                /*
+                 * int index,index2;
+                
+                index2 = random.Next(0, nodeCount - 1);
+                if (index2 == index)
+                    index2 = random.Next(0, nodeCount - 1);
+                var node1 = GraphModel.Nodes[index];
+                var node2 = GraphModel.Nodes[index2];
+                */
+                Edge edge = new Edge() { StartNode = node1, EndNode = node2 };
+                node1.Edges.Add(edge);
+                node2.Edges.Add(edge);
+                GraphModel.Edges.Add(edge);
+            }
+            return GraphModel;
         }
     }
 }

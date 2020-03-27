@@ -174,9 +174,6 @@ else
         if (graphService.CurrentGraphModel != null && oldGraphName != graphService.CurrentGraphModel.Name)
         {
             oldGraphName = graphService.CurrentGraphModel.Name;
-
-            var displayinfo = await graphService.GetSvgContainerInformation();
-            SvgDisplay.UpdateDisplaySettings(displayinfo);
             await graphService.Crop();
             StateHasChanged();
             return;

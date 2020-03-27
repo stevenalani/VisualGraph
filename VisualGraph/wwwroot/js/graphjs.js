@@ -161,8 +161,18 @@ window.GetTranslatedMousePos = function (args) {
     };
 }
 window.SetCookie = function (cookie) {
-    document.cookie = cookie[0];
+    document.cookie = cookie;
+}
+window.ClearCookie = function () {
+    var cookies = document.cookie.split(";");
+
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var eqPos = cookie.indexOf("=");
+        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
 }
 $(document).ready(() => {
-    $(document).on("contextmenu", (e) => { if ($(e.target).prop("tagName") !== "INPUT") { e.preventDefault(); return false; } });
+    $(document).on("contextmenu", (e) => { if ($(e.target).prop("tagName") != "INPUT") { e.preventDefault(); return false; } });
 });

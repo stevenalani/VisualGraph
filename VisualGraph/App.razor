@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @inject IHttpClientFactory ClientFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 ﻿
 <Router AppAssembly="@typeof(Program).Assembly">
@@ -13,19 +14,24 @@
     </NotFound>
 </Router>
 
-@code{
-    protected override async Task OnInitializedAsync()
+@code{       
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var HttpClient = ClientFactory.CreateClient("api");
-        var response = await HttpClient.GetAsync("api/account");
-        var responseData = await response.Content.ReadAsStringAsync();
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        if (firstRender)
         {
-            var loggedin = JsonConvert.DeserializeObject<UserModel>(responseData).IsAuth;
-            if (!loggedin) { }
-            //NavigationManager.NavigateTo("/account/login");
+            var HttpClient = ClientFactory.CreateClient("api");
+            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
+            if (state.User.Identity.IsAuthenticated)
+            {
+                var response = await HttpClient.PostAsync("api/account/verifieduser", new StringContent(JsonConvert.SerializeObject(state.User.Identity.Name), Encoding.UTF8, "application/json"));
+                var responseData = JsonConvert.DeserializeObject<bool>((await response.Content.ReadAsStringAsync()));
+                if (responseData)
+                {
+                    NavigationManager.NavigateTo("/", true);
+                }
+            }
+            
         }
     }
-
 }

@@ -38,9 +38,10 @@ namespace VisualGraph.Services
         public Task<Point2> GetTranslatedMousePos(double x, double y);
         public Task LayoutGraph(double scalex = 2.2, double scaley = 2.2);
         public Task<BrowserSizes> GetBrowserSizes();
-
+        public Task UseGraphModel(BasicGraphModel graphModel, bool withDefaultCallbacks = true);
         public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true);
         public Task<RenderFragment> GetRenderFragment(bool withDefaultCallbacks = true);
+        
         public Task<RenderFragment> GraphStyeTag();
         public Task<RenderFragment> GetSettingsRenderFragment();
         public Task<RenderFragment> GetEditFormRenderFragment();
