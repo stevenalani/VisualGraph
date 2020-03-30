@@ -2,6 +2,7 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     overflow: hidden;
     height:100%;
+    width:100%;
 }
 
     a, .btn-link {
@@ -29,6 +30,7 @@ html, body {
 
     .main {
         flex: 1;
+        overflow:hidden auto;
     }
 
     .main .top-row {
@@ -93,7 +95,19 @@ html, body {
         background-color: rgba(255,255,255,0.1);
         color: white;
     }
+    .nav-item a:hover .submenu {
+        display: inline-block;
+    }
+    .nav-item .submenu {
+        display: none;
+    }
+    .nav-item.active .submenu {
+        display: inline-block;
+        width:100%;
+        padding: 0;
+    }
     .main .top-row {
+        z-index:10;
         background-color:rgba(5, 23, 61,1);
     }
     #overlay {
@@ -113,7 +127,7 @@ html, body {
     }
     .flex-wrapper-title {
         flex: 0 0 100%;
-        height: 100px;
+        position:absolute;
         padding:1rem;
     }
     .navbar-toggler {
@@ -132,22 +146,57 @@ html, body {
         color: red;
     }
     .left-container {
-        height: calc(100vh - 100px) !important;
+        height: calc(100vh - 3.5rem) !important;
         flex: 1;
-        display:flex;
+        display: flex;
+    }
+    .expander{ 
+        position:absolute;
+        line-height:100vh;
+        
+    }
+    .expander span {
+       
+        font-size: 2.1rem;
+        cursor: pointer;
+        padding: 1rem 0 1rem 1rem;
+        background-color: white;
+        box-shadow: rgba(0,0,0,0.4) 0 0 15px;
+        margin-left: -2.5rem;
+        z-index: 1;
+        border-radius: 5px 0 0 5px;
+
+    }
+        .expander span:hover {
+            background-image: linear-gradient(90deg, rgba(0, 0, 0,0.15) 0%, rgba(0, 0, 0,0) 95%);
+            box-shadow: rgba(0,0,0,0.4) 5px 0 15px;
+        }
+    .expanding {
+        overflow: scroll;
+        height: 100%;
+        z-index:1;
+        box-shadow:rgba(0,0,0,0.4) 0px 0px 15px;
+        border:0 !important;
     }
     .right-container {
-        max-width:50%;
-        height: calc(100vh - 120px) !important;
-        overflow: auto;
+        height: calc(100vh - 3.5rem) !important;
+        overflow: hidden;
+        flex: 1;
+        z-index: 1;
+        box-shadow: rgba(0,0,0,0.4) 0px 0px 15px;
     }
     .right-flex-container form{
         padding:1em;
     }
-    #introslider {
-        position: absolute;
-        padding:5%;
-    }
+.algorithm-resulttable th{
+    position:sticky;
+    top:0;
+    background-color:white;
+}
+#introslider {
+    position: absolute;
+    padding: 5%;
+}
     #introslider .carousel-inner {
         padding: 5%;
         height: 100%;
@@ -156,14 +205,14 @@ html, body {
     #introslider .carousel-item{
         height:100%;
     }
-span.bannerhighlight {
-    width:0.8em;
-    font-size:1.3em;
-    margin-right:-0.2em;
-    background: -webkit-linear-gradient(90deg, rgb(5, 39, 103) 0%, #930000 95%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
+    span.bannerhighlight {
+        width:0.8em;
+        font-size:1.3em;
+        margin-right:-0.2em;
+        background: -webkit-linear-gradient(90deg, rgb(5, 39, 103) 0%, #930000 95%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
     .introslider-banner {
         display:inline-flex;
         color: white;
@@ -175,11 +224,11 @@ span.bannerhighlight {
         line-height:1em;
         align-self:center;
     }
-.introslider-title {
-    color: white;
-    text-shadow: 20px 12px 20px rgba(0, 0, 0, 0.3);
-    font-size:4em;
-}
+    .introslider-title {
+        color: white;
+        text-shadow: 20px 12px 20px rgba(0, 0, 0, 0.3);
+        font-size:4em;
+    }
     .modal{
         color:black;
     }
@@ -205,7 +254,7 @@ span.bannerhighlight {
         bottom: 0;
         text-align: left;
         background-color: white;
-        z-index: 10;
+        z-index: 1;
     }
     .legend-row{
         line-height:20px;
@@ -240,16 +289,16 @@ span.bannerhighlight {
         width: 0;
         height: auto;
     }
-.navmenu-collapse {
-    position: relative;
-    background-color: rgb(255,255,255);
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #930000 95%);
-    /*background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);*/
-    height: 100vh !important;
-    max-height: 100vh !important;
-    z-index: 11;
-    color: #d7d7d7;
-}
+    .navmenu-collapse {
+        position: relative;
+        background-color: rgb(255,255,255);
+        background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #930000 95%);
+        /*background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);*/
+        height: 100vh !important;
+        max-height: 100vh !important;
+        z-index: 11;
+        color: #d7d7d7;
+    }
     .navmenu-collapse form .card {
         padding: 1.7em;
         margin-top: 1.9em;

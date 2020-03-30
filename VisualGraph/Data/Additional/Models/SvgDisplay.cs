@@ -75,7 +75,7 @@ namespace VisualGraph.Data.Additional.Models
         {
             GraphWidth = width;
         }
-        public bool UpdateDisplaySettings(SvgPanZoomInformation svgPanZoomInformation)
+        public async Task<bool> UpdateDisplaySettings(SvgPanZoomInformation svgPanZoomInformation)
         {
             bool hasChanges = false;
             if (svgPanZoomInformation == null) return hasChanges;

@@ -37,8 +37,8 @@ namespace VisualGraph
                 configureOptions.Cookie.Path = "/";
                 configureOptions.Cookie.HttpOnly = false;
                 configureOptions.Cookie.SameSite = SameSiteMode.None;
-                configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-                //configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                configureOptions.SlidingExpiration = true;
+                configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(30);
             });
             services.AddAuthorization(options =>
             {

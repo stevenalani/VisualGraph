@@ -42,7 +42,7 @@ namespace VisualGraph.Services
         public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true);
         public Task<RenderFragment> GetRenderFragment(bool withDefaultCallbacks = true);
         
-        public Task<RenderFragment> GraphStyeTag();
+        public Task<RenderFragment> GetCssMarkup();
         public Task<RenderFragment> GetSettingsRenderFragment();
         public Task<RenderFragment> GetEditFormRenderFragment();
         public Task Rerender();

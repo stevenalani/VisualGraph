@@ -146,7 +146,7 @@ else
     [JSInvokable("UpdateDisplay")]
     public Task<bool> UpdateDisplay(SvgPanZoomInformation svgInformation)
     {
-        return Task.FromResult(SvgDisplay.UpdateDisplaySettings(svgInformation));
+        return SvgDisplay.UpdateDisplaySettings(svgInformation);
     }
 
     private string oldGraphName = string.Empty;

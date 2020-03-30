@@ -1,6 +1,14 @@
-﻿<button type="button" class="btn @Classes" data-toggle="collapse" data-target="#@Target" @onclick="@(()=> { IsToggled = !IsToggled; })">
-    <span><span class="@IconClass" aria-hidden="true"></span> @Title @(!IsToggled ? OpenText:CloseText) </span>
+﻿@if (AsAnchor) {
+    <a class="btn @Classes" data-toggle="collapse" href="#" data-target="#@Target" @onclick="@(() => { IsToggled = !IsToggled; })">
+        <span><span class="@IconClass" aria-hidden="true"></span> @Title @(!IsToggled ? OpenText : CloseText) </span>
+    </a>
+}
+else
+{
+<button type="button" class="btn @Classes" data-toggle="collapse" data-target="#@Target" @onclick="@(() => { IsToggled = !IsToggled; })">
+    <span><span class="@IconClass" aria-hidden="true"></span> @Title @(!IsToggled ? OpenText : CloseText) </span>
 </button>
+}
 @code {
     [Parameter]
     public string Title { get; set; } = "";
@@ -16,5 +24,7 @@
     public string CloseText { get; set; } = "";
     [Parameter]
     public bool IsToggled { get; set; } = false;
+    [Parameter]
+    public bool AsAnchor { get; set; } = false;
 
 }

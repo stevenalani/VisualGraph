@@ -6,41 +6,25 @@
     <div id="introslider" style="width:@(ContainerInformation.ParentWidth + "px");height:@(ContainerInformation.ParentHeight + "px")" class="carousel slide"  data-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <div class="d-flex h-100 w-100" alt="First slide">
-                    <h1 class="introslider-banner"><span class="bannerhighlight">V</span>isual<span class="bannerhighlight">G</span>raph</h1>                    
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-banner"><span class="bannerhighlight">V</span>isual<span class="bannerhighlight">G</span>raph</h1>
                 </div>
             </div>
             <div class="carousel-item">
-                <div class="d-flex h-100 w-100" alt="First slide">
+                <div class="d-flex h-100 w-100">
                     <h1 class="introslider-title">Graphen erstellen</h1>
-                    <p>
-                        Eine Anwendung die den Anwender Graphen erstellen lässt.
-                        <ul>
-                            <li>Benutzer könnnen eigene Graphen tabellarisch erstellen.</li>
-                            <li>Graphen können von Websites geladen werden.</li>
-                            <li>Aus Skripten importiert werden.</li>
-                            <li>Benutzer können Graphen unter im eigenen Verzeichnis speichern.</li>
-                        </ul>
-                    </p>
+                    <ul>
+                        <li>Benutzer könnnen eigene Graphen tabellarisch erstellen.</li>
+                        <li>Graphen können von Websites geladen werden.</li>
+                        <li>Aus Skripten importiert werden.</li>
+                        <li>Benutzer können Graphen unter im eigenen Verzeichnis speichern.</li>
+                        <li>Gespeicherte Graphen können aus dem Benutzerverzeichnis gelöscht werden.</li>
+                    </ul>
                 </div>
             </div>
             <div class="carousel-item">
-                <div class="d-flex h-100 w-100" alt="First slide">
-                    <h1>Graphen bearbeiten</h1>
-                    
-                        <ul>
-                            <li>Anwender können eigene so wie Standard- Graphen bearbeiten.</li>
-                            <li>Benutzer könnnen Graphen tabellarisch bearbeiten.</li>
-                            <li>Benutzer könnnen Knoten und Kanten im Rechtsklick- Kontextmenü bearbeiten.</li>
-                            <li>Knoten können per Drag and Drop Positioniert werden</li>
-                            <li>Aus Skripten importiert werden</li>
-                        </ul>
-                </div>
-            </div>
-            <div @ref="testref" class="carousel-item">
-                <div class="d-flex h-100 w-100" alt="First slide">
-                    <h1>Graphen bearbeiten</h1>
-
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Graphen bearbeiten</h1>
                     <ul>
                         <li>Anwender können eigene so wie Standard- Graphen bearbeiten.</li>
                         <li>Benutzer könnnen Graphen tabellarisch bearbeiten.</li>
@@ -48,7 +32,25 @@
                         <li>Knoten können per Drag and Drop Positioniert werden</li>
                         <li>Aus Skripten importiert werden</li>
                     </ul>
-
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Graphen betrachten</h1>
+                    <ul>
+                        <li>Eigene und globale Standard- Graphen betrachten.</li>
+                        <li>Die Funktionen "Autolayout" und "Zuschneiden und Zentrieren" helfen den Überblick zu behalten</li>
+                        <li>Über die Funktionen "Pan und Zoom" kann sich der Anwender frei im Graph bewegen</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Dijkstra Algorithmus</h1>
+                    <p>
+                        Das System lässt anwender den Dijkstra- Algorithmus ausführen und so die günstigste Route zwischen zwei Knoten ermitteln.<br />
+                        Das Ergebnis wird in Form einer Tabelle und farbig im Graph dargestellt.
+                    </p>
                 </div>
             </div>
 
@@ -66,26 +68,17 @@
 
 
         @code {
-            object testref;
-            string Graphname = "IndexGraph";
-            BasicGraphModel GraphModel;
-            BasicGraph GraphComponent;
-            static Random random = new Random();
-            bool isAnimated = false;
-            System.Timers.Timer Animation;
-            Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
-            SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 300, ParentWidth = 400 };
-            Vector2 Magnet = new Vector2(15, -1);
+                object testref;
+                string Graphname = "IndexGraph";
+                BasicGraphModel GraphModel;
+                BasicGraph GraphComponent;
+                static Random random = new Random();
+                bool isAnimated = false;
+                System.Timers.Timer Animation;
+                Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
+                SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
+                Vector2 Magnet = new Vector2(15, -1);
 
-            protected override async Task OnInitializedAsync()
-            {
-
-                if (graphService.CurrentGraphModel.Name != Graphname)
-                {
-                    GraphModel = GraphFactory.CreateRandomGraph(Graphname, 50, 60);
-                    await graphService.UseGraphModel(GraphModel, withDefaultCallbacks: false);
-                }
-            }
 
             protected override async Task OnAfterRenderAsync(bool firstRender)
             {
@@ -110,7 +103,7 @@
                                 {
                                     directions[x] = Vector2.Normalize(Vector2.Reflect(directions[x], Vector2.Normalize(new Vector2() - x.Pos)));
                                 }
-                                x.Pos += directions[x] * (x.Pos.Length() / 75) / 5;
+                                x.Pos += directions[x] * (75/x.Pos.Length()) / 10;
 
                             });
                             await graphService.CurrentGraph?.ChangedState();
@@ -120,9 +113,14 @@
                     };
                     Animation.AutoReset = true;
                     isAnimated = true;
-                    ContainerInformation = await graphService.GetSvgContainerInformation();
+
                     StateHasChanged();
                     Animation.Start();
+                }
+                if (ContainerInformation.ParentWidth == 1 || ContainerInformation.ParentHeight == 1)
+                {
+                    ContainerInformation = await graphService.GetSvgContainerInformation();
+                    StateHasChanged();
                 }
             }
 

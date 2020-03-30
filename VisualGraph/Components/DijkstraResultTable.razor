@@ -3,7 +3,7 @@
 {
     var headerEntries = Results[0];
     <h6>Startnode: ID=@(headerEntries.StartNode.Id); Name=@(headerEntries.StartNode.Name)</h6>
-    <table class="table table-bordered table-hover">
+    <table class="table table-bordered table-hover algorithm-resulttable">
         <thead>
             <tr>
                 <th>Iteration</th>
@@ -22,11 +22,11 @@
                     <td>@(StepCount == 0?"initial":$"{StepCount}")</td>
                     @{ StepCount++; }
                     <td>@(resultEntry.StartNode.Name!=""? resultEntry.StartNode.Name: resultEntry.StartNode.Id.ToString())</td>
-                    @foreach (var result in resultEntry.Previous)
+                    @foreach (var prev in resultEntry.Previous)
                     {
-                        if (resultEntry.Distances[result.Key] != double.PositiveInfinity)
+                        if (resultEntry.Distances[prev.Key] != double.PositiveInfinity)
                         {
-                            <td>@(String.Format("{0,0:0.00}", resultEntry.Distances[result.Key]))</td>
+                            <td>@(String.Format("{0,0:0.00}", resultEntry.Distances[prev.Key]))</td>
                         }
                         else
                         {

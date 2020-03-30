@@ -16,6 +16,7 @@ using VisualGraph.Data;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Core.Routing;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace VisualGraph.Services
 {
@@ -30,14 +31,16 @@ namespace VisualGraph.Services
         public GraphEditForm GraphEditForm { get; set; } 
         public SettingsCSS SettingsCSS { get; set; } 
         public GraphStyleParameters GraphStyleParameters { get; set; } = new GraphStyleParameters();
+        private readonly AuthenticationStateProvider authenticationStateProvider;
 
-        public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime)
+        public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime, AuthenticationStateProvider authenticationStateProvider)
         {
+            this.authenticationStateProvider = authenticationStateProvider;
             _logger = logger;
             JSRuntime = jsRuntime;
             GraphFileProvider.EnsureGraphDirExists();
             LoadGraphStyleParameters();
-            CurrentGraphModel = CreateNewGraphModel();
+            CurrentGraphModel = GraphFactory.CreateRandomGraph("Unbenannter-Graph",50,65,90,-90);
         }
         public async Task<BasicGraphModel[]> GetAllGraphs()
         {
@@ -52,7 +55,7 @@ namespace VisualGraph.Services
             BasicGraphModel graph;
             if (filename == null || filename == "Neuer Graph")
             {
-                graph = CreateNewGraphModel();
+                graph = GraphFactory.CreateNewGraphModel();
             }
             else
             {
@@ -62,35 +65,14 @@ namespace VisualGraph.Services
             await Rerender();
             
         }
-        private BasicGraphModel CreateNewGraphModel()
-        {
-            var nodes = new System.Collections.Generic.List<Data.Additional.Models.Node>{
-                new Data.Additional.Models.Node() {
-                    Id = "0",
-                    Pos = new System.Numerics.Vector2(-10,10),
-                    Name = "Knoten A"
-                },
-                new Data.Additional.Models.Node() {
-                    Id = "1",
-                    Pos = new System.Numerics.Vector2(10,-10),
-                    Name = "Knoten B"
 
-                }
-                
-            };
-            var graphmodel = new BasicGraphModel()
-            {
-                Nodes = nodes,
-                Name = "Unbenannter-Graph"
-            };
-            return graphmodel;
-        }
         public async Task<string[]> GetGraphFilenames()
         {
             return await GraphFileProvider.GetGraphFileNames();
         }
         public async Task<bool> SaveGraph(string filename = "")
         {
+            var user = await authenticationStateProvider.GetAuthenticationStateAsync();
             if (filename == "" || filename == null)
             {
                 filename = CurrentGraphModel.Name;
@@ -308,7 +290,7 @@ namespace VisualGraph.Services
         }
        
 
-        public Task<RenderFragment> GraphStyeTag()
+        public Task<RenderFragment> GetCssMarkup()
         {
             var fragment = new RenderFragment(builder =>
             {

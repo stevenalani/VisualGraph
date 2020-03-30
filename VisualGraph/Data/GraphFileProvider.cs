@@ -29,7 +29,11 @@ namespace VisualGraph.Data
 
         internal static Task<string[]> GetGraphFileNames()
         {
-            return Task.FromResult(Directory.GetFiles(_graphdir).Select(x => Path.GetFileNameWithoutExtension(x)).OrderByDescending(x => x.ToLower()).ToArray());
+            return Task.FromResult(Directory.GetFiles(_graphdir, "*.xml", SearchOption.AllDirectories).Select(x => Path.GetFileNameWithoutExtension(x)).OrderByDescending(x => x.ToLower()).ToArray());
+        }
+        internal static Task<string[]> GetUserGraphFileNames(string username)
+        {
+            return Task.FromResult(Directory.GetFiles(Path.Combine(username,_graphdir), "*.xml", SearchOption.AllDirectories).Select(x => Path.GetFileNameWithoutExtension(x)).OrderByDescending(x => x.ToLower()).ToArray());
         }
         internal static Task EnsureGraphDirExists()
         {
@@ -52,8 +56,7 @@ namespace VisualGraph.Data
         }
         internal static async Task<BasicGraphModel> GetBasicGraph(string filename)
         {
-
-                return await ReadGraphMlToBasicGraph(filename);
+            return await ReadGraphMlToBasicGraph(filename);
         }
         internal static async Task<BasicGraphModel> ReadGraphMlToBasicGraph(string filepath)
         {

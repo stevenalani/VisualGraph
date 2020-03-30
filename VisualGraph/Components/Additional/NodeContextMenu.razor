@@ -27,6 +27,15 @@
                     <InputText class="form-control" id="nodename" @bind-Value="Node.Name" @oninput="@(async (args)=> { await graphService.Rerender();})"></InputText>
                 </div>
                 <div class="form-group">
+                    @if (navigationManager.Uri.Contains("/algorithm/"))
+                    {
+                        <div class="form-group">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" @onclick="SetStartNode">Als Startknoten</button>
+                                <button type="button" class="btn btn-primary" @onclick="SetEndNode">Als Endknoten</button>
+                            </div>
+                        </div>
+                    }
                     <table>
                         <thead>
                             <tr>
@@ -46,20 +55,12 @@
                             </tr>
                         </tbody>
                     </table>
-                    
-                    
-                    
-                    
+
+
+
+
                 </div>
-                @if (navigationManager.Uri.Contains("/algorithm/"))
-                {
-                    <div class="form-group">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary" @onclick="SetStartNode">Als Startknoten</button>
-                            <button type="button" class="btn btn-primary" @onclick="SetEndNode">Als Endknoten</button>
-                        </div>
-                    </div>
-                }
+                
                 <button type="button" class="btn btn-outline-danger" @onclick="DeleteNode">entfernen</button>
             </EditForm>
         </div>

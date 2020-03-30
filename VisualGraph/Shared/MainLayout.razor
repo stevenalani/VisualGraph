@@ -3,7 +3,7 @@
 @inherits LayoutComponentBase
 @inject IGraphService graphService
 @inject NavigationManager navigationManager
-
+@graphService.GetCssMarkup().Result
 <BlazoredToasts Position="ToastPosition.TopLeft"
                 Timeout="5"
                 SuccessClass="success-toast-override"

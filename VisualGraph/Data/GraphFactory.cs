@@ -42,7 +42,7 @@ namespace VisualGraph.Data
                 try { directedGraph = Convert.ToBoolean(e.GetProperty("isdirected")); } catch { }
                 var edge = new Edge
                 {
-                    Id = e.GetProperty("vgid").ToString(),
+                    Id = e.Id.ToString(),
                     StartNode = startnode,
                     EndNode = endnode,
                     Weight = Convert.ToDouble(e.GetProperty("weight"))
@@ -61,7 +61,29 @@ namespace VisualGraph.Data
 
             return graph;
         }
+        public static BasicGraphModel CreateNewGraphModel()
+        {
+            var nodes = new System.Collections.Generic.List<Data.Additional.Models.Node>{
+                new Data.Additional.Models.Node() {
+                    Id = "0",
+                    Pos = new System.Numerics.Vector2(-10,10),
+                    Name = "Knoten A"
+                },
+                new Data.Additional.Models.Node() {
+                    Id = "1",
+                    Pos = new System.Numerics.Vector2(10,-10),
+                    Name = "Knoten B"
 
+                }
+
+            };
+            var graphmodel = new BasicGraphModel()
+            {
+                Nodes = nodes,
+                Name = "Unbenannter-Graph"
+            };
+            return graphmodel;
+        }
         public static BasicGraphModel CreateRandomGraph(string Graphname, int nodeCount, int edgeCount =  35, double UpperBound = 50, double LowerBound = -50)
         {
             Random random = new Random();
@@ -72,13 +94,13 @@ namespace VisualGraph.Data
                 GraphModel.Nodes.Add(new Node()
                 {
                     Id = i.ToString(),
+                    Name = i.ToString(),
                     Pos = new Vector2((float)(random.NextDouble() * (UpperBound - LowerBound) + LowerBound), (float)(random.NextDouble() * (UpperBound - LowerBound) + LowerBound)),
                 });
             }
             for (int i = 0; i < edgeCount; i++)
             {
                 Node node1,node2;
-                
                 node1 = GraphModel.Nodes.FirstOrDefault(x => x.Edges.Count == 0);
                 node2 = GraphModel.Nodes.FirstOrDefault(x => x.Edges.Count == 0 && x != node1);
                 if(node1 == null)
@@ -91,16 +113,8 @@ namespace VisualGraph.Data
                     var index = random.Next(0, nodeCount - 1);
                     node2 = GraphModel.Nodes[index];
                 }
-                /*
-                 * int index,index2;
-                
-                index2 = random.Next(0, nodeCount - 1);
-                if (index2 == index)
-                    index2 = random.Next(0, nodeCount - 1);
-                var node1 = GraphModel.Nodes[index];
-                var node2 = GraphModel.Nodes[index2];
-                */
-                Edge edge = new Edge() { StartNode = node1, EndNode = node2 };
+
+                Edge edge = new Edge() { StartNode = node1, EndNode = node2, Id = (i + 1).ToString(), Weight = random.NextDouble() * 10  };
                 node1.Edges.Add(edge);
                 node2.Edges.Add(edge);
                 GraphModel.Edges.Add(edge);

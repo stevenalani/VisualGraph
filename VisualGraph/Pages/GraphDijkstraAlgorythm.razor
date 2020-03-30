@@ -24,14 +24,11 @@
 </Modal>
 <div class="flex-wrapper">
     <div class="flex-wrapper-title">
-        <h3>Dijkstra Algorithmus</h3>
+
         @if (GraphService.CurrentGraphModel != null)
         {
             <form class="form-inline">
-                <div class="form-group">
-                    <button class="btn btn-secondary" type="button" @onclick="@Crop">Graph zuschneiden und zentrieren</button>
-                    <button class="btn btn-secondary" type="button" @onclick="@LayoutGraph">Graph layouten</button>
-                </div>
+                <h3>Dijkstra Algorithmus</h3>
                 <div class="form-group ml-1">
                     <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
                     <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
@@ -41,72 +38,81 @@
                 </div>
             </form>
         }
+        else
+        {
+            <h3>Dijkstra Algorithmus</h3>
+        }
     </div>
     <hr />
     <div class="left-container">
         @GraphService.GetRenderFragment().Result
     </div>
-    <div class="right-container">
+    
         @if (DijkstraAlgorithmRunner?.Results != null)
         {
-            <div class="card pb-5">
-                <div class="card-body">
-                    <DijkstraResultTable Results="@DijkstraAlgorithmRunner.Results" />
-                    <div>
-                        @if (ShortestRouteToEndnode != null)
-                        {
-                            if (ShortestRouteToEndnode.Count == 1)
+            <div class="row right-container" style="@(expanded == 2?"flex-basis:100%":expanded == 0?"max-width:50px":"")">
+                <div class="expander" @onclick="@collapsetable"><span class="oi @(expanded < 2?"oi-chevron-left":"oi-chevron-right")" aria-hidden="true"></span></div>
+                <div class="expanding col card pb-5">
+                    <div class="card-body">
+                        <DijkstraResultTable Results="@DijkstraAlgorithmRunner.Results" />
+                        <div>
+                            @if (ShortestRouteToEndnode != null)
                             {
-                                <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) konnte nicht ermittelt werden </h5>
+                                if (ShortestRouteToEndnode.Count == 1)
+                                {
+                                    <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) konnte nicht ermittelt werden </h5>
+                                }
+                                else
+                                {
+                                    <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Reihenfolge</th>
+                                                @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
+                                                {
+                                                    <th>@(i + 1)</th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th>ID</th>
+                                                @foreach (var node in ShortestRouteToEndnode)
+                                                {
+                                                    <td>@node.Item1.Id</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                <th>Name</th>
+                                                @foreach (var node in ShortestRouteToEndnode)
+                                                {
+                                                    <td>@node.Item1.Name</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                <th>Kosten</th>
+                                                @foreach (var node in ShortestRouteToEndnode)
+                                                {
+                                                    <td>@node.Item2</td>
+                                                }
+                                            </tr>
+                                            <tr>
+                                                <th>Gesamtkosten:</th>
+                                                <td>@PathCost.ToString(CultureInfo.CurrentCulture)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                }
                             }
-                            else
-                            {
-                                <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Reihenfolge</th>
-                                            @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
-                                            {
-                                                <th>@(i + 1)</th>
-                                            }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <th>ID</th>
-                                            @foreach (var node in ShortestRouteToEndnode)
-                                            {
-                                                <td>@node.Item1.Id</td>
-                                            }
-                                        </tr>
-                                        <tr>
-                                            <th>Name</th>
-                                            @foreach (var node in ShortestRouteToEndnode)
-                                            {
-                                                <td>@node.Item1.Name</td>
-                                            }
-                                        </tr>
-                                        <tr>
-                                            <th>Kosten</th>
-                                            @foreach (var node in ShortestRouteToEndnode)
-                                            {
-                                                <td>@node.Item2</td>
-                                            }
-                                        </tr>
-                                        <tr>
-                                            <th>Gesamtkosten:</th>
-                                            <td>@PathCost.ToString(CultureInfo.CurrentCulture)</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            }
-                        }
+                        </div>
                     </div>
                 </div>
+
+
             </div>
         }
-    </div>
+    
 </div>
 @code {
     Modal ModalLayoutPrarmeters { get; set; }
@@ -115,14 +121,27 @@
     List<Tuple<Node, double>> ShortestRouteToEndnode;
     double lowestvalue => GraphService.CurrentGraphModel.Edges.Min(x => x.Weight);
     double PathCost = 0;
+    int expanded = 1;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            GraphService.CurrentGraph.NodeClick += async (sender,args) => {
+                DijkstraAlgorithm runner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, args.Target.Id);
+                runner.Iterate(auto: true);
+                var lastresult = runner.Results.Last();
+                var algorithmResults = lastresult.Previous.Where(x => lastresult.Distances[x.Key] != double.PositiveInfinity).Select(x => x.Key).ToList();
+                algorithmResults.SelectMany(x => x.Edges.Where(y => x == y.EndNode && args.Target == y.StartNode)).ToList().ForEach(x => x.Classes.Add(AlgorithmPage.RouteClass));
+
+
+            };
+        }
+    }
+
     private void LayoutGraph()
     {
         ModalLayoutPrarmeters.Show();
-    }
-    private async void Crop()
-    {
-        await GraphService.Fit();
-        await GraphService.Center();
     }
 
     private void RunDikstra(bool autostep = false)
@@ -179,7 +198,10 @@
         await GraphService.Rerender();
         StateHasChanged();
     }
-
+    private void collapsetable (){
+        expanded = expanded < 2 ? expanded + 1:0;
+        StateHasChanged();
+    }
     private void visualizeRoute()
     {
         for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)

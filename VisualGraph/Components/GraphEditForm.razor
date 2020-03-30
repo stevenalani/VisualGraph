@@ -1,4 +1,5 @@
-﻿@inject IGraphService GraphService
+﻿@using System.Security.Claims
+@inject IGraphService GraphService
 @inject IToastService toastService
 @inherits GraphInternalUI
 @if (GraphService.CurrentGraphModel != null)
@@ -200,13 +201,24 @@
                 }
                 <button type="button" class="btn btn-outline-success mt-4" @onclick="@AddEdge">Kante hinzufügen</button>
                 <hr />
-                <button type="button" class="btn btn-outline-info" @onclick="@CheckExistsandOpenSaveGraphModal"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
+                <AuthorizeView Context="saveButtonCtx">
+                    <Authorized>
+                        @saveButtonCtx.User.Identity.Name
+                        <button type="button" class="btn btn-outline-info" @onclick="@CheckExistsandOpenSaveGraphModal"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <p class="text-danger">Graphen können nur als angemeldeter Benutzer gespeichert werden!<a href="account/login">Zum Login</a></p>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
         </div>
     </EditForm>
 }
 @code {
-
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private ClaimsPrincipal User { get; set; }
+    private bool isGlobal = false;
     private async void SaveGraph()
     {
         var issaved = await GraphService.SaveGraph(GraphService.CurrentGraphModel.Name);
@@ -294,6 +306,7 @@
     private Modal ModalSave;
     private async void CheckExistsandOpenSaveGraphModal()
     {
+        var User = (await authenticationStateTask).User;
         if ((await GraphService.GetGraphFilenames()).Contains(GraphService.CurrentGraphModel.Name))
         {
             ModalSave.Show();
