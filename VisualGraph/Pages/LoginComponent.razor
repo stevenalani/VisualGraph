@@ -20,6 +20,7 @@
         <div class="form-group form-inline">
             <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="passwd" />
         </div>
+        <p class="alert">@userModel.ErrorMessage</p>
         <button class="btn btn-success" @onclick="Login">Login</button>
     </div>
     <div class="card-footer">
@@ -34,13 +35,13 @@
 
     public string username = "";
     private string passwd = "";
-
+    UserModel userModel = new UserModel();
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
     override protected async Task OnInitializedAsync()
     {
-       var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var isAuth = user.Identity.IsAuthenticated;
         if (isAuth)
@@ -51,7 +52,7 @@
 
     private async Task Login()
     {
-        UserModel userModel = new UserModel()
+        userModel = new UserModel()
         {
             Username = username,
             Password = passwd,
@@ -64,7 +65,10 @@
         var decryptJson = JsonConvert.DeserializeObject<UserModel>(resultData);
         IEnumerable<string> vals;
         result.Headers.TryGetValues("Set-Cookie", out vals);
-        await JsRuntime.InvokeVoidAsync("SetCookie", vals.LastOrDefault());
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        if (vals != null)
+        {
+            await JsRuntime.InvokeVoidAsync("SetCookie", vals?.LastOrDefault() ?? "");
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        }
     }
 }

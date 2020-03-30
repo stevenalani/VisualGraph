@@ -3,11 +3,24 @@
     <Skriptloader />
 </Modal>
 <Modal @ref="loadGraphWebModal" Title="Graph aus Web laden">
+
     <GraphMlWebLoader  OnDone="(args)=> { loadGraphWebModal.Show(); }"/>
+</Modal>
+<Modal @ref="loadGraphRandomModal" Title="Zufalls Graph">
+    @{
+        <div class="form-group form-inline">
+            <label class="col-form-label">Anzahl Knoten:</label><input class="form-control" type="number" @bind="knoten" />
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-form-label">Anzahl Kanten:</label><input class="form-control" type="number" @bind="kanten" />
+        </div>
+    }
+    <button @onclick="@(async ()=> { GraphService.CurrentGraphModel = GraphFactory.CreateRandomGraph("ZufallsGraph", knoten, kanten); loadGraphRandomModal.Show(); await GraphService.Rerender(); })">Erzeugen</button>
 </Modal>
 <div class="form-group form-inline">
     <select class="form-control col mr-4" @bind="@FileToRead">
         <option style="background-color:lightgreen" value="" default>Neuer Graph</option>
+        <option style="background-color:greenyellow" value="">Zufälliger Graph</option>
         <option style="background-color:lightseagreen" value="">Graph von Skript laden</option>
         <option style="background-color:lightskyblue" value="">Graph aus Web laden</option>
         @foreach (var file in GraphService.GetGraphFilenames().Result)
@@ -20,8 +33,12 @@
 </div>
 @code {
     private string FileToRead { get; set; }
+    
     private Modal loadGraphModal;
     private Modal loadGraphWebModal;
+    private Modal loadGraphRandomModal;
+    int knoten = 50;
+    int kanten = 65;
     private async void OpenFile()
     {
         if (FileToRead == "Graph von Skript laden")
@@ -31,6 +48,9 @@
         else if (FileToRead == "Graph aus Web laden")
         {
             loadGraphWebModal.Show();
+        }else if(FileToRead == "Zufälliger Graph")
+        {
+            loadGraphRandomModal.Show();
         }
         else
         {

@@ -27,10 +27,11 @@ namespace VisualGraph.Controllers
     {
         private readonly UserProvider userProvider;
         private IConfiguration _config;
+        private readonly AuthenticationStateProvider _authenticationStateProvider;
         private readonly IJSRuntime _JsRuntime;
-        public AccountController(IConfiguration config, IJSRuntime jSRuntime)
+        public AccountController(IConfiguration config, IJSRuntime jSRuntime, AuthenticationStateProvider authenticationStateProvider)
         {
-            
+            _authenticationStateProvider = authenticationStateProvider;
             _JsRuntime = jSRuntime;
             _config = config;
             userProvider = new UserProvider(_config.GetValue<string>("UserDir", "_users"));
@@ -92,6 +93,7 @@ namespace VisualGraph.Controllers
                 {
                     Name = "Gast",
                     Username = userModel.Username,
+                    Password = "",
                     ErrorMessage = "Kein Benutzerkonto gefunden!",
 
                 });
@@ -100,6 +102,7 @@ namespace VisualGraph.Controllers
             if (result == PasswordVerificationResult.Success)
             {
                 userModel =  await signIn(foundUser);
+
             }
             return Ok(userModel);
 
@@ -145,7 +148,7 @@ namespace VisualGraph.Controllers
             //System.Console.WriteLine("result\r\n{0}\r\n{1}", result., result.Principal.Identity.Name);
             foundUser.Password = "";
             foundUser.ErrorMessage = "";
-            foundUser.IsAuth = User.Identity.IsAuthenticated;
+            foundUser.IsAuth = true;
             return foundUser;
         }
         [HttpPost("register")]

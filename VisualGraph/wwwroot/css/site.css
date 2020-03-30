@@ -188,15 +188,32 @@ html, body {
     .right-flex-container form{
         padding:1em;
     }
-.algorithm-resulttable th{
-    position:sticky;
-    top:0;
-    background-color:white;
-}
-#introslider {
-    position: absolute;
-    padding: 5%;
-}
+    .algorithm-resulttable th{
+        position:sticky;
+        top:0;
+        background-color:white;
+    }
+    .edge.vgpathpreview{
+        stroke: rgb(0, 241, 145)!important;
+    }
+    .node.vgpathpreview {
+        transform: scale(2);
+        fill: rgb(0, 241, 145) !important;
+    }
+    .vgnodeunreachable{
+        opacity: 0.1;
+    }
+    .edge.vgnodeunreachable {
+        stroke: rgba(255, 0, 55, 0.86) !important;
+    }
+    .node.vgnodeunreachable {
+        fill: rgba(255, 0, 55, 0.86) !important;
+        stroke: rgba(255, 0, 55, 0.86) !important;
+    }
+    #introslider {
+        position: absolute;
+        padding: 5%;
+    }
     #introslider .carousel-inner {
         padding: 5%;
         height: 100%;

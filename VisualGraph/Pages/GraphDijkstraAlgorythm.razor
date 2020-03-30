@@ -8,9 +8,6 @@
 @inject IJSRuntime JsRuntime
 @inject IToastService toastService
 
-<Modal @ref="ModalLayoutPrarmeters">
-    <AutoLayoutForm OnSubmit="async () => { ModalLayoutPrarmeters.Show();await GraphService.Rerender(); }" />
-</Modal>
 <Modal @ref="ModalNegativeEdgeWeigths">
     <div class="card">
         <div class="card-header">
@@ -115,60 +112,89 @@
     
 </div>
 @code {
-    Modal ModalLayoutPrarmeters { get; set; }
+
     Modal ModalNegativeEdgeWeigths { get; set; }
     DijkstraAlgorithm DijkstraAlgorithmRunner;
     List<Tuple<Node, double>> ShortestRouteToEndnode;
     double lowestvalue => GraphService.CurrentGraphModel.Edges.Min(x => x.Weight);
     double PathCost = 0;
     int expanded = 1;
-
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             GraphService.CurrentGraph.NodeClick += async (sender,args) => {
-                DijkstraAlgorithm runner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, args.Target.Id);
-                runner.Iterate(auto: true);
-                var lastresult = runner.Results.Last();
-                var algorithmResults = lastresult.Previous.Where(x => lastresult.Distances[x.Key] != double.PositiveInfinity).Select(x => x.Key).ToList();
-                algorithmResults.SelectMany(x => x.Edges.Where(y => x == y.EndNode && args.Target == y.StartNode)).ToList().ForEach(x => x.Classes.Add(AlgorithmPage.RouteClass));
+                resetPreview();
+                if (args.Target.IsActive)
+                {
 
-
+                    DijkstraAlgorithm runner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, args.Target.Id);
+                    runner.Iterate(auto: true);
+                    var lastresult = runner.Results.Last();
+                    var nodes = lastresult.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key).ToList();
+                    var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.StartNode)).ToList();
+                    nodes.ForEach(x => { if (!x.Classes.Contains(AlgorithmPage.PreviewClass)) x.Classes.Add(AlgorithmPage.PreviewClass); });
+                    previewEdges.ForEach(x => { if (!x.Classes.Contains(AlgorithmPage.PreviewClass)) x.Classes.Add(AlgorithmPage.PreviewClass); });
+                }
             };
         }
     }
-
-    private void LayoutGraph()
+    private void setPreview()
     {
-        ModalLayoutPrarmeters.Show();
+        var nodes = DijkstraAlgorithmRunner.Results.Last().Distances.Where(x => x.Value != double.PositiveInfinity).Select( x => x.Key).ToList();
+        nodes.ForEach(x => x.Classes.Remove(AlgorithmPage.NodeNotReachableClass));
+        var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.StartNode)).ToList();
+        previewEdges.ForEach(x => { if (x.Classes.Contains(AlgorithmPage.NodeNotReachableClass)) x.Classes.Remove(AlgorithmPage.NodeNotReachableClass); });
     }
-
-    private void RunDikstra(bool autostep = false)
+    private void resetPreview()
     {
+        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Remove(AlgorithmPage.PreviewClass));
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Remove(AlgorithmPage.PreviewClass));
+    }
+    private void setUnreachables()
+    {
+        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Add(AlgorithmPage.NodeNotReachableClass));
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Add(AlgorithmPage.NodeNotReachableClass));
+    }
+    private void resetUnreachables()
+    {
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Remove(AlgorithmPage.NodeNotReachableClass));
+        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Remove(AlgorithmPage.NodeNotReachableClass));
+    }
+    private async void RunDikstra(bool autostep = false)
+    {
+        resetPreview();
         if(lowestvalue < 0) {
             ModalNegativeEdgeWeigths.Show();
             return;
         }
         if (this.DijkstraAlgorithmRunner == null)
         {
+
             var startNodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(StartNodeClass))?.Id ?? "-1";
             if (startNodeId != "-1")
             {
 
                 DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startNodeId);
+                
             }
             else
             {
                 DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel);
             }
+            clearRouteClasses();
+            ShortestRouteToEndnode = null;
+            setUnreachables();
         }
         if (DijkstraAlgorithmRunner.RemainingSteps > 0)
         {
             DijkstraAlgorithmRunner.Iterate(autostep);
+            setPreview();
+            await GraphService.Rerender();
         }
         else
         {
+            resetUnreachables();
             DijkstraAlgorithmRunner = null;
             RunDikstra(autostep);
         }
@@ -191,12 +217,12 @@
         }
         if (ShortestRouteToEndnode != null)
             clearRouteClasses();
+
         DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startnodeId);
 
         ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
         visualizeRoute();
         await GraphService.Rerender();
-        StateHasChanged();
     }
     private void collapsetable (){
         expanded = expanded < 2 ? expanded + 1:0;
