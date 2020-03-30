@@ -13,7 +13,8 @@ namespace VisualGraph.Components
         public static string RouteClass = "vgpath";
         public static string PreviewClass = "vgpathpreview";
         public static string NodeNotReachableClass = "vgnodeunreachable";
-
+        public static string IterationCurrentNodeClass = "iterationnode";
+        public static string IterationClass = "vgiteration";
 
     }
 }

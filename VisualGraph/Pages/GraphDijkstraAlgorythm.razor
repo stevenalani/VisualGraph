@@ -125,7 +125,8 @@
         {
             GraphService.CurrentGraph.NodeClick += async (sender,args) => {
                 resetPreview();
-                if (args.Target.IsActive)
+                resetUnreachables();
+                if (args.Target.IsActive && !GraphService.CurrentGraphModel.Nodes.Any(x => x.Classes.Contains(AlgorithmPage.StartNodeClass) && !args.Target.Classes.Contains(AlgorithmPage.StartNodeClass)))
                 {
 
                     DijkstraAlgorithm runner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, args.Target.Id);
@@ -139,17 +140,34 @@
             };
         }
     }
+    private void clearRouteClasses()
+    {
+        removeClassFromNodesAndEdges(AlgorithmPage.RouteClass);
+    }
     private void setPreview()
     {
-        var nodes = DijkstraAlgorithmRunner.Results.Last().Distances.Where(x => x.Value != double.PositiveInfinity).Select( x => x.Key).ToList();
-        nodes.ForEach(x => x.Classes.Remove(AlgorithmPage.NodeNotReachableClass));
-        var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.StartNode)).ToList();
-        previewEdges.ForEach(x => { if (x.Classes.Contains(AlgorithmPage.NodeNotReachableClass)) x.Classes.Remove(AlgorithmPage.NodeNotReachableClass); });
+        var lastresults = DijkstraAlgorithmRunner.Results.Last();
+        var nodes = lastresults.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key).ToList();
+        nodes.ForEach(x =>
+        {
+            x.Classes.Remove(AlgorithmPage.NodeNotReachableClass);
+            x.Classes.Remove(AlgorithmPage.IterationCurrentNodeClass);
+            x.Classes.Remove(AlgorithmPage.IterationClass);
+
+        });
+
+        var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.EndNode && lastresults.StartNode == y.StartNode)).ToList();
+        lastresults.StartNode.Classes.Add(AlgorithmPage.IterationCurrentNodeClass);
+        lastresults.StartNode.Classes.Add(AlgorithmPage.IterationClass);
+        previewEdges.ForEach(x => {
+            x.Classes.Remove(AlgorithmPage.NodeNotReachableClass);
+            x.EndNode.Classes.Add(AlgorithmPage.IterationClass);
+            
+        });
     }
     private void resetPreview()
     {
-        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Remove(AlgorithmPage.PreviewClass));
-        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Remove(AlgorithmPage.PreviewClass));
+        removeClassFromNodesAndEdges(AlgorithmPage.PreviewClass);
     }
     private void setUnreachables()
     {
@@ -158,8 +176,7 @@
     }
     private void resetUnreachables()
     {
-        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Remove(AlgorithmPage.NodeNotReachableClass));
-        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Remove(AlgorithmPage.NodeNotReachableClass));
+        removeClassFromNodesAndEdges(AlgorithmPage.NodeNotReachableClass);
     }
     private async void RunDikstra(bool autostep = false)
     {
@@ -176,7 +193,7 @@
             {
 
                 DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startNodeId);
-                
+
             }
             else
             {
@@ -242,7 +259,15 @@
                 var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
                 if (!node1.Classes.Contains(AlgorithmPage.RouteClass))
                     node1.Classes.Add(AlgorithmPage.RouteClass);
-                var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
+                Edge edge;
+                if(GraphService.CurrentGraphModel.IsDirected)
+                    edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
+                else
+                {
+                    var edges = node.Edges.Where(x => (x.StartNode == node && x.EndNode == node1 || x.StartNode == node1 && x.EndNode == node));
+                    edge = edges.FirstOrDefault(x => x.Weight == edges.Min(y => y.Weight));
+                }
+
                 if (edge != null)
                 {
                     if (!edge.Classes.Contains(AlgorithmPage.RouteClass))
@@ -253,31 +278,15 @@
         }
     }
 
-    private void clearRouteClasses()
+    private void removeClassFromNodesAndEdges(string classname)
     {
-        if (ShortestRouteToEndnode != null)
-        {
-            for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
-            {
-                var node = ShortestRouteToEndnode[nodeindex].Item1;
-
-                if (node.Classes.Contains(AlgorithmPage.RouteClass))
-                    node.Classes.Remove(AlgorithmPage.RouteClass);
-
-                if (nodeindex < ShortestRouteToEndnode.Count - 1)
-                {
-                    var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
-                    if (node1.Classes.Contains(AlgorithmPage.RouteClass))
-                        node1.Classes.Remove(AlgorithmPage.RouteClass);
-                    var edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
-                    if (edge != null)
-                    {
-                        if (edge.Classes.Contains(AlgorithmPage.RouteClass))
-                            edge.Classes.Remove(AlgorithmPage.RouteClass);
-                    }
-                }
-            }
-        }
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Remove(classname));
+        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Remove(classname));
+    }
+    private void addClassToNodesAndEdges(string classname)
+    {
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => { if (!x.Classes.Contains(classname)) x.Classes.Add(classname); });
+        GraphService.CurrentGraphModel.Edges.ForEach(x => { if (!x.Classes.Contains(classname)) x.Classes.Add(classname); });
     }
     private void resetDijkstra()
     {

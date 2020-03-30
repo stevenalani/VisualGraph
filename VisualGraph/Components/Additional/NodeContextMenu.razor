@@ -83,18 +83,30 @@
 
     private async void SetStartNode()
     {
-        graphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Classes.Remove(AlgorithmPage.StartNodeClass);
-        Node.Classes.Add(AlgorithmPage.StartNodeClass);
-        modalSetStart.Show();
+        if (Node.Classes.Contains(AlgorithmPage.StartNodeClass))
+        {
+            Node.Classes.Remove(AlgorithmPage.StartNodeClass);
+        }
+        else
+        {
+            graphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Classes.Remove(AlgorithmPage.StartNodeClass);
+            Node.Classes.Add(AlgorithmPage.StartNodeClass);
+        }
         visible = false;
         await graphService.Rerender();
     }
 
     private async void SetEndNode()
     {
-        graphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Classes.Remove(AlgorithmPage.EndNodeClass);
-        Node.Classes.Add(AlgorithmPage.EndNodeClass);
-        modalSetEnd.Show();
+        if (Node.Classes.Contains(AlgorithmPage.EndNodeClass))
+        {
+            Node.Classes.Remove(AlgorithmPage.EndNodeClass);
+        }
+        else
+        {
+            graphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Classes.Remove(AlgorithmPage.EndNodeClass);
+            Node.Classes.Add(AlgorithmPage.EndNodeClass);
+        }
         visible = false;
         await graphService.Rerender();
     }

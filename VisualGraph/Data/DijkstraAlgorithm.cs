@@ -100,7 +100,16 @@ namespace VisualGraph.Data
 
                     if (previousNode != null)
                     {
-                        edgeweight = currentNode.Edges.FirstOrDefault(x => x.EndNode == currentNode && x.StartNode == previousNode).Weight;
+                        if (Model.IsDirected)
+                        {
+                            edgeweight = currentNode.Edges.FirstOrDefault(x => x.EndNode == currentNode && x.StartNode == previousNode).Weight;
+                        }
+                        else
+                        {
+                            var edges = currentNode.Edges.Where(x => x.EndNode == currentNode && x.StartNode == previousNode || x.StartNode == currentNode && x.EndNode == previousNode);
+                            edgeweight = edges.First(x => x.Weight == edges.Min(y => y.Weight)).Weight;
+                        }
+                        
                     }
                     else
                     {

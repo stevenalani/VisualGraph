@@ -115,9 +115,17 @@ namespace VisualGraph.Data
                 }
 
                 Edge edge = new Edge() { StartNode = node1, EndNode = node2, Id = (i + 1).ToString(), Weight = random.NextDouble() * 10  };
-                node1.Edges.Add(edge);
-                node2.Edges.Add(edge);
-                GraphModel.Edges.Add(edge);
+                if(GraphModel.Edges.Any(x=>x.StartNode == node1 && x.EndNode == node2))
+                {
+                    i--;
+                }
+                else
+                {
+                    node1.Edges.Add(edge);
+                    node2.Edges.Add(edge);
+                    GraphModel.Edges.Add(edge);
+                }
+                
             }
             return GraphModel;
         }
