@@ -26,7 +26,11 @@ namespace VisualGraph
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
+                    var cfg = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
+                    webBuilder.ConfigureKestrel(x => {
+                        x.ListenAnyIP(int.Parse(cfg["Hosting:Port"]));
+                        x.ListenAnyIP(443);
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }

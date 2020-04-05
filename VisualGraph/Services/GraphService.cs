@@ -145,62 +145,114 @@ namespace VisualGraph.Services
         }
         public async Task InitZoomPan(DotNetObjectReference<BasicGraph> reference)
         {
-            await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] { reference, CurrentGraphModel.Name });
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("InitPanZoom", new object[] { reference, CurrentGraphModel.Name });
+            }
+            catch { }
         }
         public async Task DestroyZoomPan()
         {
-            await JSRuntime.InvokeVoidAsync("DestroyPanZoom");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("DestroyPanZoom");
+                }
+            catch { }
         }
         public async Task DisablePan()
         {
-            await JSRuntime.InvokeVoidAsync("DisablePan");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("DisablePan");
+            }
+            catch { }
         }
         public async Task EnablePan()
         {
-            await JSRuntime.InvokeVoidAsync("EnablePan");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("EnablePan");
+            }
+            catch { }
         }
 
         public async Task<SvgPanZoomInformation> GetSvgPanZoomInformation()
         {
-            var svginfo = await JSRuntime.InvokeAsync<SvgPanZoomInformation>("GetPanZoomValues", new object[] { CurrentGraphModel.Name });
-            return svginfo;
+            try
+            {
+                var svginfo = await JSRuntime.InvokeAsync<SvgPanZoomInformation>("GetPanZoomValues", new object[] { CurrentGraphModel.Name });
+                return svginfo;
+            }
+            catch { return new SvgPanZoomInformation(); };
         }
         public async Task<SvgContainerInformation> GetSvgContainerInformation()
         {
-            var svginfo = await JSRuntime.InvokeAsync<SvgContainerInformation>("GetSvgContainerSizes", new object[] { CurrentGraphModel.Name });
+            try
+            {
+                var svginfo = await JSRuntime.InvokeAsync<SvgContainerInformation>("GetSvgContainerSizes", new object[] { CurrentGraphModel.Name });
             return svginfo;
+            }
+            catch { return new SvgContainerInformation(); };
         }
         public async Task<BrowserSizes> GetBrowserSizes()
         {
-            return await JSRuntime.InvokeAsync<BrowserSizes>("GetBrowserSizes");
+            try
+            {
+                return await JSRuntime.InvokeAsync<BrowserSizes>("GetBrowserSizes");
+            }
+            catch { return new BrowserSizes(); }
         }
         public async Task<Point2> GetTranslatedMousePos(double x, double y)
         {
-            var svgInfo = await GetSvgPanZoomInformation();
-            var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = CurrentGraphModel.Name, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } });
-            return mousePos;
+            try
+            {
+                var svgInfo = await GetSvgPanZoomInformation();
+                var mousePos = await JSRuntime.InvokeAsync<Point2>("GetTranslatedMousePos", new object[] { new { id = CurrentGraphModel.Name, x = x - svgInfo.OffsetLeft, y = y - svgInfo.OffsetTop } });
+                return mousePos;
+            }
+            catch { return new Point2(); }
         }
         public async Task UpdateBBox()
         {
-            await JSRuntime.InvokeVoidAsync("UpdateBBox");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("UpdateBBox");
+            }
+            catch { }
         }
 
         public async Task Fit()
         {
-            await JSRuntime.InvokeVoidAsync("Fit");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("Fit");
+            }
+            catch { }
         }
         public async Task Center()
         {
-            await JSRuntime.InvokeVoidAsync("Center");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("Center");
+            }
+            catch { }
         }
         public async Task Resize()
         {
-            await JSRuntime.InvokeVoidAsync("Resize");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("Resize");
+            }
+            catch { }
         }
         public async Task Crop()
         {
-            await Fit();
-            await Center();
+            try
+            {
+                await Fit();
+                await Center();
+            }
+            catch { }
         }
 
         public Task SaveGraphStyleParameters(GraphStyleParameters styleParameters = null)

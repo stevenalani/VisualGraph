@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using VisualGraph.Services;
+using VisualGraph.Shared;
 
 namespace VisualGraph
 {
@@ -28,11 +30,11 @@ namespace VisualGraph
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication( o => {
+            services.AddAuthentication(o => {
                 o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,configureOptions => {
+            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions => {
                 configureOptions.Cookie.Name = "VisualGraphCookie";
                 configureOptions.Cookie.Path = "/";
                 configureOptions.Cookie.HttpOnly = false;
@@ -52,18 +54,24 @@ namespace VisualGraph
                         .Build();
                 });
             });
-            services.AddControllers();
+            
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<IGraphService, GraphService>();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddBlazoredToast();
-            services.AddHttpClient("api",options => options.BaseAddress = new Uri("https://localhost:44362"));
+            VGAppSettings.BaseAddress = Configuration["Hosting:BaseAddress"]+"/";
+            VGAppSettings.RemoteRequestProxy = Configuration["Hosting:RemoteRequestProxy"];
+            services.AddHttpClient("api", options => options.BaseAddress = new Uri(VGAppSettings.BaseAddress));
+            services.AddHttpClient("publicapi", options => options.BaseAddress = new Uri("https://visualgraph.stevenalani.info"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddFile("Logs/customlogger/visualgraph-{Date}.txt",LogLevel.Trace);
+            
+        
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -77,7 +85,6 @@ namespace VisualGraph
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

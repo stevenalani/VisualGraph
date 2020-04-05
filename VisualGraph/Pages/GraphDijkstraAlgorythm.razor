@@ -24,15 +24,11 @@
 
         @if (GraphService.CurrentGraphModel != null)
         {
-            <form class="form-inline">
-                <h3>Dijkstra Algorithmus</h3>
-                <div class="form-group ml-1">
-                    <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
-                    <button class="btn btn-secondary" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
-                </div>
-                <div class="form-group ml-1">
-                    <button type="button" @onclick="@DijkstraCheapestRoute" class="btn btn-secondary">Günstigste Route ermitteln</button>
-                </div>
+            <h3>Dijkstra Algorithmus</h3>
+            <form class="form position-absolute">
+                    <button class="btn btn-outline-primary form-control" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
+                    <button class="btn btn-outline-primary form-control" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
+                    <button class="btn btn-outline-primary form-control" type="button" @onclick="@DijkstraCheapestRoute">Günstigste Route ermitteln</button>
             </form>
         }
         else
@@ -147,7 +143,9 @@
     private void setPreview()
     {
         var lastresults = DijkstraAlgorithmRunner.Results.Last();
-        var nodes = lastresults.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key).ToList();
+        //var nodes = lastresults.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key).ToList();
+        var allresults = DijkstraAlgorithmRunner.Results;
+        var nodes = allresults.SelectMany( x => x.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key)).ToList();
         nodes.ForEach(x =>
         {
             x.Classes.Remove(AlgorithmPage.NodeNotReachableClass);
@@ -156,7 +154,7 @@
 
         });
 
-        var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.EndNode && lastresults.StartNode == y.StartNode)).ToList();
+        var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.EndNode && !y.StartNode.Classes.Contains(AlgorithmPage.NodeNotReachableClass))).ToList();
         lastresults.StartNode.Classes.Add(AlgorithmPage.IterationCurrentNodeClass);
         lastresults.StartNode.Classes.Add(AlgorithmPage.IterationClass);
         previewEdges.ForEach(x => {

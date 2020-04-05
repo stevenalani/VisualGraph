@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:17364",
+      "applicationUrl": "http://localhost:6077",
       "sslPort": 44362
     }
   },
@@ -18,10 +18,10 @@
     "VisualGraph": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:44362;http://localhost:17364",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "https://localhost:44362;http://localhost:17364"
     }
   }
 }

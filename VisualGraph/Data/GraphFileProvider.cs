@@ -17,6 +17,7 @@ using Frontenac.Gremlinq;
 using Microsoft.AspNetCore.Mvc;
 using VisualGraph.Components;
 using VisualGraph.Data.Additional.Models;
+using VisualGraph.Shared;
 
 namespace VisualGraph.Data
 {
@@ -127,6 +128,11 @@ namespace VisualGraph.Data
             var graphpath = Path.Combine(_graphdir, graphname);
             using (var client = new WebClient())
             {
+                var proxyConfig = VGAppSettings.RemoteRequestProxy;
+                if(proxyConfig != "")
+                {
+                    client.Proxy = new WebProxy(proxyConfig);
+                }                
                 client.DownloadFile(url,tmpgraphpath);
             }
             await IsolateGraphInFile(tmpgraphpath,graphpath);

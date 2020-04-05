@@ -7,9 +7,8 @@ namespace VisualGraph.Shared
 {
     public static class VGAppSettings
     {
-        public static List<string> Roles { get; set; } = new List<string> {
-            "Administrator",
-            "Member"
-        };
+        public static string RemoteRequestProxy { get; set; } = "";
+        public static string Port { get; set; } = "";
+        public static string BaseAddress { get; set; } = "";
     }
 }
