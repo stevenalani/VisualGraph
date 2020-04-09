@@ -1,0 +1,52 @@
+﻿@using Newtonsoft.Json
+@inject IHttpClientFactory Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<Modal @ref="LoginModal">
+    <VisualGraph.Pages.LoginComponent>
+        <VisualGraph.Pages.RegisterComponent />
+    </VisualGraph.Pages.LoginComponent>
+</Modal>
+@if (!UserModel.IsAuth)
+{
+    <div class="dropdown">
+        <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="oi oi-person"></span> @(UserModel.Username != "" ? UserModel.Username : "Gast")
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <button class="dropdown-item" @onclick="() => { LoginModal.Show(); }"><span class="oi oi-account-login"></span>Anmelden oder registrieren</button>
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="dropdown">
+        <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="oi oi-person"></span> @(UserModel.Username ?? "Gast")
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="/account/manage">Verwalten</a>
+            <a class="dropdown-item" href="/account/logout"><span class="oi oi-account-logout"></span> Abmelden</a>
+        </div>
+    </div>
+}
+@code {
+    UserModel UserModel = new UserModel();
+    Modal LoginModal { get; set; }
+    Modal RegisterModal { get; set; }
+    override protected async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var isAuth = user.Identity.IsAuthenticated;
+        var HttpClient = Http.CreateClient("api");
+        var response = await HttpClient.GetAsync($"/api/account/user/{user.Identity.Name??"Gast"}");
+        var responseData = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            UserModel = JsonConvert.DeserializeObject<UserModel>(responseData);
+            UserModel.IsAuth = isAuth;
+        }
+    }
+
+}

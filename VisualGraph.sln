@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.29512.175
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualGraph", "VisualGraph\VisualGraph.csproj", "{EC2F8631-FC06-49AE-9DBF-C9C64D98AFBB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualGraph.Client", "Client\VisualGraph.Client.csproj", "{911CC655-3052-439E-8580-6E3F6CF8FB29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualGraph.Shared", "Shared\VisualGraph.Shared.csproj", "{FA143DC9-8E81-486B-9C09-44894E80A2FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{EC2F8631-FC06-49AE-9DBF-C9C64D98AFBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC2F8631-FC06-49AE-9DBF-C9C64D98AFBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC2F8631-FC06-49AE-9DBF-C9C64D98AFBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{911CC655-3052-439E-8580-6E3F6CF8FB29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{911CC655-3052-439E-8580-6E3F6CF8FB29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{911CC655-3052-439E-8580-6E3F6CF8FB29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{911CC655-3052-439E-8580-6E3F6CF8FB29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA143DC9-8E81-486B-9C09-44894E80A2FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA143DC9-8E81-486B-9C09-44894E80A2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA143DC9-8E81-486B-9C09-44894E80A2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA143DC9-8E81-486B-9C09-44894E80A2FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
