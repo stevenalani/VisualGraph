@@ -1,0 +1,15 @@
+﻿@page "/Account/Logout"
+@inject NavigationManager navigatorionManager
+@inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
+@code {
+    public string returnurl { get; set; }
+    override protected async Task OnInitializedAsync()
+    {
+        var client = httpClient;
+        var result = await client.GetAsync("api/account/logout");
+        var resultData = await result.Content.ReadAsStringAsync();
+        await JsRuntime.InvokeVoidAsync("ClearCookie");
+        navigatorionManager.NavigateTo("/", true);
+    }
+}

@@ -1,0 +1,35 @@
+﻿@inject IGraphService graphService
+@if (show) { 
+    <div class="modal fade show" id="vGModal" style=" display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">@Title</h4>
+                    <button type="button" class="close" data-dismiss="modal" @onclick="Show">&times;</button>
+                </div>
+                <div class="modal-body">
+                    @ChildContent
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" @onclick="Show">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+@code {
+    private bool show { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+    public void Show()
+    {
+        show = !show;
+    }
+    public bool Result { get; private set; }
+}

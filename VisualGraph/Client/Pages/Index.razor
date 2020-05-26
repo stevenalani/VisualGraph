@@ -1,0 +1,136 @@
+﻿@page "/"
+@using System.Threading
+@inject IGraphService graphService
+@inject NavigationManager NavigationManager
+
+    <div id="introslider" style="width:@(ContainerInformation.ParentWidth + "px");height:@(ContainerInformation.ParentHeight + "px")" class="carousel slide"  data-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-banner"><span class="bannerhighlight">V</span>isual<span class="bannerhighlight">G</span>raph</h1>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Graphen erstellen</h1>
+                    <ul>
+                        <li>Benutzer könnnen eigene Graphen tabellarisch erstellen.</li>
+                        <li>Graphen können von Websites geladen werden.</li>
+                        <li>Aus Skripten importiert werden.</li>
+                        <li>Benutzer können Graphen unter im eigenen Verzeichnis speichern.</li>
+                        <li>Gespeicherte Graphen können aus dem Benutzerverzeichnis gelöscht werden.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Graphen bearbeiten</h1>
+                    <ul>
+                        <li>Anwender können eigene so wie Standard- Graphen bearbeiten.</li>
+                        <li>Benutzer könnnen Graphen tabellarisch bearbeiten.</li>
+                        <li>Benutzer könnnen Knoten und Kanten im Rechtsklick- Kontextmenü bearbeiten.</li>
+                        <li>Knoten können per Drag and Drop Positioniert werden</li>
+                        <li>Aus Skripten importiert werden</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Graphen betrachten</h1>
+                    <ul>
+                        <li>Eigene und globale Standard- Graphen betrachten.</li>
+                        <li>Die Funktionen "Autolayout" und "Zuschneiden und Zentrieren" helfen den Überblick zu behalten</li>
+                        <li>Über die Funktionen "Pan und Zoom" kann sich der Anwender frei im Graph bewegen</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="d-flex h-100 w-100">
+                    <h1 class="introslider-title">Dijkstra Algorithmus</h1>
+                    <p>
+                        Das System lässt anwender den Dijkstra- Algorithmus ausführen und so die günstigste Route zwischen zwei Knoten ermitteln.<br />
+                        Das Ergebnis wird in Form einer Tabelle und farbig im Graph dargestellt.
+                    </p>
+                </div>
+            </div>
+
+            <a class="carousel-control-prev" href="#introslider" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#introslider" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
+        @(graphService.GetRenderFragment(withDefaultCallbacks: false).Result)
+
+
+        @code {
+            string Graphname = "IndexGraph";
+            BasicGraphModel GraphModel;
+            BasicGraph GraphComponent;
+            static Random random = new Random();
+            bool isAnimated = false;
+            System.Timers.Timer Animation = new System.Timers.Timer();
+            Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
+            SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
+            Vector2 Magnet = new Vector2(15, -1);
+
+            private async void animation(object sender,System.Timers.ElapsedEventArgs args)
+            {
+                var nodes = GraphModel.Nodes;
+
+
+                try
+                {
+                    for (var i = 0; i < nodes.Count; i++)
+                    {
+
+                        if (nodes[i].Pos.Length() > 75)
+                        {
+                            directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
+                        }
+                        nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
+                    }
+
+                    await graphService.Rerender();
+
+
+                }
+                catch { };
+
+            }
+            protected override async Task OnAfterRenderAsync(bool firstRender)
+            {
+                if (firstRender)
+                {
+                    NavigationManager.LocationChanged += endAnimation;
+                    GraphModel = graphService.CurrentGraphModel;
+                    GraphModel.Nodes.ForEach(node => directions.Add(node, Vector2.Normalize(Magnet += node.Neighbours(false).Last().Pos - node.Pos)));
+                    Animation.Interval = 1;
+                    Animation.AutoReset = true;
+                    Animation.Elapsed += animation;
+
+                    isAnimated = true;
+                    Animation.Start();
+                }
+                if (ContainerInformation.ParentWidth == 1 || ContainerInformation.ParentHeight == 1)
+                {
+                    ContainerInformation = await graphService.GetSvgContainerInformation();
+                    StateHasChanged();
+                }
+            }
+
+            private void endAnimation(object sender, LocationChangedEventArgs args)
+            {
+                if (!args.Location.EndsWith("/"))
+                {
+                    isAnimated = false;
+                    Animation.Stop();
+                    NavigationManager.LocationChanged -= endAnimation;
+                }
+            }
+
+        }

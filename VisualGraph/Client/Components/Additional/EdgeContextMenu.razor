@@ -1,0 +1,57 @@
+﻿@inject IGraphService graphService
+@inherits ContextMenu
+@if (Edge != null && visible)
+{
+<Modal @ref="ModalDelete" Title="Kante aus Graph entfernen">
+    <p>Sie sind dabei eine Kante zu entfernen.</p>
+    <button class="btn btn-success" @onclick="DeleteEdge">entfernen</button>
+</Modal>
+<div class="card contextMenu" style="position:absolute; left:@(PosX-5)px; top:@(PosY-5)px" onmouseover="window.reposctxmenu(this)">
+    <div class="card-header">
+        <h6>Kante mit ID: @Edge.Id<button type="button" @onclick="()=> { visible = false; }" class="close">x</button></h6>
+    </div>
+    <div class="card-body">
+        <EditForm Model="@Edge">
+            <div class="form-group form-inline">
+                <label for="edgeweigth">Gewicht: </label>
+                <InputNumber class="form-control" @bind-Value="Edge.Weight" @oninput="@graphService.Rerender"></InputNumber>
+            </div>
+            <div class="form-group form-inline">
+                <label for="curvescale">Kurven Weite: </label>
+                <input type="range" min="@(Edge.curveScaleLowerBound*100)" max="@(Edge.curveScaleUpperBound*100)" class="form-control-range" @onchange="calcDecimalStep" @oninput="calcDecimalStep" />
+                <span @onchange="graphService.Rerender" class="form-control">@Edge.curveScale</span>
+                <span class="form-control">@inputval</span>
+            </div>
+            <button type="button" class="btn btn-outline-danger" @onclick="ModalDelete.Show">entfernen</button>
+        </EditForm> 
+    </div>
+</div>
+}
+@code {
+    [Parameter]
+    public Edge Edge { get; set; }
+    public Modal ModalDelete;
+    private int inputval;
+
+    protected override void OnParametersSet()
+    {
+        if(Edge != null)
+        inputval = (int)(Edge.curveScale * 100f);
+    }
+
+    private async void calcDecimalStep(ChangeEventArgs args)
+    {
+        Edge.curveScale = Convert.ToInt32(args.Value) / 100f;
+        Console.WriteLine(Edge.curveScale);
+        await graphService.Rerender();
+    }
+
+    private void DeleteEdge()
+    {
+        Edge.EndNode.Edges.Remove(Edge);
+        Edge.StartNode.Edges.Remove(Edge);
+        graphService.CurrentGraphModel.Edges.Remove(Edge);
+        visible = false;
+        graphService.Rerender();
+    }
+}

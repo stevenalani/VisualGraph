@@ -1,0 +1,314 @@
+﻿@page "/algorithm/dijkstra"
+@page "/algorithm/dijkstra/{filename}"
+@using System.IO
+@using Blazored.Toast;
+
+@inherits AlgorithmPage
+@inject IGraphService GraphService
+@inject IJSRuntime JsRuntime
+@inject IToastService toastService
+
+<Modal @ref="ModalNegativeEdgeWeigths">
+    <div class="card">
+        <div class="card-header">
+            <p class="card-title">Negative Kanten gefunden</p>
+        </div>
+        <div class="card-body">
+            <p class="card-text">Es wurden negative Kanten im Graph gefunden. Der Dijkstra - Algorithmus kann nicht mit negativen Kanten umgehen. Sollen diese Kanten korrigiert werden? Dadurch wird |@lowestvalue| auf alle Kanten- Gewichte addiert!</p>
+            <button class="btn btn-outline-success" @onclick="CorrectEdgeWeights">Kanten korrigieren</button>
+        </div>
+    </div>
+</Modal>
+<div class="flex-wrapper">
+    <div class="flex-wrapper-title">
+
+        @if (GraphService.CurrentGraphModel != null)
+        {
+            <h3>Dijkstra Algorithmus</h3>
+            <form class="form position-absolute">
+                <button class="btn btn-outline-primary form-control" type="button" @onclick="@(() => RunDikstra())">Dikstra Einzelschritt</button>
+                <button class="btn btn-outline-primary form-control" type="button" @onclick="@(() => RunDikstra(true))">Dikstra ausführen</button>
+                <button class="btn btn-outline-primary form-control" type="button" @onclick="@DijkstraCheapestRoute">Günstigste Route ermitteln</button>
+            </form>
+        }
+        else
+        {
+            <h3>Dijkstra Algorithmus</h3>
+        }
+    </div>
+    <hr />
+    <div class="left-container">
+        @GraphService.GetRenderFragment().Result
+    </div>
+
+    @if (DijkstraAlgorithmRunner?.Results != null)
+    {
+        <div class="row right-container" style="@(expanded == 2?"flex-basis:100%":expanded == 0?"max-width:50px":"")">
+            <div class="expander" @onclick="@collapsetable"><span class="oi @(expanded < 2?"oi-chevron-left":"oi-chevron-right")" aria-hidden="true"></span></div>
+            <div class="expanding col card pb-5">
+                <div class="card-body">
+                    <DijkstraResultTable Results="@DijkstraAlgorithmRunner.Results" />
+                    <div>
+                        @if (ShortestRouteToEndnode != null)
+                        {
+                            if (ShortestRouteToEndnode.Count == 1)
+                            {
+                                <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) konnte nicht ermittelt werden </h5>
+                            }
+                            else
+                            {
+                                <h5>Die günstigste/kürzeste Route von @(DijkstraAlgorithmRunner.StartNode.Name ?? DijkstraAlgorithmRunner.StartNode.Id.ToString()) nach @(DijkstraAlgorithmRunner.EndNode.Name ?? DijkstraAlgorithmRunner.EndNode.Id.ToString()) </h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Reihenfolge</th>
+                                            @for (int i = 0; i < ShortestRouteToEndnode.Count; i++)
+                                            {
+                                                <th>@(i + 1)</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>ID</th>
+                                            @foreach (var node in ShortestRouteToEndnode)
+                                            {
+                                                <td>@node.Item1.Id</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Name</th>
+                                            @foreach (var node in ShortestRouteToEndnode)
+                                            {
+                                                <td>@node.Item1.Name</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Kosten</th>
+                                            @foreach (var node in ShortestRouteToEndnode)
+                                            {
+                                                <td>@node.Item2</td>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Gesamtkosten:</th>
+                                            <td>@PathCost.ToString(CultureInfo.CurrentCulture)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    }
+
+</div>
+@code {
+    Modal ModalNegativeEdgeWeigths { get; set; }
+    DijkstraAlgorithm DijkstraAlgorithmRunner;
+    List<Tuple<Node, double>> ShortestRouteToEndnode;
+    double lowestvalue => GraphService.CurrentGraphModel.Edges.Min(x => x.Weight);
+    double PathCost = 0;
+    int expanded = 1;
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            GraphService.CurrentGraph.NodeClick += async (sender, args) =>
+            {
+                resetPreview();
+                resetUnreachables();
+                if (args.Target.IsActive && !GraphService.CurrentGraphModel.Nodes.Any(x => x.Classes.Contains(AlgorithmPage.StartNodeClass) && !args.Target.Classes.Contains(AlgorithmPage.StartNodeClass)))
+                {
+
+                    DijkstraAlgorithm runner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, args.Target.Id);
+                    runner.Iterate(auto: true);
+                    var lastresult = runner.Results.Last();
+                    var nodes = lastresult.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key).ToList();
+                    var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.StartNode)).ToList();
+                    nodes.ForEach(x => { if (!x.Classes.Contains(AlgorithmPage.PreviewClass)) x.Classes.Add(AlgorithmPage.PreviewClass); });
+                    previewEdges.ForEach(x => { if (!x.Classes.Contains(AlgorithmPage.PreviewClass)) x.Classes.Add(AlgorithmPage.PreviewClass); });
+                }
+            };
+        }
+    }
+    private void clearRouteClasses()
+    {
+        removeClassFromNodesAndEdges(AlgorithmPage.RouteClass);
+    }
+    private void setPreview()
+    {
+        var lastresults = DijkstraAlgorithmRunner.Results.Last();
+
+        var allresults = DijkstraAlgorithmRunner.Results;
+        var nodes = allresults.SelectMany(x => x.Distances.Where(x => x.Value != double.PositiveInfinity).Select(x => x.Key)).ToList();
+        nodes.ForEach(x =>
+        {
+            x.Classes.Remove(AlgorithmPage.NodeNotReachableClass);
+            x.Classes.Remove(AlgorithmPage.IterationCurrentNodeClass);
+            x.Classes.Remove(AlgorithmPage.IterationClass);
+
+        });
+
+        var previewEdges = nodes.SelectMany(x => x.Edges.Where(y => x == y.EndNode && !y.StartNode.Classes.Contains(AlgorithmPage.NodeNotReachableClass))).ToList();
+        lastresults.StartNode.Classes.Add(AlgorithmPage.IterationCurrentNodeClass);
+        lastresults.StartNode.Classes.Add(AlgorithmPage.IterationClass);
+        previewEdges.ForEach(x =>
+        {
+            x.Classes.Remove(AlgorithmPage.NodeNotReachableClass);
+            if (!x.EndNode.Classes.Contains(AlgorithmPage.IterationClass))
+            {
+                x.EndNode.Classes.Add(AlgorithmPage.IterationClass);
+            }
+
+        });
+    }
+    private void resetPreview()
+    {
+        removeClassFromNodesAndEdges(AlgorithmPage.PreviewClass);
+    }
+    private void setUnreachables()
+    {
+        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Add(AlgorithmPage.NodeNotReachableClass));
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Add(AlgorithmPage.NodeNotReachableClass));
+    }
+    private void resetUnreachables()
+    {
+        removeClassFromNodesAndEdges(AlgorithmPage.NodeNotReachableClass);
+    }
+    private async void RunDikstra(bool autostep = false)
+    {
+        resetPreview();
+        if (lowestvalue < 0)
+        {
+            ModalNegativeEdgeWeigths.Show();
+            return;
+        }
+        if (this.DijkstraAlgorithmRunner == null)
+        {
+
+            var startNodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(StartNodeClass))?.Id ?? "-1";
+            if (startNodeId != "-1")
+            {
+
+                DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startNodeId);
+
+            }
+            else
+            {
+                toastService.ShowError("Es muss ein Startknoten per Rechtsklick gewählt werden.");
+                return;
+            }
+            clearRouteClasses();
+            ShortestRouteToEndnode = null;
+            setUnreachables();
+        }
+        if (DijkstraAlgorithmRunner.RemainingSteps > 0)
+        {
+            DijkstraAlgorithmRunner.Iterate(autostep);
+            setPreview();
+            await GraphService.Rerender();
+        }
+        else
+        {
+            toastService.ShowInfo("Es wurden alle Knoten verarbeitet. Der Algorithmus beginnt erneut");
+            removeClassFromNodesAndEdges(AlgorithmPage.IterationCurrentNodeClass);
+            removeClassFromNodesAndEdges(AlgorithmPage.IterationClass);
+            resetUnreachables();
+            DijkstraAlgorithmRunner = null;
+            RunDikstra(autostep);
+        }
+    }
+
+    private async void DijkstraCheapestRoute()
+    {
+        if (lowestvalue < 0)
+        {
+            ModalNegativeEdgeWeigths.Show();
+            return;
+        }
+        PathCost = 0;
+        var startnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.StartNodeClass))?.Id ?? "-1";
+        var endnodeId = GraphService.CurrentGraphModel.Nodes.FirstOrDefault(x => x.Classes.Contains(AlgorithmPage.EndNodeClass))?.Id ?? "-1";
+        if (startnodeId == "-1" || endnodeId == "-1")
+        {
+            toastService.ShowError("Es muss ein Start- und Endknoten per Rechtsklick gewählt werden.");
+            return;
+        }
+        if (ShortestRouteToEndnode != null)
+            clearRouteClasses();
+
+        DijkstraAlgorithmRunner = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startnodeId);
+
+        ShortestRouteToEndnode = DijkstraAlgorithmRunner.GetShortestRoute(startnodeId, endnodeId);
+        visualizeRoute();
+        await GraphService.Rerender();
+    }
+    private void collapsetable()
+    {
+        expanded = expanded < 2 ? expanded + 1 : 0;
+        StateHasChanged();
+    }
+    private void visualizeRoute()
+    {
+        for (int nodeindex = 0; nodeindex < ShortestRouteToEndnode.Count; nodeindex++)
+        {
+            var node = ShortestRouteToEndnode[nodeindex].Item1;
+
+            if (!node.Classes.Contains(AlgorithmPage.RouteClass))
+                node.Classes.Add(AlgorithmPage.RouteClass);
+
+            if (nodeindex < ShortestRouteToEndnode.Count - 1)
+            {
+                var node1 = ShortestRouteToEndnode[nodeindex + 1].Item1;
+                if (!node1.Classes.Contains(AlgorithmPage.RouteClass))
+                    node1.Classes.Add(AlgorithmPage.RouteClass);
+                Edge edge;
+                if (GraphService.CurrentGraphModel.IsDirected)
+                    edge = node.Edges.FirstOrDefault(x => (x.StartNode == node && x.EndNode == node1));
+                else
+                {
+                    var edges = node.Edges.Where(x => (x.StartNode == node && x.EndNode == node1 || x.StartNode == node1 && x.EndNode == node));
+                    edge = edges.FirstOrDefault(x => x.Weight == edges.Min(y => y.Weight));
+                }
+
+                if (edge != null)
+                {
+                    if (!edge.Classes.Contains(AlgorithmPage.RouteClass))
+                        edge.Classes.Add(AlgorithmPage.RouteClass);
+                    PathCost += edge.Weight;
+                }
+            }
+        }
+    }
+
+    private void removeClassFromNodesAndEdges(string classname)
+    {
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => x.Classes.Remove(classname));
+        GraphService.CurrentGraphModel.Edges.ForEach(x => x.Classes.Remove(classname));
+    }
+    private void addClassToNodesAndEdges(string classname)
+    {
+        GraphService.CurrentGraphModel.Nodes.ForEach(x => { if (!x.Classes.Contains(classname)) x.Classes.Add(classname); });
+        GraphService.CurrentGraphModel.Edges.ForEach(x => { if (!x.Classes.Contains(classname)) x.Classes.Add(classname); });
+    }
+    private void resetDijkstra()
+    {
+        DijkstraAlgorithmRunner = null;
+        ShortestRouteToEndnode = null;
+    }
+    private async void CorrectEdgeWeights()
+    {
+        var absVal = Math.Abs(lowestvalue);
+        foreach (var edge in GraphService.CurrentGraphModel.Edges)
+        {
+            edge.Weight += absVal;
+        }
+        await GraphService.Rerender();
+    }
+
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GraphStyleParametersPOCO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Padding>3</Padding>
+  <TextSize>1</TextSize>
+  <TextColor>#000000</TextColor>
+  <NodeRadius>2.2</NodeRadius>
+  <NodeStrokeColor>rgba(0, 79, 224, 0.9)</NodeStrokeColor>
+  <NodeStrokeWidth>0.2</NodeStrokeWidth>
+  <NodeFill>rgba(16,200, 255)</NodeFill>
+  <NodeActiveFill>rgba(0, 79, 224,1)</NodeActiveFill>
+  <NodeStartFill>rgba(50, 255, 0, 1)</NodeStartFill>
+  <NodeEndFill>rgba(255,50,0,1)</NodeEndFill>
+  <EdgeActiveStrokeColor>rgba(0, 79, 224, 1)</EdgeActiveStrokeColor>
+  <EdgeStrokeColor>rgba(125,150,125,1)</EdgeStrokeColor>
+  <EdgeWidth>0.2</EdgeWidth>
+  <EdgeRouteColor>rgba(125,255,125,1)</EdgeRouteColor>
+  <EdgeRouteWidth>0.4</EdgeRouteWidth>
+  <EdgeHighlitingColor>rgba(255,100,100,1)</EdgeHighlitingColor>
+  <EdgeHighlitingWidth>0.4</EdgeHighlitingWidth>
+</GraphStyleParametersPOCO>

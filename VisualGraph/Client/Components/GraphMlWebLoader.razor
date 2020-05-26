@@ -1,0 +1,86 @@
+﻿@inject IGraphService graphService
+@inject HttpClient httpClient
+<div class="card">
+    <div class="card-body">
+
+        @if (graphToGraphMlMapping == null)
+        {
+            <div class="card-header">
+                <p class="card-title">Externen Graph aus Internet laden</p>
+            </div>
+            <div class="form-group form-inline">
+                <label for="graphName">Graphname: </label>
+                <input type="text" @bind-value="graphName" />
+            </div>
+            <div class="form-group form-inline">
+                <label for="graphName">Graph- URL: </label>
+                <input type="url" @bind-value="graphUrl" />
+
+            </div>
+            <button class="btn btn-success" @onclick="LoadGraph">Load Graph</button>
+        }
+        else
+        {
+            <div class="card-header">
+                <p class="card-title">Externe Grapheigenschaften an interne Grapheigenschaften binden</p>
+            </div>
+            <h5>Knoten- Eigenschaften</h5>
+            foreach (var kvp in graphToGraphMlMapping.Mappings["Node"])
+            {
+                <div class="form-group form-inline">
+                    <label for="@kvp.Key">@kvp.Key:</label>
+                    <select class="form-control" id="@kvp.Key" @onchange="@((args) => { graphToGraphMlMapping.Mappings["Node"][kvp.Key] = args.Value.ToString(); })">
+                        <option></option>
+                        @foreach (var foundKey in graphToGraphMlMapping.FoundNodeKeys)
+                        {
+                            var inlist = graphToGraphMlMapping.Mappings["Node"].Any(x => x.Value == foundKey && x.Key != kvp.Key);
+                            if (!inlist)
+                            {
+                                <option>@foundKey</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+            <h5>Kanten- Eigenschaften</h5>
+            foreach (var kvp in graphToGraphMlMapping.Mappings["Edge"])
+            {
+                <div class="form-group form-inline">
+                    <label for="@kvp.Key">@kvp.Key:</label>
+                    <select class="form-control" id="@kvp.Key" @onchange="@((args) => { graphToGraphMlMapping.Mappings["Edge"][kvp.Key] = args.Value.ToString(); })">
+                        <option></option>
+                        @foreach (var foundKey in graphToGraphMlMapping.FoundEdgeKeys)
+                        {
+                            var inlist = graphToGraphMlMapping.Mappings["Edge"].Any(x => x.Value == foundKey && x.Key != kvp.Key);
+                            if (!inlist)
+                            {
+                                <option>@foundKey</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+            <button class="btn btn-success" @onclick="MapGraphProps">Load Graph</button>
+        }
+    </div>
+</div>
+@code {
+    private string graphUrl { get; set; }
+    private string graphName { get; set; }
+    BasicGraphToGraphMlMapping graphToGraphMlMapping { get; set; }
+    [Parameter]
+    public EventCallback OnDone { get; set; }
+    private async void LoadGraph()
+    {
+        var graphmodel = await httpClient.GetJsonAsync<BasicGraphToGraphMlMapping>($"api/Graph/loadfromweb?url={graphUrl}&name={graphName}");
+    }
+    private async void MapGraphProps()
+    {
+        graphToGraphMlMapping.ExecuteMappingOfValues();
+        graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraph;
+        await graphService.LayoutGraph();
+        await OnDone.InvokeAsync(null);
+        await graphService.SaveGraph();
+        await graphService.Rerender();
+    }
+}
