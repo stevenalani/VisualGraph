@@ -1,4 +1,5 @@
 ﻿@inject IGraphService graphService
+@inherits GraphInternalUI
 @((MarkupString)$"<text class=\"nodeText\" text-anchor=\"middle\" x=\"{ Node.PosXText }\" y=\"{ (Node.Pos.Y + 2 *graphService.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\">{Node.Name}</text>")
 @if (Node.IsActive)
 {
@@ -32,5 +33,7 @@
     public EventCallback<TouchEventArgs> ontouchenter { get; set; }
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchend { get; set; }
+
+    
 
 }

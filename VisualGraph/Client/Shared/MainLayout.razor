@@ -6,9 +6,11 @@
 @graphService.GetCssMarkup().Result
 <BlazoredToasts Position="ToastPosition.TopLeft"
                 Timeout="5"
+                IconType="IconType.FontAwesome"
                 SuccessClass="success-toast-override"
-                SuccessIconClass="oi oi-thumbs-up"
-                ErrorIconClass="oi oi-bug" />
+                SuccessIcon="oi oi-thumbs-up"
+                ErrorIcon="oi oi-bug" 
+                InfoIcon="oi oi-lightbulb"/>
 <div class="sidebar">
     <NavMenu />
 </div>
@@ -57,6 +59,6 @@
     {
         //await graphService.LoadGraphStyleParameters();
         StateHasChanged();
-        base.OnInitialized();
+        await base.OnInitializedAsync();
     }
 }

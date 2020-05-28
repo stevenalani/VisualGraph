@@ -1,4 +1,5 @@
 ﻿@inject IGraphService graphService
+@inherits GraphInternalUI
 <g class="@Edge.Activeclass">
     <path class="@(((ICSSProperties)Edge).ClassesProppertie) edge @Edge.Activeclass"
           d="M @startPos.X.ToString(CultureInfo.InvariantCulture) @startPos.Y.ToString(CultureInfo.InvariantCulture) 

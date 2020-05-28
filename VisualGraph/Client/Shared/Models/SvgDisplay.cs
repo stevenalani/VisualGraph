@@ -75,10 +75,10 @@ namespace VisualGraph.Client.Shared.Models
         {
             GraphWidth = width;
         }
-        public async Task<bool> UpdateDisplaySettings(SvgPanZoomInformation svgPanZoomInformation)
+        public Task<bool> UpdateDisplaySettings(SvgPanZoomInformation svgPanZoomInformation)
         {
             bool hasChanges = false;
-            if (svgPanZoomInformation == null) return hasChanges;
+            if (svgPanZoomInformation == null) return Task.FromResult(hasChanges);
             if (svgPanZoomInformation.PanZoomHeight != GraphHeight)
             {
                 GraphHeight = svgPanZoomInformation.PanZoomHeight;
@@ -109,7 +109,7 @@ namespace VisualGraph.Client.Shared.Models
                 hasChanges = true;
             }
 
-            return hasChanges;
+            return Task.FromResult(hasChanges);
         }
         public bool UpdateDisplaySettings(SvgContainerInformation svgContainerInformation)
         {

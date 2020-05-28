@@ -17,11 +17,15 @@ using VisualGraph.Shared.Models;
 using VisualGraph.Client.Components;
 using VisualGraph.Client.Shared;
 using System.Net.Http;
+using System.Net.Http.Json;
 
 
 using System.Collections.Generic;
 using VisualGraph.Client.Shared.Models;
 using System.Globalization;
+using VisualGraph.Client.Components.Additional;
+using Node = VisualGraph.Shared.Models.Node;
+using VisualGraph.Shared.Models.Interfaces;
 
 namespace VisualGraph.Client.Services
 {
@@ -48,11 +52,11 @@ namespace VisualGraph.Client.Services
         }
         public async Task<BasicGraphModel[]> GetAllGraphs()
         {
-            return (await _httpClient.GetJsonAsync<IEnumerable<BasicGraphModelPoco>>("api/Graph/GetGraphModels")).ToArray();
+            return (await _httpClient.GetFromJsonAsync<IEnumerable<BasicGraphModelPoco>>("api/Graph/GetGraphModels")).ToArray();
         }
         public async Task<BasicGraphModel> GetGraph(string filename)
         {
-            var graphResponse = await _httpClient.GetJsonAsync<BasicGraphModelPoco>($"api/Graph/GetGraphModel/{filename}");
+            var graphResponse = await _httpClient.GetFromJsonAsync<BasicGraphModelPoco>($"api/Graph/GetGraphModel/{filename}");
             graphResponse.Nodes = graphResponse.NodesPoco.Select(n => new VisualGraph.Shared.Models.Node
             {
                 Name = n.Name,
@@ -93,7 +97,7 @@ namespace VisualGraph.Client.Services
         public async Task<string[]> GetGraphFilenames()
         {
             //Get
-            var graphFilenames = await _httpClient.GetJsonAsync<IEnumerable<string>>($"api/Graph/GetGraphFilenames");
+            var graphFilenames = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api/Graph/GetGraphFilenames");
             return graphFilenames.ToArray();
         }
         public async Task<bool> SaveGraph(string filename = "")
@@ -128,7 +132,7 @@ namespace VisualGraph.Client.Services
         private async Task<bool> WriteGraph(BasicGraphModel graph, string filename)
         {
             
-            return await _httpClient.PostJsonAsync<bool>($"api/Graph/SaveGraph/{filename}",new BasicGraphModelPoco(graph));
+            return await (await _httpClient.PostAsJsonAsync($"api/Graph/SaveGraph/{filename}",new BasicGraphModelPoco(graph))).Content.ReadFromJsonAsync<bool>();
         }
 
         public Task LayoutGraph(double scalex = 2.2, double scaley = 2.2)
@@ -300,7 +304,7 @@ namespace VisualGraph.Client.Services
         }
         public async Task LoadGraphStyleParameters()
         {
-            GraphStyleParametersPOCO styleParametersPOCO = await _httpClient.GetJsonAsync<GraphStyleParametersPOCO>("api/Settings/GetGraphStyle");
+            GraphStyleParametersPOCO styleParametersPOCO = await _httpClient.GetFromJsonAsync<GraphStyleParametersPOCO>("api/Settings/GetGraphStyle");
             GraphStyleParameters.InitFromPoco(styleParametersPOCO);
             await Rerender();
             //SaveGraphStyleParameters();
@@ -363,7 +367,7 @@ namespace VisualGraph.Client.Services
             var fragment = new RenderFragment(builder =>
             {
                 builder.OpenComponent<SettingsCSS>(0);
-                builder.AddComponentReferenceCapture(2,
+                builder.AddComponentReferenceCapture(1,
                 inst =>
                 {
                     SettingsCSS = (SettingsCSS)inst;
@@ -391,22 +395,67 @@ namespace VisualGraph.Client.Services
         }
         public async Task Rerender()
         {
-            if(CurrentGraph != null && await CurrentGraph?.IsRendered)
+            if(CurrentGraph != null && CurrentGraph.IsRendered)
             {
                 await CurrentGraph.ChangedState();
             }
-            if (SettingsCSS != null && await SettingsCSS?.IsRendered) {
+            if (SettingsCSS != null && SettingsCSS.IsRendered) {
                 await SettingsCSS.ChangedState();
             }
-            if (Settings != null && await Settings?.IsRendered) {
+            if (Settings != null && Settings.IsRendered) {
                 
                 await Settings.ChangedState();
             }
-            if (GraphEditForm != null && await GraphEditForm?.IsRendered) {
+            if (GraphEditForm != null && GraphEditForm.IsRendered) {
                 await GraphEditForm.ChangedState();
             }
         }
+        public async Task Rerender(VisualGraph.Shared.Models.Node node = null) 
+        {
+            
+                if (CurrentGraph != null && CurrentGraph.IsRendered)
+                {
+                    Console.WriteLine(node.Name);
+                    NodeComponent component = CurrentGraph.NodeComponents.FirstOrDefault(x => x.Node.Name == node.Name);
+                    Console.WriteLine(component.Node.Name);
+                    await component.ChangedState();
+                }
+            
+        }
+        public async Task Rerender(VisualGraph.Shared.Models.Edge edge = null)
+        {
+            if (CurrentGraph != null && CurrentGraph.IsRendered)
+            {
+                var component = CurrentGraph.EdgeComponents.SingleOrDefault(x => x.Edge == edge);
+                Console.WriteLine(component.GetType().Name);
+                if (component != null && component.IsRendered)
+                {
+                   await component.ChangedState();
+                }
+            }
+            
+        }
+        public async Task Rerender<T>() where T : GraphInternalUI
+        {
+            if (typeof(T) == typeof(BasicGraph) && CurrentGraph != null && CurrentGraph.IsRendered)
+            {
+                await CurrentGraph.ChangedState();
+            }
+            else if (typeof(T) == typeof(SettingsCSS) && SettingsCSS != null && SettingsCSS.IsRendered)
+            {
+                await SettingsCSS.ChangedState();
+            }
+            else if(typeof(T) == typeof(Settings) && Settings != null && Settings.IsRendered)
+            {
 
+                await Settings.ChangedState();
+            }
+            else if(typeof(T) == typeof(GraphEditForm) && GraphEditForm != null && GraphEditForm.IsRendered)
+            {
+                await GraphEditForm.ChangedState();
+            }
+
+        }
         public Task<RenderFragment> GetEditFormRenderFragment()
         {
             var fragment = new RenderFragment(builder =>

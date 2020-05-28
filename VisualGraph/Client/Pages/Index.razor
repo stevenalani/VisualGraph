@@ -68,40 +68,37 @@
 
 
         @code {
-            string Graphname = "IndexGraph";
-            BasicGraphModel GraphModel;
-            BasicGraph GraphComponent;
-            static Random random = new Random();
-            bool isAnimated = false;
-            System.Timers.Timer Animation = new System.Timers.Timer();
-            Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
-            SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
-            Vector2 Magnet = new Vector2(15, -1);
+                BasicGraphModel GraphModel;
+                BasicGraph GraphComponent;
+                static Random random = new Random();
+                System.Timers.Timer Animation = new System.Timers.Timer();
+                Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
+                SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
+                Vector2 Magnet = new Vector2(15, -1);
 
-            private async void animation(object sender,System.Timers.ElapsedEventArgs args)
-            {
-                var nodes = GraphModel.Nodes;
-
-
-                try
+                private async void animation(object sender,System.Timers.ElapsedEventArgs args)
                 {
-                    for (var i = 0; i < nodes.Count; i++)
+                    var nodes = GraphModel.Nodes;
+
+
+                    try
                     {
-
-                        if (nodes[i].Pos.Length() > 75)
+                        for (var i = 0; i < nodes.Count; i++)
                         {
-                            directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
+
+                            if (nodes[i].Pos.Length() > 75)
+                            {
+                                directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
+                            }
+                            nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
+                            await graphService.Rerender(nodes[i]);
                         }
-                        nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
+
+
                     }
-
-                    await graphService.Rerender();
-
+                    catch { };
 
                 }
-                catch { };
-
-            }
             protected override async Task OnAfterRenderAsync(bool firstRender)
             {
                 if (firstRender)
@@ -109,11 +106,10 @@
                     NavigationManager.LocationChanged += endAnimation;
                     GraphModel = graphService.CurrentGraphModel;
                     GraphModel.Nodes.ForEach(node => directions.Add(node, Vector2.Normalize(Magnet += node.Neighbours(false).Last().Pos - node.Pos)));
-                    Animation.Interval = 1;
+                    Animation.Interval = 14;
                     Animation.AutoReset = true;
                     Animation.Elapsed += animation;
 
-                    isAnimated = true;
                     Animation.Start();
                 }
                 if (ContainerInformation.ParentWidth == 1 || ContainerInformation.ParentHeight == 1)
@@ -127,7 +123,6 @@
             {
                 if (!args.Location.EndsWith("/"))
                 {
-                    isAnimated = false;
                     Animation.Stop();
                     NavigationManager.LocationChanged -= endAnimation;
                 }

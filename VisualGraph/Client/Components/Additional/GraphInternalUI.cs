@@ -19,7 +19,7 @@ namespace VisualGraph.Client.Components.Additional
             return Task.CompletedTask;
         }
 
-        public Task<bool> IsRendered => Task.FromResult(isRendered);
+        public bool IsRendered => isRendered;
         protected override Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender) { isRendered = true; }

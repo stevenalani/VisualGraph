@@ -16,14 +16,11 @@ namespace VisualGraph.Client
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<Client.App>("app");
-            builder.Services.AddSingleton(sp => {
-                HttpClient httpClient = new HttpClient()
+            builder.Services.AddTransient(sp =>
+                new HttpClient
                 {
-                    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress),
-                };
-
-                return httpClient;
-            });
+                    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+                });
             //builder.Configuration.JsonSerializerOptions.Converters.Add(new Vector2Converter());
             builder.Services.AddBlazoredToast();
             builder.Services.AddSingleton<IGraphService, GraphService>();

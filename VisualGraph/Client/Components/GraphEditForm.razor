@@ -219,7 +219,6 @@
 }
 @code {
     private ClaimsPrincipal User { get; set; }
-    private bool isGlobal = false;
     private async void SaveGraph()
     {
         var issaved = await GraphService.SaveGraph(GraphService.CurrentGraphModel.Name);

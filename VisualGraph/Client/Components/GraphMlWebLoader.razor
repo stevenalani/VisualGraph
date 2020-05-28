@@ -72,7 +72,7 @@
     public EventCallback OnDone { get; set; }
     private async void LoadGraph()
     {
-        var graphmodel = await httpClient.GetJsonAsync<BasicGraphToGraphMlMapping>($"api/Graph/loadfromweb?url={graphUrl}&name={graphName}");
+        var graphmodel = await httpClient.GetFromJsonAsync<BasicGraphToGraphMlMapping>($"api/Graph/loadfromweb?url={graphUrl}&name={graphName}");
     }
     private async void MapGraphProps()
     {

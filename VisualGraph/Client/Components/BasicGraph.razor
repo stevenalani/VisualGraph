@@ -68,22 +68,22 @@
                     {
 
                         <EdgeComponent Edge="edge" HasReversedEdge="false" IsDirected="true"
-                                        @onclick="(args) => { OnEdgeClick(args, edge); }"
-                                        @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
-                                        @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
-                                        @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
-                                        @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
-                                        @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
+                                       @onclick="(args) => { OnEdgeClick(args, edge); }"
+                                       @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
+                                       @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
+                                       @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
+                                       @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
+                                       @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
                     }
                     else
                     {
                         <EdgeComponent Edge="edge" HasReversedEdge="true" IsDirected="true"
-                                        @onclick="(args) => { OnEdgeClick(args, edge); }"
-                                        @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
-                                        @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
-                                        @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
-                                        @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
-                                        @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
+                                       @onclick="(args) => { OnEdgeClick(args, edge); }"
+                                       @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
+                                       @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
+                                       @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
+                                       @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
+                                       @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
                     }
                 }
                 else
@@ -92,27 +92,27 @@
                     if (reverseEdge == null)
                     {
                         <EdgeComponent Edge="edge" HasReversedEdge="false" IsDirected="false"
-                                        @onclick="(args) => { OnEdgeClick(args, edge); }"
-                                        @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
-                                        @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
-                                        @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
-                                        @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
-                                        @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
+                                       @onclick="(args) => { OnEdgeClick(args, edge); }"
+                                       @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
+                                       @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
+                                       @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
+                                       @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
+                                       @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
                     }
                 }
-                
+
 
             }
         }
-        @foreach (var node in graphService.CurrentGraphModel.Nodes)
-        {
-            <NodeComponent Node="node" 
-                            @onclick="(args) => { OnNodeClick(args, node); }"
-                            @onmousedown="(args) => { OnNodeMouseDown(args, node); }"
-                            @onmouseup="(args) => { OnNodeMouseUp(args, node); }"
-                            @ontouchstart="(args) => { OnNodeTouchStart(args, node); }"
-                            @ontouchenter="(args) => { OnNodeTouchEnter(args, node); }"
-                            @ontouchend="(args) => { OnNodeTouchEnd(args, node); }" />
+        
+        @{
+
+            var i = 0;
+            foreach (var node in NodeRenderFragments)
+            {
+                @node
+              
+            }
         }
     </svg>
     <div id="legend">
@@ -140,8 +140,9 @@ else
     EdgeContextMenu edgeContextMenu;
     NodeContextMenu nodeContextMenu;
     public SvgDisplay SvgDisplay;
-    public List<EdgeComponent> EdgeComponents = new List<EdgeComponent>();
-    public List<NodeComponent> NodeComponents = new List<NodeComponent>();
+    public List<EdgeComponent> EdgeComponents { get; set; }
+    public List<NodeComponent> NodeComponents { get; set; }
+    public List<RenderFragment> NodeRenderFragments { get; set; } = new List<RenderFragment>();
 
     private DotNetObjectReference<BasicGraph> dotnetreference;
 
@@ -177,7 +178,22 @@ else
         if (graphService.CurrentGraphModel != null && oldGraphName != graphService.CurrentGraphModel.Name)
         {
             oldGraphName = graphService.CurrentGraphModel.Name;
-            NodeComponents = graphService.CurrentGraphModel.Nodes.Select(x => new NodeComponent()).ToList();
+            for(int i = 0; i< graphService.CurrentGraphModel.Nodes.Count; i++)
+            {
+                NodeRenderFragments.Add(new RenderFragment(
+                   builder =>
+                   {
+                       builder.OpenComponent<NodeComponent>(3*i);
+                       builder.AddComponentReferenceCapture(3*i+1,
+                           inst =>
+                           {
+                               NodeComponents.Add((NodeComponent)inst);
+                           });
+                       builder.AddAttribute(3 * i + 2, "Node", graphService.CurrentGraphModel.Nodes[i]);
+                       builder.CloseComponent();
+                   })
+                );
+            }
             await graphService.Crop();
             StateHasChanged();
             return;
@@ -197,14 +213,21 @@ else
     public bool NodeDragStarted = false;
     public bool EdgeDragStarted = false;
 
-    public event EventHandler<MouseEventArgs> SvgClick;
-    public event EventHandler<MouseEventArgs> SvgMouseDown;
-    public event EventHandler<MouseEventArgs> SvgMouseUp;
-    public event EventHandler<MouseEventArgs> SvgMouseMove;
-    public event EventHandler<WheelEventArgs> SvgMouseWheel;
-    public event EventHandler<KeyboardEventArgs> SvgKeyDown;
+    public event EventHandler<MouseEventArgs>
+        SvgClick;
+    public event EventHandler<MouseEventArgs>
+        SvgMouseDown;
+    public event EventHandler<MouseEventArgs>
+        SvgMouseUp;
+    public event EventHandler<MouseEventArgs>
+        SvgMouseMove;
+    public event EventHandler<WheelEventArgs>
+        SvgMouseWheel;
+    public event EventHandler<KeyboardEventArgs>
+        SvgKeyDown;
 
-    public event EventHandler<TouchEventArgs> SvgTouchMove;
+    public event EventHandler<TouchEventArgs>
+        SvgTouchMove;
 
     public event EventHandler<GraphMouseEventArgs<Node>> NodeClick;
     public event EventHandler<GraphMouseEventArgs<Node>> NodeMouseDown;

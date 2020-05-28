@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using VisualGraph.Client.Components;
+using VisualGraph.Client.Components.Additional;
 using VisualGraph.Client.Shared.Models;
 using VisualGraph.Shared.Models;
+using VisualGraph.Shared.Models.Interfaces;
 
 namespace VisualGraph.Client.Services
 {
@@ -47,5 +49,8 @@ namespace VisualGraph.Client.Services
         public Task<RenderFragment> GetSettingsRenderFragment();
         public Task<RenderFragment> GetEditFormRenderFragment();
         public Task Rerender();
+        public Task Rerender(Node instance);
+        public Task Rerender(Edge instance);
+        public Task Rerender<T>() where T : GraphInternalUI;
     }
 }
