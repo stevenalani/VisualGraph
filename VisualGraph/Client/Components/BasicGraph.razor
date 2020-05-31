@@ -1,5 +1,4 @@
-﻿@inject IGraphService GraphService
-@inherits GraphInternalUI
+﻿@inherits GraphInternalUI
 
 @if (graphService.CurrentGraphModel != null && SvgDisplay != null)
 {
@@ -48,7 +47,8 @@
                 <line x1="3.5" y1="0" x2="3.5" y2="7" stroke="@CoordinateAxis.CoordinateSystemColor"></line>
             </marker>
         </defs>
-        @CoordinateAxis.GenerateForGraphRange(graphService.CurrentGraphModel.ConvexHull[0].X, graphService.CurrentGraphModel.ConvexHull[0].Y, graphService.CurrentGraphModel.ConvexHull[1].X, graphService.CurrentGraphModel.ConvexHull[1].Y)
+        <AxisComponent @ref="@CoordinateSystemComponent"/>
+        <!--CoordinateAxis.GenerateForGraphRange(graphService.CurrentGraphModel.ConvexHull[0].X, graphService.CurrentGraphModel.ConvexHull[0].Y, graphService.CurrentGraphModel.ConvexHull[1].X, graphService.CurrentGraphModel.ConvexHull[1].Y)-->
         @if (activenode != null)
         {
             <line x1="@activenode.PosXText" y1="@activenode.PosYText" x2="0" y2="@activenode.PosYText" stroke="rgba(0,0,0,0.5)" stroke-width="0.1"></line>
@@ -66,24 +66,11 @@
 
                     if (reverseEdge == null)
                     {
-
-                        <EdgeComponent Edge="edge" HasReversedEdge="false" IsDirected="true"
-                                       @onclick="(args) => { OnEdgeClick(args, edge); }"
-                                       @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
-                                       @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
-                                       @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
-                                       @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
-                                       @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
+                        @RenderFragmentEdge(edge, false, true);
                     }
                     else
                     {
-                        <EdgeComponent Edge="edge" HasReversedEdge="true" IsDirected="true"
-                                       @onclick="(args) => { OnEdgeClick(args, edge); }"
-                                       @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
-                                       @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
-                                       @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
-                                       @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
-                                       @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
+                        @RenderFragmentEdge(edge, true, true);
                     }
                 }
                 else
@@ -91,28 +78,16 @@
 
                     if (reverseEdge == null)
                     {
-                        <EdgeComponent Edge="edge" HasReversedEdge="false" IsDirected="false"
-                                       @onclick="(args) => { OnEdgeClick(args, edge); }"
-                                       @onmousedown="(args) => { OnEdgeMouseDown(args, edge); }"
-                                       @onmouseup="(args) => { OnEdgeMouseUp(args, edge); }"
-                                       @ontouchstart="(args) => { OnEdgeTouchStart(args, edge); }"
-                                       @ontouchenter="(args) => { OnEdgeTouchEnter(args, edge); }"
-                                       @ontouchend="(args) => { OnEdgeTouchEnd(args, edge); }" />
+                        @RenderFragmentEdge(edge, false, false);
                     }
                 }
 
 
             }
         }
-        
-        @{
-
-            var i = 0;
-            foreach (var node in NodeRenderFragments)
-            {
-                @node
-              
-            }
+        @foreach (var node in graphService.CurrentGraphModel.Nodes)
+        {
+            @RenderFragmentNode(node)
         }
     </svg>
     <div id="legend">
@@ -135,15 +110,13 @@ else
 
 
 @code {
-    public IGraphService graphService => GraphService;
-    GraphContextMenu graphContextMenu;
-    EdgeContextMenu edgeContextMenu;
-    NodeContextMenu nodeContextMenu;
+        GraphContextMenu graphContextMenu;
+        EdgeContextMenu edgeContextMenu;
+        NodeContextMenu nodeContextMenu;
     public SvgDisplay SvgDisplay;
-    public List<EdgeComponent> EdgeComponents { get; set; }
-    public List<NodeComponent> NodeComponents { get; set; }
-    public List<RenderFragment> NodeRenderFragments { get; set; } = new List<RenderFragment>();
-
+    public List<EdgeComponent> EdgeComponents { get; set; } = new List<EdgeComponent>();
+    public List<NodeComponent> NodeComponents { get; set; } = new List<NodeComponent>();
+    public AxisComponent CoordinateSystemComponent { get; set; }
     private DotNetObjectReference<BasicGraph> dotnetreference;
 
 
@@ -178,27 +151,55 @@ else
         if (graphService.CurrentGraphModel != null && oldGraphName != graphService.CurrentGraphModel.Name)
         {
             oldGraphName = graphService.CurrentGraphModel.Name;
-            for(int i = 0; i< graphService.CurrentGraphModel.Nodes.Count; i++)
-            {
-                NodeRenderFragments.Add(new RenderFragment(
-                   builder =>
-                   {
-                       builder.OpenComponent<NodeComponent>(3*i);
-                       builder.AddComponentReferenceCapture(3*i+1,
-                           inst =>
-                           {
-                               NodeComponents.Add((NodeComponent)inst);
-                           });
-                       builder.AddAttribute(3 * i + 2, "Node", graphService.CurrentGraphModel.Nodes[i]);
-                       builder.CloseComponent();
-                   })
-                );
-            }
+
             await graphService.Crop();
             StateHasChanged();
             return;
         }
     }
+    RenderFragment RenderFragmentNode(Node node) => builder =>
+    {
+        builder.OpenComponent(0,typeof(NodeComponent));
+        builder.AddAttribute(1, "Node", node);
+        builder.AddAttribute(2, "onclick", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnNodeClick(args, node)));
+        builder.AddAttribute(3, "onmousedown", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnNodeMouseDown(args, node)));
+        builder.AddAttribute(4, "onmouseup", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnNodeMouseUp(args, node)));
+        builder.AddAttribute(5, "ontouchstart", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnNodeTouchStart(args, node)));
+        builder.AddAttribute(6, "ontouchenter", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnNodeTouchEnter(args, node)));
+        builder.AddAttribute(7, "ontouchend", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnNodeTouchEnd(args, node)));
+        builder.AddComponentReferenceCapture(8,
+            inst =>
+            {
+                NodeComponents.Add((NodeComponent)inst);
+            }
+        );
+
+        builder.CloseComponent();
+    };
+
+    RenderFragment RenderFragmentEdge(Edge edge, bool hasReversedEdge, bool isDirected) =>
+        builder =>
+        {
+            builder.OpenComponent(0,typeof(EdgeComponent));
+            builder.AddAttribute(1, "Edge", edge);
+            builder.AddAttribute(2, "onclick", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeClick(args, edge)));
+            builder.AddAttribute(3, "onmousedown", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseDown(args, edge)));
+            builder.AddAttribute(4, "onmouseup", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseUp(args, edge)));
+            builder.AddAttribute(5, "ontouchstart", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchStart(args, edge)));
+            builder.AddAttribute(6, "ontouchenter", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnter(args, edge)));
+            builder.AddAttribute(7, "ontouchend", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnd(args, edge)));
+            builder.AddComponentReferenceCapture(8,
+                inst =>
+                {
+                    EdgeComponents.Add((EdgeComponent)inst);
+                    //((EdgeComponent)inst).HasReversedEdge = hasReversedEdge;
+                    ((EdgeComponent)inst).IsDirected = isDirected;
+                }
+            );
+
+            builder.CloseComponent();
+        };
+
 
     public async void DisablePan()
     {
@@ -460,7 +461,6 @@ else
         this.NodeTouchStart += DefaultCallbacks.ActivateDragNode;
         this.NodeMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeTouchEnd += DefaultCallbacks.DeactivateDragNode;
-        //this.SvgMouseMove += DefaultCallbacks.MoveNodeOrEdge;
         this.SvgMouseUp += DefaultCallbacks.DeactivateDragNode;
         this.NodeClick += DefaultCallbacks.ToggleActiveStateNode;
         this.EdgeClick += DefaultCallbacks.ToggleActiveStateEdge;

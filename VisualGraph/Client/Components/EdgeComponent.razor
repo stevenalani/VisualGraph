@@ -29,8 +29,8 @@
 
     [Parameter]
     public Edge Edge { get; set; }
-    [Parameter]
-    public bool HasReversedEdge { get; set; } = false;
+
+    public bool HasReversedEdge => graphService.CurrentGraphModel.Edges.Any(x => x.StartNode == Edge.EndNode && x.EndNode == Edge.StartNode);
     [Parameter]
     public bool IsDirected { get; set; } = false;
 

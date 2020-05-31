@@ -8,6 +8,10 @@ using Microsoft.Extensions.Hosting;
 using System.Linq;
 using VisualGraph.Shared;
 using VisualGraph.Shared.Serialization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using System;
 
 namespace VisualGraph.Server
 {
@@ -25,9 +29,31 @@ namespace VisualGraph.Server
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllersWithViews().AddJsonOptions(o => {
-               // o.JsonSerializerOptions.Converters.Add(new Vector2Converter());
+            services.AddAuthentication(o => {
+                o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions => {
+                configureOptions.Cookie.Name = "VisualGraphCookie";
+                configureOptions.Cookie.Path = "/";
+                configureOptions.Cookie.HttpOnly = false;
+                configureOptions.Cookie.SameSite = SameSiteMode.None;
+                configureOptions.SlidingExpiration = true;
+                configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(30);
             });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsVisualGraphMember", policyBuilder =>
+                {
+                    policyBuilder
+                        .RequireAuthenticatedUser()
+                        .RequireClaim(ClaimTypes.Name)
+                        .RequireClaim(ClaimTypes.GivenName)
+                        .RequireClaim(ClaimTypes.NameIdentifier)
+                        .Build();
+                });
+            });
+            services.AddControllersWithViews();
             
         }
 
@@ -51,7 +77,9 @@ namespace VisualGraph.Server
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseCookiePolicy();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

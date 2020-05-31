@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Microsoft.Msagl.Core.Geometry.Curves;
+using System.Drawing;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Miscellaneous;
 using System;
@@ -148,7 +149,7 @@ namespace VisualGraph.Client.Services
                 }).ToList();
 
 
-                nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(new Ellipse(1, 1, new Point()), x.Id)));
+                nodes.ForEach(x => geometryGraph.Nodes.Add(new Microsoft.Msagl.Core.Layout.Node(new Ellipse(1, 1, new Microsoft.Msagl.Core.Geometry.Point()), x.Id)));
                 CurrentGraphModel.Edges.ForEach(x =>
                 {
                     var node1 = geometryGraph.Nodes.FirstOrDefault(n => n.UserData.ToString() == x.StartNode.Id);
@@ -415,23 +416,16 @@ namespace VisualGraph.Client.Services
             
                 if (CurrentGraph != null && CurrentGraph.IsRendered)
                 {
-                    Console.WriteLine(node.Name);
-                    NodeComponent component = CurrentGraph.NodeComponents.FirstOrDefault(x => x.Node.Name == node.Name);
-                    Console.WriteLine(component.Node.Name);
+                    NodeComponent component = CurrentGraph.NodeComponents.FirstOrDefault(x => x.Node == node);
                     await component.ChangedState();
                 }
-            
         }
         public async Task Rerender(VisualGraph.Shared.Models.Edge edge = null)
         {
             if (CurrentGraph != null && CurrentGraph.IsRendered)
             {
-                var component = CurrentGraph.EdgeComponents.SingleOrDefault(x => x.Edge == edge);
-                Console.WriteLine(component.GetType().Name);
-                if (component != null && component.IsRendered)
-                {
-                   await component.ChangedState();
-                }
+                var component = CurrentGraph.EdgeComponents.FirstOrDefault(x => x.Edge == edge);
+                await component.ChangedState();
             }
             
         }
@@ -453,6 +447,10 @@ namespace VisualGraph.Client.Services
             else if(typeof(T) == typeof(GraphEditForm) && GraphEditForm != null && GraphEditForm.IsRendered)
             {
                 await GraphEditForm.ChangedState();
+            }
+            else if (typeof(T) == typeof(AxisComponent) && CurrentGraph != null)
+            {
+                await CurrentGraph.CoordinateSystemComponent.ChangedState();
             }
 
         }

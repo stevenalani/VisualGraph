@@ -31,19 +31,6 @@
 
 <div class="main">
     <div class="top-row pl-4 navbar navbar-dark">
-        @if (navigationManager.Uri.Contains("create"))
-        {
-            <div class="form-group">
-                <CollapseToggle Classes="btn-outline-primary ml-4"
-                                Target="grapheditform"
-                                Title="Editor Formular"
-                                IconClass="oi oi-spreadsheet"
-                                IsToggled="true"
-                                OpenText="öffnen"
-                                CloseText="schließen" />
-
-            </div>
-        }
         @if (navigationManager.Uri != navigationManager.BaseUri)
         {
             <LoadGraph></LoadGraph>

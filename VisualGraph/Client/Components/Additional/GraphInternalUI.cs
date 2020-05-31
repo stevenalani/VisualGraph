@@ -3,14 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VisualGraph.Client.Services;
 
 namespace VisualGraph.Client.Components.Additional
 {
     
     public abstract class GraphInternalUI : ComponentBase
     {
-
         private bool isRendered;
+        [Inject]
+        public IGraphService graphService { get; set; }
+
         public Task ChangedState()
         {
             InvokeAsync(() => {

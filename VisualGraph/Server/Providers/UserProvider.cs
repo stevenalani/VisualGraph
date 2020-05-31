@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using VisualGraph.Shared.Models;
 
-namespace VisualGraph.Client.Shared
+namespace VisualGraph.Server.Providers
 {
     public class UserProvider
     {

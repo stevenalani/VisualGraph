@@ -1,6 +1,6 @@
 ﻿@using Newtonsoft.Json
-@inject HttpClient httpClient
 
+@inherits AccountComponentBase
 <Modal @ref="LoginModal">
     <VisualGraph.Client.Pages.LoginComponent>
         <VisualGraph.Client.Pages.RegisterComponent />
@@ -31,23 +31,16 @@ else
     </div>
 }
 @code {
-    UserModel UserModel = new UserModel();
-    Modal LoginModal { get; set; }
-    Modal RegisterModal { get; set; }
+        UserModel UserModel = new UserModel();
+        Modal LoginModal { get; set; }
+        Modal RegisterModal { get; set; }
     override protected async Task OnInitializedAsync()
     {
-        /*var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var isAuth = user.Identity.IsAuthenticated;
-        var HttpClient = httpClient;
-        var response = await HttpClient.GetAsync($"/api/account/user/{user.Identity.Name??"Gast"}");
-        var responseData = await response.Content.ReadAsStringAsync();
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            UserModel = JsonConvert.DeserializeObject<UserModel>(responseData);
-            UserModel.IsAuth = isAuth;
-        }*/
-        UserModel.IsAuth = true;
+        var isAuth = await AccountService.UserIsAuthenticated();
+        var user = await AccountService.GetUser();
+        var UserModel = await AccountService.GetUserModel( user.Identity.Name??"Gast");
+        UserModel.IsAuth = isAuth;
+        AuthenticationStateProvider.AuthenticationStateChanged += (args) => StateHasChanged(); 
     }
 
 }

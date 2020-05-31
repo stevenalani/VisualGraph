@@ -43,39 +43,6 @@
             </div>
         </div>
 
-        @if (GraphService.CurrentGraphModel.ActiveNode != null)
-        {<div class="card">
-                <div class="card-body">
-                    <h5 class="card-title"><span class="oi oi-media-record" style="color:royalblue" aria-hidden="true"></span>Aktiver Knoten</h5>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th class="col p-0">Name</th>
-                                <th>Pos X:</th>
-                                <th>Pos Y:</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="form-control">@GraphService.CurrentGraphModel.ActiveNode.Id:</span></td>
-                                <td class="col p-0">
-                                    <InputText id="ActiveNodeName" class="form-control" @bind-Value="@GraphService.CurrentGraphModel.ActiveNode.Name" @oninput="@(async (args)=> { await GraphService.Rerender();})"></InputText>
-                                </td>
-                                <td>
-                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.X" maxlength="6" size="6" style="width:6em;" id="ActiveNodeX" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                                </td>
-                                <td>
-                                    <input type="number" @bind="@GraphService.CurrentGraphModel.ActiveNode.Pos.Y" maxlength="6" size="6" style="width:6em;" id="ActiveNodeY" class="form-control" @oninput="@(async (args)=> { await GraphService.Rerender();})" />
-                                </td>
-
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        }
-
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title"><span class="legend-node" aria-hidden="true"></span> Knoten bearbeiten</h5>
@@ -192,7 +159,11 @@
                                     <td>
                                         <InputNumber class="form-control" @bind-Value="@edge.Weight" maxlength="6" size="6" style="width:6em;"></InputNumber>
                                     </td>
-                                    <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> { GraphService.CurrentGraphModel.Edges.Remove(edge); }"></button></td>
+                                    <td><button type="button" class="form-control oi oi-delete btn btn-outline-danger" @onclick="(args)=> {
+                                                                                                                                     GraphService.CurrentGraphModel.Edges.Remove(edge);
+                                                                                                                                     edge.StartNode.Edges.Remove(edge);
+                                                                                                                                     edge.EndNode.Edges.Remove(edge);
+                                                                                                                                 }"></button></td>
 
                                 </tr>
                             }
@@ -269,26 +240,34 @@
         try
         {
             edge.EndNode = GraphService.CurrentGraphModel.Nodes.First(x => x.Id == args.Value.ToString());
+            if (!edge.StartNode.Edges.Contains(edge))
+            {
+                edge.StartNode.Edges.Add(edge);
+            }
         }
         catch
         {
             edge.EndNode = null;
         }
         StateHasChanged();
-        await GraphService.Rerender();
+        await GraphService.Rerender(edge);
     }
     private async void ChangedStartEdge(Edge edge, ChangeEventArgs args)
     {
         try
         {
             edge.StartNode = GraphService.CurrentGraphModel.Nodes.First(x => x.Id == args.Value.ToString());
+            if (!edge.StartNode.Edges.Contains(edge))
+            {
+                edge.StartNode.Edges.Add(edge);
+            }
         }
         catch
         {
             edge.StartNode = null;
         }
         StateHasChanged();
-        await GraphService.Rerender();
+        await GraphService.Rerender(edge);
     }
 
     private Modal ModalDirectional;

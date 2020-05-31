@@ -4,10 +4,7 @@
 @using Newtonsoft.Json
 @using Microsoft.AspNetCore.Authorization
 
-@inject HttpClient httpClient
-@inject IJSRuntime JsRuntime
-@inject NavigationManager NavigationManager
-
+@inherits AccountComponentBase
 
 <div class="card">
     <div class="card-header">
@@ -41,13 +38,11 @@
 
     override protected async Task OnInitializedAsync()
     {
-        /*var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var isAuth = user.Identity.IsAuthenticated;
+        var isAuth = await AccountService.UserIsAuthenticated();
         if (isAuth)
         {
-            NavigationManager.NavigateTo("/");
-        }*/
+            AccountService.NavigationManager.NavigateTo("/");
+        }
     }
 
     private async Task Login()
@@ -57,18 +52,6 @@
             Username = username,
             Password = passwd,
         };
-        var client = httpClient;
-        var data = System.Text.Json.JsonSerializer.Serialize<UserModel>(userModel);
-        var content = new StringContent(data, Encoding.UTF8, "application/json");
-        var result = await client.PostAsync("api/account/login", content);
-        var resultData = await result.Content.ReadAsStringAsync();//await result.Content.ReadAsStreamAsync();
-        var decryptJson = JsonConvert.DeserializeObject<UserModel>(resultData);
-        IEnumerable<string> vals;
-        result.Headers.TryGetValues("Set-Cookie", out vals);
-        if (vals != null)
-        {
-            await JsRuntime.InvokeVoidAsync("SetCookie", vals?.LastOrDefault() ?? "");
-            NavigationManager.NavigateTo(NavigationManager.Uri, true);
-        }
+        await AccountService.LogIn(userModel);
     }
 }

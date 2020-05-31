@@ -1,0 +1,7 @@
+﻿@inherits GraphInternalUI
+
+@CoordinateAxis.GenerateForGraphRange(lowerBoundings.X,lowerBoundings.Y,upperBoundings.X, upperBoundings.Y)
+@code { 
+    Vector2 lowerBoundings => graphService.CurrentGraphModel.ConvexHull[0];
+    Vector2 upperBoundings => graphService.CurrentGraphModel.ConvexHull[1];
+}

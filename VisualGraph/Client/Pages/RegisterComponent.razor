@@ -1,6 +1,7 @@
 ﻿@page "/Account/Register/"
 @using System.Text.Json
 @using System.Text
+@inherits AccountComponentBase
 <div class="card">
     <div class="card-header">
         <p class="card-title">Benutzer Registrieren</p>
@@ -29,16 +30,13 @@
     UserModel userModel = new UserModel();
     private async Task Register()
     {
-        /*if (passwd != userModel.Password)
+        if (passwd != userModel.Password)
         {
             return;
         }
-        var client = HttpClientFactory.CreateClient("api");
-        var data = System.Text.Json.JsonSerializer.Serialize(userModel);
-        var content = new StringContent(data, Encoding.UTF8, "application/json");
-        var result = await client.PostAsync("api/account/register", content);
-        var rescntnt = await result.Content.ReadAsStringAsync();
-        var decryptJson = JsonConvert.DeserializeObject<UserModel>(rescntnt);*/
+
+        var result = await AccountService.Register(userModel);
+        
     }
 
 }

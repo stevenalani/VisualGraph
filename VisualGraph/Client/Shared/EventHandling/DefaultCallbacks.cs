@@ -170,9 +170,15 @@ namespace VisualGraph.Client.Shared.EventHandling
             {
                 Point2 coords = await sender.RequestTransformedEventPosition(x, y);
                 setNodePosition(sender.graphService.CurrentGraphModel.ActiveNode, coords);
+                await sender.graphService.Rerender<GraphEditForm>();
             }
             catch { }
 
+        }
+        private static void setNodePosition(Node node, Point2 coords)
+        {
+            node.Pos.X = Convert.ToSingle(coords.X);
+            node.Pos.Y = Convert.ToSingle(coords.Y);
         }
         private static async void moveEdge(BasicGraph sender, double x, double y)
         {
@@ -200,11 +206,7 @@ namespace VisualGraph.Client.Shared.EventHandling
             catch { }
 
         }
-        private static void setNodePosition(Node node, Point2 coords)
-        {
-            node.Pos.X = Convert.ToSingle(coords.X);
-            node.Pos.Y = Convert.ToSingle(coords.Y);
-        }
+
     }
 
 }

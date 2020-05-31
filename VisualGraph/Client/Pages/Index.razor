@@ -68,37 +68,42 @@
 
 
         @code {
-                BasicGraphModel GraphModel;
-                BasicGraph GraphComponent;
-                static Random random = new Random();
-                System.Timers.Timer Animation = new System.Timers.Timer();
-                Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
-                SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
-                Vector2 Magnet = new Vector2(15, -1);
+            BasicGraphModel GraphModel;
+            BasicGraph GraphComponent;
+            static Random random = new Random();
+            System.Timers.Timer Animation = new System.Timers.Timer();
+            Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
+            SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
+            Vector2 Magnet = new Vector2(15, -1);
 
-                private async void animation(object sender,System.Timers.ElapsedEventArgs args)
+            private async void animation(object sender,System.Timers.ElapsedEventArgs args)
+            {
+                var nodes = GraphModel.Nodes;
+                var edges = GraphModel.Edges;
+
+                try
                 {
-                    var nodes = GraphModel.Nodes;
-
-
-                    try
+                    for (var i = 0; i < nodes.Count; i++)
                     {
-                        for (var i = 0; i < nodes.Count; i++)
+
+                        if (nodes[i].Pos.Length() > 75)
                         {
-
-                            if (nodes[i].Pos.Length() > 75)
-                            {
-                                directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
-                            }
-                            nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
-                            await graphService.Rerender(nodes[i]);
+                            directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
                         }
-
-
+                        nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
+                        await graphService.Rerender(nodes[i]);
                     }
-                    catch { };
+
+                    for (var i = 0; i < edges.Count; i++)
+                    {
+                        await graphService.Rerender(edges[i]);
+                    }
+                    await graphService.Rerender<AxisComponent>();
 
                 }
+                catch { };
+
+            }
             protected override async Task OnAfterRenderAsync(bool firstRender)
             {
                 if (firstRender)

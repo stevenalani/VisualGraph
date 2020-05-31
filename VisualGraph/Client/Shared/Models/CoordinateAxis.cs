@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Globalization;
+using System.Numerics;
 using VisualGraph.Shared;
 namespace VisualGraph.Client.Shared.Models
 {
@@ -10,7 +11,8 @@ namespace VisualGraph.Client.Shared.Models
         public static string CoordinateSystemColor { get; set; } = "rgba(0,0,0,0.2)";
         public static double CoordinateAxisMarkerHeight { get; set; } = 0.5;
         public static double CoordinateAxisFontSize { get; set; } = 1;
-
+        public static Vector2 CoordinateSystemStepsize = new Vector2(5);
+        public static double CoordinateSystemPadding = 10.5;
         public static MarkupString GenerateForGraphRange(double minX = 0, double minY = 0, double maxX = 0, double maxY = 0, double padding = 10.5)
         {
             minX = minX > 0 ? -padding : minX - padding;

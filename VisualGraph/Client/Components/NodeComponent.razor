@@ -1,5 +1,4 @@
-﻿@inject IGraphService graphService
-@inherits GraphInternalUI
+﻿@inherits GraphInternalUI
 @((MarkupString)$"<text class=\"nodeText\" text-anchor=\"middle\" x=\"{ Node.PosXText }\" y=\"{ (Node.Pos.Y + 2 *graphService.GraphStyleParameters.NodeRadius).ToString(CultureInfo.InvariantCulture)}\">{Node.Name}</text>")
 @if (Node.IsActive)
 {
