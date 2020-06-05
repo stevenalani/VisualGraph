@@ -25,6 +25,19 @@ namespace VisualGraph.Shared.Models
     }
     public class UserUpdateModel : UserModel
     {
+        public static UserUpdateModel FromUserModel(UserModel usermodel) => new UserUpdateModel()
+        {
+            ErrorMessage = usermodel.ErrorMessage,
+            Firstname = usermodel.Firstname,
+            Id = usermodel.Id,
+            IsAuth = usermodel.IsAuth,
+            Name = usermodel.Name,
+            NewPassword = "",
+            Password = "",
+            RetypedPassword = "",
+            Roles = usermodel.Roles,
+            Username = usermodel.Username,
+        };
         public string NewPassword { get; set; } = "";
         public string RetypedPassword { get; set; } = "";
     }

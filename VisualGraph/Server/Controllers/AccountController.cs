@@ -15,10 +15,11 @@ using Microsoft.JSInterop;
 
 using VisualGraph.Shared.Models;
 using VisualGraph.Server.Providers;
+using VisualGraph.Server.Shared;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace VisualGraph.Controllers
+namespace VisualGraph.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -43,7 +44,7 @@ namespace VisualGraph.Controllers
             {
                 Username = username ?? "Gast",
             };
-            if (User.Identity.IsAuthenticated)
+            if (User != null && User.Identity.IsAuthenticated)
             {
                 user = await userProvider.FindUser(User.Identity.Name);
                 user.Password = "";
@@ -56,7 +57,7 @@ namespace VisualGraph.Controllers
         public async Task<IActionResult> Logout()
         {
 
-            if (!User.Identity.IsAuthenticated)
+            if (User == null || !User.Identity.IsAuthenticated)
             {
                 return Ok("Kein Nutzer eingeloggt!");
             }
@@ -65,14 +66,12 @@ namespace VisualGraph.Controllers
                 await HttpContext.SignOutAsync();
                 return Ok("ausgeloggt!");
             }
-
-
         }
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<UserModel> Login([FromBody] UserModel userModel)
         {
-            if (User.Identity.IsAuthenticated)
+            if (User?.Identity.IsAuthenticated??false)
             {
                 await HttpContext.SignOutAsync();
             }
@@ -99,7 +98,7 @@ namespace VisualGraph.Controllers
             if (result == PasswordVerificationResult.Success)
             {
                 userModel = await signIn(foundUser);
-
+                userModel.Password = "";
             }
             return userModel;
 
@@ -129,7 +128,7 @@ namespace VisualGraph.Controllers
                 new Claim(ClaimTypes.NameIdentifier, foundUser.Id),
                 new Claim(ClaimTypes.Email, foundUser.Username+"@visualgraph.eu"),
                 new Claim(ClaimTypes.Sid, foundUser.Id),
-                new Claim(ClaimTypes.Role, "Member")
+                new Claim(ClaimTypes.Role, VGAppSettings.MemberRole)
             };
 
             foreach (var role in foundUser.Roles)
@@ -142,7 +141,6 @@ namespace VisualGraph.Controllers
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, new AuthenticationProperties() { IsPersistent = true });
-            //System.Console.WriteLine("result\r\n{0}\r\n{1}", result., result.Principal.Identity.Name);
             foundUser.Password = "";
             foundUser.ErrorMessage = "";
             foundUser.IsAuth = true;
@@ -193,6 +191,10 @@ namespace VisualGraph.Controllers
                         usrModel.ErrorMessage = "Der das eingegebene Passwort ist stimmt nicht!";
                         return usrModel;
                     }
+                }
+                else
+                {
+                    usrModel.Password = _usrModel.Password;
                 }
                 await userProvider.UpdateUser(usrModel);
 

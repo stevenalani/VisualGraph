@@ -22,6 +22,7 @@ namespace VisualGraph.Server
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    var cfg = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
                     webBuilder.UseStartup<Startup>();
                 });
     }

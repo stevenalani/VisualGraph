@@ -15,8 +15,11 @@ namespace VisualGraph.Client.Services
         Task LogOut();
         Task<UserModel> Register(UserModel userModel);
         Task<ClaimsPrincipal> GetUser();
-        Task<UserModel> GetUserModel(string username);
-        Task<UserModel> UpdateUser(UserModel userModel);
+        Task<UserModel> GetUserModel();
+        Task<UserModel> GetUserModelFromName(string username);
+        Task<UserUpdateModel> GetUserUpdateModel();
+
+         Task<UserModel> UpdateUser(UserModel userModel);
         Task<bool> UserIsAuthenticated();
 
     }

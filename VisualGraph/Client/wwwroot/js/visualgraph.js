@@ -163,6 +163,9 @@ window.GetTranslatedMousePos = function (args) {
 window.SetCookie = function (cookie) {
     document.cookie = cookie;
 }
+window.GetCookie = function () {
+    return document.cookie;
+}
 window.ClearCookie = function () {
     var cookies = document.cookie.split(";");
 

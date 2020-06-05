@@ -1,7 +1,8 @@
 ﻿@page "/Account/Register/"
 @using System.Text.Json
 @using System.Text
-@inherits AccountComponentBase
+@inject AccountController AccountControler
+@inject NavigationManager navigatorionManager
 <div class="card">
     <div class="card-header">
         <p class="card-title">Benutzer Registrieren</p>
@@ -35,8 +36,8 @@
             return;
         }
 
-        var result = await AccountService.Register(userModel);
-        
+        var result = await AccountControler.Register(userModel);
+
     }
 
 }

@@ -1,34 +1,37 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
-using VisualGraph.Shared;
-using VisualGraph.Shared.Serialization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using System;
+using Blazored.Toast;
+using Microsoft.AspNetCore.Components.Authorization;
+using VisualGraph.Server.Services;
+using VisualGraph.Server.Shared;
 
 namespace VisualGraph.Server
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration,IWebHostEnvironment env)
         {
+            _env = env;
             Configuration = configuration;
+            httpsPort = configuration.GetValue<int>("HTTPS_PORT");
+
         }
 
         public IConfiguration Configuration { get; }
-
+        private readonly IWebHostEnvironment _env;
+        private readonly int httpPort;
+        private readonly int httpsPort;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddAuthentication(o => {
                 o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -40,6 +43,7 @@ namespace VisualGraph.Server
                 configureOptions.Cookie.SameSite = SameSiteMode.None;
                 configureOptions.SlidingExpiration = true;
                 configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                configureOptions.LoginPath = "/account/login";
             });
             services.AddAuthorization(options =>
             {
@@ -53,8 +57,17 @@ namespace VisualGraph.Server
                         .Build();
                 });
             });
-            services.AddControllersWithViews();
-            
+            services.AddBlazoredToast();
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddControllersWithViews().AddControllersAsServices();
+            //services.AddScoped<AuthenticationStateProvider, AuthenticationStateProviderService>();
+            VGAppSettings.BaseAddress =  $"https://localhost:{httpsPort}/api/";
+            VGAppSettings.RemoteRequestProxy = Configuration["Hosting:RemoteRequestProxy"];
+            VGAppSettings.InitFromConfiguration(Configuration);
+            services.AddHttpClient("api", options => { 
+                options.BaseAddress = new Uri(VGAppSettings.BaseAddress);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -75,15 +88,23 @@ namespace VisualGraph.Server
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-
+            
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCookiePolicy();
-            app.UseEndpoints(endpoints =>
+            app.Use(async (context, next) =>
+            {
+                var u = context.User;
+                await next();
+            });
+ app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("account/{path}","/_Host");
                 endpoints.MapFallbackToFile("index.html");
+               
             });
         }
     }

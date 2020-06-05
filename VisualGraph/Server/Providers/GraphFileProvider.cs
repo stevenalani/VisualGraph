@@ -10,7 +10,7 @@ using Frontenac.Blueprints.Impls.TG;
 using Frontenac.Blueprints.Util.IO.GraphML;
 using Frontenac.Gremlinq;
 using VisualGraph.Shared.Models;
-using VisualGraph.Shared;
+using VisualGraph.Server.Shared;
 
 namespace VisualGraph.Server.Providers
 {

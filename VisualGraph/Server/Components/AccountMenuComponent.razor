@@ -1,11 +1,17 @@
-﻿@using Newtonsoft.Json
-
-
-<AuthorizeView>
+﻿
+@inherits AccountComponent
+<Modal @ref="LoginModal">
+    <LoginComponent/>
+    <RegisterComponent />
+</Modal>
+<AuthorizeView Context="manage_user">
+    <Authorizing>
+        <h2>Authorisierung wird durchgeführt</h2>
+    </Authorizing>
     <Authorized>
         <div class="dropdown">
-            <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="oi oi-person"></span> @(authenticationState.Result.User.Identity.Name)
+            <button class="btn btn-dark dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="oi oi-person"></span> @(AuthTask.Result.User.Identity.Name)
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="/account/manage">Verwalten</a>
@@ -19,16 +25,16 @@
                 <span class="oi oi-person"></span> @("Gast")
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="account/login"><span class="oi oi-account-login"></span>Anmelden oder registrieren</a>
+                <a class="dropdown-item" href="/account/login"><span class="oi oi-account-login"></span>Anmelden oder registrieren</a>
             </div>
         </div>
-
     </NotAuthorized>
 </AuthorizeView>
-@code {
-    UserModel UserModel = new UserModel();
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; }
+        }
+        @code {
+
+            Modal LoginModal { get; set; }
+            Modal RegisterModal { get; set; }
 
 
-}
+        }

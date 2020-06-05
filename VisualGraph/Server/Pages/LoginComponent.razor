@@ -1,10 +1,12 @@
 ﻿@page "/Account/Login"
+
+@inherits AccountComponent
+
 @using System.Text
-@using System.Text.Json.Serialization;
-@using Newtonsoft.Json
+@using System.Text.Json
+@using System.Net.Http.Json
 @using Microsoft.AspNetCore.Authorization
 
-@inherits AccountComponentBase
 
 <div class="card">
     <div class="card-header">
@@ -38,20 +40,31 @@
 
     override protected async Task OnInitializedAsync()
     {
-        var isAuth = await AccountService.UserIsAuthenticated();
-        if (isAuth)
+        await base.OnInitializedAsync();
+        var isAuth = (await AuthTask).User?.Identity.IsAuthenticated;
+        if (isAuth??false)
         {
-            AccountService.NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/account/manage");
         }
     }
 
     private async Task Login()
     {
+        
         userModel = new UserModel()
         {
             Username = username,
             Password = passwd,
         };
-        await AccountService.LogIn(userModel);
+        var response = await httpclient.PostAsJsonAsync<UserModel>("account/login",userModel);
+        IEnumerable<string> vals;
+        response.Headers.TryGetValues("Set-Cookie", out vals);
+        if (vals != null)
+        {
+            await JSRuntime.InvokeVoidAsync("SetCookie", vals?.LastOrDefault() ?? "");
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
+            userModel.IsAuth = true;
+        }
+        NavigationManager.NavigateTo("/account/manage",true);
     }
 }

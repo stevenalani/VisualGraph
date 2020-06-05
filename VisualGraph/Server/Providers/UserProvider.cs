@@ -87,6 +87,7 @@ namespace VisualGraph.Server.Providers
 
         internal async Task UpdateUser(UserModel user)
         {
+            user.Roles = user.Roles.Distinct().ToList();
             var json = JsonSerializer.Serialize(user); //(typeof(UserModel));
             await File.WriteAllTextAsync(userdir + "/" + user.Id + ".json", json);
         }

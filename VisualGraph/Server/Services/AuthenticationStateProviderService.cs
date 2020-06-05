@@ -1,41 +1,36 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using VisualGraph.Shared.Models;
 
-namespace VisualGraph.Client.Services
+namespace VisualGraph.Server.Services
 {
-    public class AuthenticationStateService : AuthenticationStateProvider
+    public class AuthenticationStateProviderService : ServerAuthenticationStateProvider
     {
-        private readonly HttpClient _httpClient;
+        private readonly IJSRuntime _jsruntime;
+        private readonly HttpClient _hhtpClient;
         private AuthenticationState lastAuthenticationState;
-        private readonly IJSRuntime _jSRuntime;
 
 
-        public AuthenticationStateService(HttpClient httpClient, IJSRuntime iJSRuntime)
+        public AuthenticationStateProviderService(ILoggerFactory loggerFactory, IHttpClientFactory http)
         {
-            _httpClient = httpClient;
-            _jSRuntime = iJSRuntime;
+            _hhtpClient = http.CreateClient("api");
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             ClaimsPrincipal user;
-            
-            var cookie = await _jSRuntime.InvokeAsync<string>("GetCookie");
-            if(cookie != "")
-            {
-                _httpClient.DefaultRequestHeaders.Add("Cookie", cookie);
-            }
-            var result =  await _httpClient.GetFromJsonAsync<UserModel>("api/Account/user");
+            var result = await _hhtpClient.GetFromJsonAsync<UserModel>("account/user");
 
 
-            if (result.Id != "" && cookie != "")
+            if (result.Id != "")
             {
                 // Create a ClaimsPrincipal for the user
                 var identity = new ClaimsIdentity(new[]
@@ -44,25 +39,24 @@ namespace VisualGraph.Client.Services
                    new Claim(ClaimTypes.GivenName, "cn=" + result.Firstname),
                     new Claim(ClaimTypes.NameIdentifier, result.Id),
                 }, "VisualGraphCookie");
-                foreach(var role in result.Roles)
+                foreach (var role in result.Roles)
                 {
                     identity.AddClaim(new Claim(ClaimTypes.Role, role));
                 }
                 user = new ClaimsPrincipal(identity);
             }
             else
-
             {
                 user = new ClaimsPrincipal(new ClaimsIdentity());
             }
             var newstate = new AuthenticationState(user);
             if (lastAuthenticationState == null || lastAuthenticationState.User.Identity?.IsAuthenticated != newstate.User.Identity.IsAuthenticated)
             {
-                lastAuthenticationState = new AuthenticationState(user);
-                NotifyAuthenticationStateChanged(Task.FromResult(lastAuthenticationState));
+                
+                NotifyAuthenticationStateChanged(Task.FromResult(newstate));
             }
-            return await Task.FromResult(lastAuthenticationState);
+            lastAuthenticationState = newstate;
+            return lastAuthenticationState;
         }
-        
     }
 }
