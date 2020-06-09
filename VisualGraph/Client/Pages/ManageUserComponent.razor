@@ -1,0 +1,96 @@
+﻿@page "/account/manage"
+@inherits AccountComponent
+@using System.Security.Claims
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title"><span class="oi oi-person"></span> <span>Benutzerverwaltung</span></span>
+        </div>
+        <div class="card-body">
+            <AuthorizeView Context="manage_user">
+                <Authorized>
+                    <EditForm Model="@UserUpdateModel" OnValidSubmit="saveMember">
+                        <div class="form-group form-inline">
+                            <label class="col-form-label">Benutzer ID:</label>
+                            <span class="form-control">@UserUpdateModel.Id</span>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="col-form-label">Benutzername:</label>
+                            <span class="form-control">@UserUpdateModel.Username</span>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="col-form-label" for="firstname">Vorname:</label>
+                            <InputText class="form-control" id="firstname" @bind-Value="@UserUpdateModel.Firstname" />
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="col-form-label" for="name">Name:</label>
+                            <InputText class="form-control" id="name" @bind-Value="@UserUpdateModel.Name" />
+                        </div>
+                        @if (AuthTask.Result.User.IsInRole("Administrator")|| AuthTask.Result.User.IsInRole("SuperUser"))
+                        {
+                        <div class="form-group form-inline">
+                            <label class="col-form-label" for="roles">Ist Administrator</label>
+                            <input class="form-control" type="checkbox" @bind="@isAdmin" />
+                        </div>
+                        }
+                        <div class="form-group form-inline">
+                            <label class="col-form-label" for="newpasswd">Neues Passwort:</label>
+                            <InputText class="form-control" id="newpasswd" type="password" @bind-Value="@UserUpdateModel.NewPassword" />
+                        </div>
+
+                        @if (UserUpdateModel.NewPassword != "")
+                        {
+                            <div class="form-group form-inline">
+                                <label class="col-form-label" for="pwretype">Passwort <span class="font-weight-lighter">(Bestätigung)</span>:</label>
+                                <InputText class="form-control" id="pwretype" type="password" @bind-Value="@UserUpdateModel.RetypedPassword" />
+                            </div>
+                            <div class="form-group form-inline">
+                                <label class="col-form-label" for="passwd">Altes Passwort:</label>
+                                <InputText class="form-control" id="passwd" type="password" @bind-Value="@UserUpdateModel.Password" />
+                            </div>
+                        }
+                        <p class="card-text text-danger">@UserUpdateModel.ErrorMessage</p>
+                        <button class="btn btn-success" type="submit">Speichern</button>
+                    </EditForm>
+                </Authorized>
+                <NotAuthorized>
+                    <LoginComponent />
+                </NotAuthorized>
+            </AuthorizeView>
+
+
+        </div>
+    </div>
+
+
+
+@code {
+
+    UserUpdateModel UserUpdateModel { get; set; } = new UserUpdateModel();
+    private bool isAdmin = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var _UserUpdateModel = UserUpdateModel.FromUserModel(UserModel);
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (_UserUpdateModel.Id != UserUpdateModel.Id)
+        {
+            UserUpdateModel = UserUpdateModel.FromUserModel(UserModel);
+            StateHasChanged();
+        }
+    }
+    async Task saveMember()
+    {
+        if (isAdmin && !(await AuthTask).User.IsInRole("Administrator"))
+        {
+            /*Todo: Move roles to settings */
+            UserUpdateModel.Roles.Add("Administrator");
+        }
+        if (UserUpdateModel.Password == "" && (UserUpdateModel.NewPassword != "" && UserUpdateModel.NewPassword != UserUpdateModel.RetypedPassword))
+        {
+            UserUpdateModel.ErrorMessage = "Die eingegebenen Passwörter stimmen nicht überein";
+        }
+
+        var response = await HttpClient.PostJsonAsync<UserUpdateModel>("api/account/update", UserUpdateModel);
+    }
+}

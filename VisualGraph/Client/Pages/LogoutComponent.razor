@@ -1,0 +1,13 @@
+﻿@page "/Account/Logout"
+@inherits AccountComponent
+@code {
+    public string returnurl { get; set; }
+     
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        var response = await HttpClient.GetAsync("api/account/logout");
+        await JSRuntime.InvokeVoidAsync("ClearCookie");
+        NavigationManager.NavigateTo("/", true);
+    }
+}

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
+using VisualGraph.Server.Shared;
 
 namespace VisualGraph.Server.Pages
 
@@ -16,7 +17,7 @@ namespace VisualGraph.Server.Pages
         {
             // Clear the existing external cookie
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return LocalRedirect(Url.Content("~/"));
+            return LocalRedirect("~/");
         }
 
     }

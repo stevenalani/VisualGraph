@@ -59,8 +59,8 @@ namespace VisualGraph.Server
             });
             services.AddBlazoredToast();
             services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddControllersWithViews().AddControllersAsServices();
+            //services.AddServerSideBlazor();
+            //services.AddControllersWithViews().AddControllersAsServices();
             //services.AddScoped<AuthenticationStateProvider, AuthenticationStateProviderService>();
             VGAppSettings.BaseAddress =  $"https://localhost:{httpsPort}/api/";
             VGAppSettings.RemoteRequestProxy = Configuration["Hosting:RemoteRequestProxy"];
@@ -73,9 +73,10 @@ namespace VisualGraph.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseDeveloperExceptionPage();
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                
                 app.UseWebAssemblyDebugging();
             }
             else
@@ -93,16 +94,18 @@ namespace VisualGraph.Server
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCookiePolicy();
+            
             app.Use(async (context, next) =>
             {
                 var u = context.User;
                 await next();
             });
- app.UseEndpoints(endpoints =>
+
+            app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapBlazorHub();
-                endpoints.MapFallbackToPage("account/{path}","/_Host");
+                //endpoints.MapBlazorHub();
+                //endpoints.MapFallbackToPage("account/{path}","/_Host");
                 endpoints.MapFallbackToFile("index.html");
                
             });
