@@ -2,8 +2,10 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using VisualGraph.Server.Providers;
+using VisualGraph.Server.Shared;
 using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Controllers
@@ -68,6 +70,25 @@ namespace VisualGraph.Server.Controllers
             {
                 return null;
             }
+        }
+        [HttpGet("GetWebData")]
+        public Task<string> getWebData([FromQuery] string url)
+        {
+            string result = string.Empty;
+            using (var client = new WebClient())
+            {
+                var proxyConfig = VGAppSettings.RemoteRequestProxy;
+                if (proxyConfig != "")
+                {
+                    client.Proxy = new WebProxy(proxyConfig);
+                }
+                try
+                {
+                    result = client.DownloadString(url);
+                }
+                catch {}
+            }
+            return Task.FromResult(result);
         }
 
     }

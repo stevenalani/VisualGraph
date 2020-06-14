@@ -1,10 +1,11 @@
 ﻿@inject IGraphService GraphService
+@inject NavigationManager NavigationManager
 <Modal @ref="loadGraphModal" Title="Graph von Skript laden">
     <Skriptloader />
 </Modal>
 <Modal @ref="loadGraphWebModal" Title="Graph aus Web laden">
-
-    <GraphMlWebLoader  OnDone="(args)=> { loadGraphWebModal.Show(); }"/>
+    <GraphMlWebLoader @ref="WebLoader"/>
+    <button type="button" class="btn btn-outline-primary" @onclick="@(async ()=> { GraphService.CurrentGraphModel = WebLoader.graphToGraphMlMapping.BasicGraphModel; loadGraphWebModal.Show(); await GraphService.Rerender(); })">Fertig</button>
 </Modal>
 <Modal @ref="loadGraphRandomModal" Title="Zufalls Graph">
     @{
@@ -37,6 +38,7 @@
     private Modal loadGraphModal;
     private Modal loadGraphWebModal;
     private Modal loadGraphRandomModal;
+    private GraphMlWebLoader WebLoader;
     int knoten = 10;
     int kanten = 15;
     protected override async Task OnInitializedAsync()

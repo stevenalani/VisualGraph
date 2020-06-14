@@ -182,18 +182,18 @@ else
         {
             builder.OpenComponent(0,typeof(EdgeComponent));
             builder.AddAttribute(1, "Edge", edge);
-            builder.AddAttribute(2, "onclick", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeClick(args, edge)));
-            builder.AddAttribute(3, "onmousedown", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseDown(args, edge)));
-            builder.AddAttribute(4, "onmouseup", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseUp(args, edge)));
-            builder.AddAttribute(5, "ontouchstart", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchStart(args, edge)));
-            builder.AddAttribute(6, "ontouchenter", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnter(args, edge)));
-            builder.AddAttribute(7, "ontouchend", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnd(args, edge)));
+            builder.AddAttribute(2, "IsDirected", isDirected);
+            builder.AddAttribute(3, "onclick", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeClick(args, edge)));
+            builder.AddAttribute(4, "onmousedown", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseDown(args, edge)));
+            builder.AddAttribute(5, "onmouseup", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseUp(args, edge)));
+            builder.AddAttribute(6, "ontouchstart", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchStart(args, edge)));
+            builder.AddAttribute(7, "ontouchenter", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnter(args, edge)));
+            builder.AddAttribute(8, "ontouchend", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnd(args, edge)));
+
             builder.AddComponentReferenceCapture(8,
                 inst =>
                 {
                     EdgeComponents.Add((EdgeComponent)inst);
-                    //((EdgeComponent)inst).HasReversedEdge = hasReversedEdge;
-                    ((EdgeComponent)inst).IsDirected = isDirected;
                 }
             );
 

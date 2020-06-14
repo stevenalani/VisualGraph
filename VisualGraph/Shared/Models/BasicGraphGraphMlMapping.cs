@@ -9,7 +9,7 @@ namespace VisualGraph.Shared.Models
 {
     public class BasicGraphToGraphMlMapping
     {
-        public BasicGraphModelPoco BasicGraphModelPoco { get; set; }
+        public BasicGraphModel BasicGraphModel { get; set; }
         public AttributeMappings Mappings { get; set; } = new AttributeMappings();
 
         public TinkerGrapĥ tinkerGraph { get; set; }
@@ -28,19 +28,20 @@ namespace VisualGraph.Shared.Models
         public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph, AttributeMappings mappings)
         {
             tinkerGraph = loadedGraph;
-            BasicGraphModelPoco = new BasicGraphModelPoco(graph);
+            BasicGraphModel = graph;
             Mappings = mappings;
             update();
         }
         public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph)
         {
             tinkerGraph = loadedGraph;
+            BasicGraphModel = new BasicGraphModel();
             update();
         }
         public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph)
         {
             tinkerGraph = loadedGraph;
-            BasicGraphModelPoco = new BasicGraphModelPoco(graph);
+            BasicGraphModel = graph;
             update();
         }
 
@@ -48,7 +49,7 @@ namespace VisualGraph.Shared.Models
         public void ExecuteMappingOfValues()
         {
             bool isDirected = true;
-            BasicGraphModelPoco.Nodes = tinkerGraph.GetVertices().Select(x =>
+            BasicGraphModel.Nodes = tinkerGraph.GetVertices().Select(x =>
             {
                 string id;
                 int idFix = 0;
@@ -99,7 +100,7 @@ namespace VisualGraph.Shared.Models
                     Pos = new Vector2(posx, posy)
                 };
             }).ToList();
-            BasicGraphModelPoco.Edges = tinkerGraph.GetEdges().Select(x =>
+            BasicGraphModel.Edges = tinkerGraph.GetEdges().Select(x =>
             {
                 string id;
                 int idFix = 0;
@@ -131,8 +132,8 @@ namespace VisualGraph.Shared.Models
                 {
                     isDirected = true;
                 }
-                var startnode = BasicGraphModelPoco.Nodes.FirstOrDefault(n => x.GetVertex(Direction.Out).Id.ToString() == n.Id);
-                var endnode = BasicGraphModelPoco.Nodes.FirstOrDefault(n => x.GetVertex(Direction.In).Id.ToString() == n.Id);
+                var startnode = BasicGraphModel.Nodes.FirstOrDefault(n => x.GetVertex(Direction.Out).Id.ToString() == n.Id);
+                var endnode = BasicGraphModel.Nodes.FirstOrDefault(n => x.GetVertex(Direction.In).Id.ToString() == n.Id);
                 var edge = new Edge()
                 {
                     Id = id,

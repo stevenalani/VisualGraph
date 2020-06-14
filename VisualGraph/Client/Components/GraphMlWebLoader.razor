@@ -69,21 +69,20 @@
 @code {
     private string graphUrl { get; set; }
     private string graphName { get; set; }
-    BasicGraphToGraphMlMapping graphToGraphMlMapping { get; set; }
+    public BasicGraphToGraphMlMapping graphToGraphMlMapping { get; set; }
     [Parameter]
     public EventCallback OnDone { get; set; }
     private async void LoadGraph()
     {
-        graphToGraphMlMapping = await httpClient.GetFromJsonAsync<BasicGraphToGraphMlMapping>($"api/Graph/loadfromweb?url={graphUrl}&name={graphName}");
+        string graphstring = await (await httpClient.GetAsync($"api/Graph/GetWebData?url={graphUrl}")).Content.ReadAsStringAsync();
+        graphToGraphMlMapping = await GraphWebloader.LoadBasicGraphFromUrl(graphstring, graphName);
         StateHasChanged();
     }
     private async void MapGraphProps()
     {
         graphToGraphMlMapping.ExecuteMappingOfValues();
-        graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraphModelPoco;
-        await graphService.LayoutGraph();
-        await OnDone.InvokeAsync(null);
-        await graphService.SaveGraph();
-        await graphService.Rerender();
+        graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraphModel;
+        await graphService.LayoutGraph();        
+        //await OnDone.InvokeAsync(null);
     }
 }
