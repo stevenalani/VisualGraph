@@ -3,10 +3,6 @@
 <Modal @ref="loadGraphModal" Title="Graph von Skript laden">
     <Skriptloader />
 </Modal>
-<Modal @ref="loadGraphWebModal" Title="Graph aus Web laden">
-    <GraphMlWebLoader @ref="WebLoader"/>
-    <button type="button" class="btn btn-outline-primary" @onclick="@(async ()=> { GraphService.CurrentGraphModel = WebLoader.graphToGraphMlMapping.BasicGraphModel; loadGraphWebModal.Show(); await GraphService.Rerender(); })">Fertig</button>
-</Modal>
 <Modal @ref="loadGraphRandomModal" Title="Zufalls Graph">
     @{
         <div class="form-group form-inline">
