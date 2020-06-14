@@ -1,8 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using VisualGraph.Client.Services;
 
 namespace VisualGraph.Client.Components
@@ -10,7 +6,7 @@ namespace VisualGraph.Client.Components
     public class AlgorithmPage : ComponentBase
     {
 
-        
+
         [Parameter]
         public string Filename { get; set; }
         [Inject]
@@ -26,7 +22,8 @@ namespace VisualGraph.Client.Components
 
         protected override void OnInitialized()
         {
-            if (Filename != null) {
+            if (Filename != null)
+            {
                 GraphService.LoadGraph(Filename);
             }
         }

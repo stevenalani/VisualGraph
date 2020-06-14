@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using Microsoft.Msagl.Core.DataStructures;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using VisualGraph.Shared.Models;
-using Microsoft.AspNetCore.Components.Authorization;
-using System.Security.Claims;
 
 namespace VisualGraph.Client.Services
 {
@@ -43,10 +41,10 @@ namespace VisualGraph.Client.Services
         }
         public async Task LogIn(UserModel userModel)
         {
-            var response = await _httpClient.PostAsJsonAsync<UserModel>($"{baseroute}/login",userModel);
+            var response = await _httpClient.PostAsJsonAsync<UserModel>($"{baseroute}/login", userModel);
             var user = await response.Content.ReadFromJsonAsync<UserModel>();
             User = user;
-            if((await authState.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated)
+            if ((await authState.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated)
             {
                 _logger.LogDebug("user is authed after login");
             }
@@ -62,7 +60,7 @@ namespace VisualGraph.Client.Services
 
         public async Task LogOut()
         {
-            await  _httpClient.GetAsync($"{baseroute}/logout");
+            await _httpClient.GetAsync($"{baseroute}/logout");
         }
 
         public async Task<UserModel> Register(UserModel userModel)
@@ -73,7 +71,7 @@ namespace VisualGraph.Client.Services
 
         public async Task<UserModel> UpdateUser(UserModel userModel)
         {
-             var response = await _httpClient.PostAsJsonAsync<UserModel>($"{baseroute}/update", userModel);
+            var response = await _httpClient.PostAsJsonAsync<UserModel>($"{baseroute}/update", userModel);
             return await response.Content.ReadFromJsonAsync<UserModel>();
         }
 
@@ -85,8 +83,9 @@ namespace VisualGraph.Client.Services
 
         public async Task<UserModel> GetUserModel()
         {
-            if(User != null) { 
-                return await _httpClient.GetFromJsonAsync<UserModel>($"{baseroute}/user/{User.Username}"); 
+            if (User != null)
+            {
+                return await _httpClient.GetFromJsonAsync<UserModel>($"{baseroute}/user/{User.Username}");
             }
             return await _httpClient.GetFromJsonAsync<UserModel>($"{baseroute}/user");
         }

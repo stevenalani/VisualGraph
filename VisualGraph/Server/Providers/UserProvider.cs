@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Providers

@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
-using System;
 using System.Globalization;
 using System.Numerics;
 using VisualGraph.Shared;
@@ -38,7 +36,7 @@ namespace VisualGraph.Client.Shared.Models
             for (var ystep = ((int)(minY / 10)) * 10; ystep < maxY; ystep += stepSizeY)
             {
                 linemarkup += $"L0 {ystep} ";
-                textmarkup += SVGHelper.Text(CoordinateAxisFontSize, ystep + CoordinateAxisFontSize/2, ystep.ToString(CultureInfo.InvariantCulture), 1, CoordinateSystemColor);
+                textmarkup += SVGHelper.Text(CoordinateAxisFontSize, ystep + CoordinateAxisFontSize / 2, ystep.ToString(CultureInfo.InvariantCulture), 1, CoordinateSystemColor);
             }
             linemarkup += $"\" style=\"stroke:{CoordinateSystemColor}; stroke-width:0.1; fill:none; ";
             linemarkup += $"marker-start: url(#axisarrow); ";
@@ -87,6 +85,6 @@ namespace VisualGraph.Client.Shared.Models
             MarkupString markupString = new MarkupString(markup);
             return markupString;
         }
-       
+
     }
 }

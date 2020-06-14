@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using VisualGraph.Client.Services;
-using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.Components
 {
@@ -22,7 +19,7 @@ namespace VisualGraph.Client.Components
         {
             User = (await task).User;
             var isAuthenticated = User.Identity?.IsAuthenticated;
-            if (isAuthenticated??false)
+            if (isAuthenticated ?? false)
             {
                 Console.WriteLine("AuthenticationStateChanged: " + this.GetType());
                 StateHasChanged();

@@ -20,6 +20,7 @@
 
   <PropertyGroup>
     <BlazorWebAssemblyEnableLinking>true</BlazorWebAssemblyEnableLinking>
+    <UserSecretsId>20ad5477-63ff-46da-a999-ab292eb284ec</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <None Update="Graphs\erzeugeGraph1.xml">

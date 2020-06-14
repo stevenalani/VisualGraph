@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using VisualGraph.Server.Providers;
 
 namespace VisualGraph.Server
@@ -23,7 +18,8 @@ namespace VisualGraph.Server
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     var cfg = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
-                    webBuilder.ConfigureKestrel(x => {
+                    webBuilder.ConfigureKestrel(x =>
+                    {
                         x.ListenAnyIP(int.Parse(cfg["Hosting:Port"]));
                         x.ListenAnyIP(443);
                     });

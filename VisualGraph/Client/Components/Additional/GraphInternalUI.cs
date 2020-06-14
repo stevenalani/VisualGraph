@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using VisualGraph.Client.Services;
 
 namespace VisualGraph.Client.Components.Additional
 {
-    
+
     public abstract class GraphInternalUI : ComponentBase
     {
         private bool isRendered;
@@ -16,7 +13,8 @@ namespace VisualGraph.Client.Components.Additional
 
         public Task ChangedState()
         {
-            InvokeAsync(() => {
+            InvokeAsync(() =>
+            {
                 StateHasChanged();
             });
             return Task.CompletedTask;

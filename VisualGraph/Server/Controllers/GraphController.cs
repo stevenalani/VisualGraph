@@ -1,12 +1,10 @@
-﻿using VisualGraph.Shared;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using VisualGraph.Shared.Models;
 using VisualGraph.Server.Providers;
+using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Controllers
 {
@@ -14,7 +12,7 @@ namespace VisualGraph.Server.Controllers
     [Route("api/[controller]")]
     public class GraphController : ControllerBase
     {
-        
+
         private readonly ILogger<GraphController> logger;
 
         public GraphController(ILogger<GraphController> logger)
@@ -25,20 +23,20 @@ namespace VisualGraph.Server.Controllers
         [HttpGet("GetGraphModel/{graphname}")]
         public async Task<BasicGraphModelPoco> GetGraphModel(string graphname)
         {
-            if(graphname == string.Empty || graphname == null)
+            if (graphname == string.Empty || graphname == null)
             {
                 return null;
             }
             BasicGraphModel model = await GraphFileProvider.GetBasicGraph(graphname);
-            BasicGraphModelPoco modelPoco = new BasicGraphModelPoco( model);
+            BasicGraphModelPoco modelPoco = new BasicGraphModelPoco(model);
             return modelPoco;
         }
 
         [HttpGet]
         public async Task<IEnumerable<BasicGraphModelPoco>> GetGraphModels()
         {
-            var models = (await GraphFileProvider.GetBasicGraphs()).Select( x => new BasicGraphModelPoco(x));
-             
+            var models = (await GraphFileProvider.GetBasicGraphs()).Select(x => new BasicGraphModelPoco(x));
+
             return models;
         }
 
@@ -49,9 +47,28 @@ namespace VisualGraph.Server.Controllers
             return graphnames;
         }
         [HttpPost("SaveGraph/{filename}")]
-        public async Task<bool> SaveGraph([FromRoute]string filename,[FromBody] BasicGraphModelPoco graph)
+        public async Task<bool> SaveGraph([FromRoute] string filename, [FromBody] BasicGraphModelPoco graph)
         {
             return await GraphFileProvider.WriteToGraphMlFile(new BasicGraphModel(graph), filename);
         }
+
+        [HttpGet("LoadFromWeb")]
+        public async Task<BasicGraphToGraphMlMapping> LoadFromWeb([FromQuery] string url, [FromQuery] string name)
+        {
+            if (url != null && url != string.Empty)
+            {
+                if (name == null || name == string.Empty)
+                {
+                    name = "unknownFromWeb";
+                }
+                var mapping = await GraphFileProvider.LoadBasicGraphFromUrl(url, name);
+                return mapping;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using VisualGraph.Client.Shared;
 using VisualGraph.Client.Shared.Models;
 using VisualGraph.Shared.Models;
 

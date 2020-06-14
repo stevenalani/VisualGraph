@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 using VisualGraph.Shared.Models.Interfaces;
 
 namespace VisualGraph.Shared.Models
@@ -18,7 +17,7 @@ namespace VisualGraph.Shared.Models
         public List<Edge> Edges = new List<Edge>();
         public bool IsActive;
 
-        public List<Node> Neighbours(bool isDirectional) => isDirectional? Edges.Select(x => x.EndNode).Where( x => x != this ).ToList(): Edges.SelectMany(x => new[] { x.StartNode, x.EndNode }).Where(x => x != this).ToList();
+        public List<Node> Neighbours(bool isDirectional) => isDirectional ? Edges.Select(x => x.EndNode).Where(x => x != this).ToList() : Edges.SelectMany(x => new[] { x.StartNode, x.EndNode }).Where(x => x != this).ToList();
 
         public string PosXText => Pos.X.ToString(CultureInfo.InvariantCulture);
         public string PosYText => Pos.Y.ToString(CultureInfo.InvariantCulture);
@@ -27,14 +26,17 @@ namespace VisualGraph.Shared.Models
         public string Id { get; set; }
 
         public List<string> Classes { get; set; }
-        public string Activeclass => IsActive? "active":"";
-        public static Node operator +(Node a,Node b) => new Node { 
+        public string Activeclass => IsActive ? "active" : "";
+        public static Node operator +(Node a, Node b) => new Node
+        {
             Id = "-1",
             Name = "valueonly",
             Pos = a.Pos + b.Pos,
         };
-        public static Node operator -(Node a, Node b){
-            if(a == null){
+        public static Node operator -(Node a, Node b)
+        {
+            if (a == null)
+            {
                 a = new Node { Pos = new Vector2() };
             }
             if (b == null)
@@ -48,8 +50,8 @@ namespace VisualGraph.Shared.Models
                 Pos = a.Pos - b.Pos,
             };
         }
-        
-        public double Distance => Math.Sqrt((Pos.X * Pos.X ) + (Pos.Y * Pos.Y));
+
+        public double Distance => Math.Sqrt((Pos.X * Pos.X) + (Pos.Y * Pos.Y));
 
     }
 }

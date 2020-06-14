@@ -3,30 +3,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Microsoft.Msagl.Core.Geometry.Curves;
-using System.Drawing;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Miscellaneous;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.Xml.Serialization;
-using Microsoft.Msagl.Core.Geometry;
-using VisualGraph.Shared;
-using VisualGraph.Shared.Models;
-using VisualGraph.Client.Components;
-using VisualGraph.Client.Shared;
 using System.Net.Http;
 using System.Net.Http.Json;
-
-
-using System.Collections.Generic;
-using VisualGraph.Client.Shared.Models;
-using System.Globalization;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
+using VisualGraph.Client.Components;
 using VisualGraph.Client.Components.Additional;
-using Node = VisualGraph.Shared.Models.Node;
-using VisualGraph.Shared.Models.Interfaces;
+using VisualGraph.Client.Shared.Models;
+using VisualGraph.Shared;
+using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.Services
 {
@@ -36,11 +27,11 @@ namespace VisualGraph.Client.Services
         ILogger<GraphService> _logger;
         IJSRuntime JSRuntime;
         public static string settingsFile = "settings.xml";
-        public BasicGraphModel CurrentGraphModel { get; set; } 
-        public BasicGraph CurrentGraph { get; set; } 
-        public Settings Settings { get; set; } 
-        public GraphEditForm GraphEditForm { get; set; } 
-        public SettingsCSS SettingsCSS { get; set; } 
+        public BasicGraphModel CurrentGraphModel { get; set; }
+        public BasicGraph CurrentGraph { get; set; }
+        public Settings Settings { get; set; }
+        public GraphEditForm GraphEditForm { get; set; }
+        public SettingsCSS SettingsCSS { get; set; }
         public GraphStyleParameters GraphStyleParameters { get; set; } = new GraphStyleParameters();
 
         public GraphService(IConfiguration config, ILogger<GraphService> logger, IJSRuntime jsRuntime, HttpClient httpClient)
@@ -49,7 +40,7 @@ namespace VisualGraph.Client.Services
             _logger = logger;
             JSRuntime = jsRuntime;
             Task.Run(LoadGraphStyleParameters);
-            CurrentGraphModel = GraphFactory.CreateRandomGraph("Unbenannter-Graph",10,20,50,-50);
+            CurrentGraphModel = GraphFactory.CreateRandomGraph("Unbenannter-Graph", 10, 20, 50, -50);
         }
         public async Task<BasicGraphModel[]> GetAllGraphs()
         {
@@ -64,10 +55,10 @@ namespace VisualGraph.Client.Services
                 Classes = n.Classes,
                 Edges = n.Edges,
                 Id = n.Id,
-                Pos = new System.Numerics.Vector2(float.Parse(n.PosXTextPoco.Replace(".",",")), float.Parse(n.PosYTextPoco.Replace(".", ",")))
-                
+                Pos = new System.Numerics.Vector2(float.Parse(n.PosXTextPoco.Replace(".", ",")), float.Parse(n.PosYTextPoco.Replace(".", ",")))
+
             }).ToList();
-            foreach(var edge in graphResponse.Edges)
+            foreach (var edge in graphResponse.Edges)
             {
                 edge.StartNode = graphResponse.Nodes.FirstOrDefault(x => x.Id == edge.StartNode.Id);
                 edge.EndNode = graphResponse.Nodes.FirstOrDefault(x => x.Id == edge.EndNode.Id);
@@ -75,7 +66,7 @@ namespace VisualGraph.Client.Services
                 edge.EndNode.Edges.Add(edge);
             }
             Console.WriteLine(graphResponse.Edges[0].StartNode.Id + " -> " + graphResponse.Edges[0].EndNode.Id);
-            
+
 
             return (BasicGraphModel)graphResponse;
         }
@@ -92,7 +83,7 @@ namespace VisualGraph.Client.Services
             }
             CurrentGraphModel = graph;
             await Rerender();
-            
+
         }
 
         public async Task<string[]> GetGraphFilenames()
@@ -132,8 +123,8 @@ namespace VisualGraph.Client.Services
         }
         private async Task<bool> WriteGraph(BasicGraphModel graph, string filename)
         {
-            
-            return await (await _httpClient.PostAsJsonAsync($"api/Graph/SaveGraph/{filename}",new BasicGraphModelPoco(graph))).Content.ReadFromJsonAsync<bool>();
+
+            return await (await _httpClient.PostAsJsonAsync($"api/Graph/SaveGraph/{filename}", new BasicGraphModelPoco(graph))).Content.ReadFromJsonAsync<bool>();
         }
 
         public Task LayoutGraph(double scalex = 2.2, double scaley = 2.2)
@@ -187,7 +178,7 @@ namespace VisualGraph.Client.Services
             try
             {
                 await JSRuntime.InvokeVoidAsync("DestroyPanZoom");
-                }
+            }
             catch { }
         }
         public async Task DisablePan()
@@ -221,7 +212,7 @@ namespace VisualGraph.Client.Services
             try
             {
                 var svginfo = await JSRuntime.InvokeAsync<SvgContainerInformation>("GetSvgContainerSizes", new object[] { CurrentGraphModel.Name });
-            return svginfo;
+                return svginfo;
             }
             catch { return new SvgContainerInformation(); };
         }
@@ -312,9 +303,9 @@ namespace VisualGraph.Client.Services
         }
         public async Task<RenderFragment> GetRenderFragment(bool withDefaultCallbacks = true)
         {
-            if(CurrentGraphModel != null)
+            if (CurrentGraphModel != null)
             {
-                return await BuildBasicGraphFragment(CurrentGraphModel,withDefaultCallbacks);
+                return await BuildBasicGraphFragment(CurrentGraphModel, withDefaultCallbacks);
             }
             return null;
         }
@@ -361,7 +352,7 @@ namespace VisualGraph.Client.Services
 
             return Task.FromResult(fragment);
         }
-       
+
 
         public Task<RenderFragment> GetCssMarkup()
         {
@@ -396,29 +387,32 @@ namespace VisualGraph.Client.Services
         }
         public async Task Rerender()
         {
-            if(CurrentGraph != null && CurrentGraph.IsRendered)
+            if (CurrentGraph != null && CurrentGraph.IsRendered)
             {
                 await CurrentGraph.ChangedState();
             }
-            if (SettingsCSS != null && SettingsCSS.IsRendered) {
+            if (SettingsCSS != null && SettingsCSS.IsRendered)
+            {
                 await SettingsCSS.ChangedState();
             }
-            if (Settings != null && Settings.IsRendered) {
-                
+            if (Settings != null && Settings.IsRendered)
+            {
+
                 await Settings.ChangedState();
             }
-            if (GraphEditForm != null && GraphEditForm.IsRendered) {
+            if (GraphEditForm != null && GraphEditForm.IsRendered)
+            {
                 await GraphEditForm.ChangedState();
             }
         }
-        public async Task Rerender(VisualGraph.Shared.Models.Node node = null) 
+        public async Task Rerender(VisualGraph.Shared.Models.Node node = null)
         {
-            
-                if (CurrentGraph != null && CurrentGraph.IsRendered)
-                {
-                    NodeComponent component = CurrentGraph.NodeComponents.FirstOrDefault(x => x.Node == node);
-                    await component.ChangedState();
-                }
+
+            if (CurrentGraph != null && CurrentGraph.IsRendered)
+            {
+                NodeComponent component = CurrentGraph.NodeComponents.FirstOrDefault(x => x.Node == node);
+                await component.ChangedState();
+            }
         }
         public async Task Rerender(VisualGraph.Shared.Models.Edge edge = null)
         {
@@ -427,7 +421,7 @@ namespace VisualGraph.Client.Services
                 var component = CurrentGraph.EdgeComponents.FirstOrDefault(x => x.Edge == edge);
                 await component.ChangedState();
             }
-            
+
         }
         public async Task Rerender<T>() where T : GraphInternalUI
         {
@@ -439,12 +433,12 @@ namespace VisualGraph.Client.Services
             {
                 await SettingsCSS.ChangedState();
             }
-            else if(typeof(T) == typeof(Settings) && Settings != null && Settings.IsRendered)
+            else if (typeof(T) == typeof(Settings) && Settings != null && Settings.IsRendered)
             {
 
                 await Settings.ChangedState();
             }
-            else if(typeof(T) == typeof(GraphEditForm) && GraphEditForm != null && GraphEditForm.IsRendered)
+            else if (typeof(T) == typeof(GraphEditForm) && GraphEditForm != null && GraphEditForm.IsRendered)
             {
                 await GraphEditForm.ChangedState();
             }

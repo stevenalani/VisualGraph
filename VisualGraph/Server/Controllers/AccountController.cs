@@ -1,21 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.JSInterop;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
-using Microsoft.JSInterop;
-
-using VisualGraph.Shared.Models;
 using VisualGraph.Server.Providers;
 using VisualGraph.Server.Shared;
+using VisualGraph.Shared.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,7 +33,7 @@ namespace VisualGraph.Server.Controllers
         // GET: api/<controller>
         [AllowAnonymous]
         [HttpGet("user/{username?}")]
-        public async Task<UserModel> GetUser([FromRoute] string? username)
+        public async Task<UserModel> GetUser([FromRoute] string username)
         {
             UserModel user = new UserModel
             {
@@ -71,7 +66,7 @@ namespace VisualGraph.Server.Controllers
         [AllowAnonymous]
         public async Task<UserModel> Login([FromBody] UserModel userModel)
         {
-            if (User?.Identity.IsAuthenticated??false)
+            if (User?.Identity.IsAuthenticated ?? false)
             {
                 await HttpContext.SignOutAsync();
             }

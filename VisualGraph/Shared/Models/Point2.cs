@@ -31,8 +31,9 @@ namespace VisualGraph.Shared.Models
         {
             return new Point2(a.X * factor, a.Y * factor);
         }
-        public static Point2 operator -(Point2 a, Point2 b){
-            return new Point2(a.X - b.X, a.Y-b.Y);
+        public static Point2 operator -(Point2 a, Point2 b)
+        {
+            return new Point2(a.X - b.X, a.Y - b.Y);
         }
         public static Point2 operator +(Point2 a, Point2 b)
         {
@@ -40,11 +41,11 @@ namespace VisualGraph.Shared.Models
         }
         public static Point2 operator +(Point2 a)
         {
-            return new Point2(Math.Abs(a.X),Math.Abs(a.Y));
+            return new Point2(Math.Abs(a.X), Math.Abs(a.Y));
         }
         public static Point2 operator -(Point2 a)
         {
-            return new Point2( - Math.Abs(a.X), - Math.Abs(a.Y));
+            return new Point2(-Math.Abs(a.X), -Math.Abs(a.Y));
         }
     }
 }

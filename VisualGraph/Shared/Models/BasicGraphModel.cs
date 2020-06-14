@@ -13,8 +13,9 @@ namespace VisualGraph.Shared.Models
         public BasicGraphModel() { }
         public BasicGraphModel(BasicGraphModelPoco graph)
         {
-            this.Nodes = graph.NodesPoco.Select(y => new Node { 
-                Pos = new Vector2(float.Parse(y.PosXTextPoco.Replace(".",",")),float.Parse(y.PosYTextPoco.Replace(".", ","))),
+            this.Nodes = graph.NodesPoco.Select(y => new Node
+            {
+                Pos = new Vector2(float.Parse(y.PosXTextPoco.Replace(".", ",")), float.Parse(y.PosYTextPoco.Replace(".", ","))),
                 Name = y.Name,
                 Id = y.Id,
                 Edges = y.Edges
@@ -27,12 +28,19 @@ namespace VisualGraph.Shared.Models
         public string Name { get; set; }
         public List<Node> Nodes { get; set; } = new List<Node>();
         public List<Edge> Edges { get; set; } = new List<Edge>();
+        [System.Text.Json.Serialization.JsonIgnore]
         public Node ActiveNode => Nodes.FirstOrDefault(x => x.IsActive);
+        [System.Text.Json.Serialization.JsonIgnore]
         public Edge ActiveEdge => Edges.FirstOrDefault(x => x.IsActive);
+        [System.Text.Json.Serialization.JsonIgnore]
         float maxX => Nodes.Max(x => (int)Math.Ceiling(x.Pos.X));
+        [System.Text.Json.Serialization.JsonIgnore]
         float minX => Nodes.Min(x => (int)Math.Floor(x.Pos.X));
+        [System.Text.Json.Serialization.JsonIgnore]
         float maxY => Nodes.Max(x => (int)Math.Ceiling(x.Pos.Y));
+        [System.Text.Json.Serialization.JsonIgnore]
         float minY => Nodes.Min(x => (int)Math.Floor(x.Pos.Y));
+        [System.Text.Json.Serialization.JsonIgnore]
         public Vector2[] ConvexHull => new[] { new Vector2(minX, minY), new Vector2(maxX, maxY) };
 
         public bool IsDirected { get; set; } = true;

@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using VisualGraph.Shared.Models;
@@ -19,7 +16,7 @@ namespace VisualGraph.Client.Services
         Task<UserModel> GetUserModelFromName(string username);
         Task<UserUpdateModel> GetUserUpdateModel();
 
-         Task<UserModel> UpdateUser(UserModel userModel);
+        Task<UserModel> UpdateUser(UserModel userModel);
         Task<bool> UserIsAuthenticated();
 
     }

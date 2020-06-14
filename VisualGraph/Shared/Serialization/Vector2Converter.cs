@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Numerics;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -13,10 +11,11 @@ namespace VisualGraph.Shared.Serialization
         public override Vector2 Read(
             ref Utf8JsonReader reader,
             Type typeToConvert,
-            JsonSerializerOptions options){
+            JsonSerializerOptions options)
+        {
             var readstring = reader.GetString().Split(":");
-            return new Vector2(float.Parse(readstring[0]),float.Parse(readstring[1])); 
-         }
+            return new Vector2(float.Parse(readstring[0]), float.Parse(readstring[1]));
+        }
 
         public override void Write(
             Utf8JsonWriter writer,

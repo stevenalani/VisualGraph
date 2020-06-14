@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using VisualGraph.Shared.Models;
@@ -11,9 +8,10 @@ namespace VisualGraph.Server.Providers
     public static class SettingsFileProvider
     {
 
-        private static string _settingsdir = Path.GetFullPath("./Settings");        
-        public static Task<GraphStyleParametersPOCO> GetGraphStyleParameters(string user = "") {
-            var settingsDir = user != "" ? Path.Combine(_settingsdir,user): _settingsdir;
+        private static string _settingsdir = Path.GetFullPath("./Settings");
+        public static Task<GraphStyleParametersPOCO> GetGraphStyleParameters(string user = "")
+        {
+            var settingsDir = user != "" ? Path.Combine(_settingsdir, user) : _settingsdir;
             string settingsfile = Path.Combine(_settingsdir, "default.xml");
             if (Directory.Exists(settingsDir))
             {
@@ -25,6 +23,6 @@ namespace VisualGraph.Server.Providers
             sr.Close();
             return Task.FromResult(styleParametersPOCO);
         }
-        
+
     }
 }

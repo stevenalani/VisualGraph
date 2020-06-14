@@ -1,6 +1,4 @@
 ﻿using System.Globalization;
-using System.IO;
-using System.Xml.Serialization;
 
 namespace VisualGraph.Shared.Models
 {

@@ -7,33 +7,48 @@ using System.Numerics;
 
 namespace VisualGraph.Shared.Models
 {
-    public class BasicGraphToGraphMlMapping : Tuple<BasicGraphModel, Mappings>
+    public class BasicGraphToGraphMlMapping
     {
-        public BasicGraphModel BasicGraph => Item1;
-        public Mappings Mappings => Item2;
+        public BasicGraphModelPoco BasicGraphModelPoco { get; set; }
+        public AttributeMappings Mappings { get; set; } = new AttributeMappings();
 
-        private TinkerGrapĥ tinkerGraph;
+        public TinkerGrapĥ tinkerGraph { get; set; }
 
-        public List<string> FoundNodeKeys => tinkerGraph.GetVertices().SelectMany(x => x.GetPropertyKeys()).Distinct().ToList();
-        public List<string> FoundEdgeKeys => tinkerGraph.GetEdges().SelectMany(x => x.GetPropertyKeys()).Distinct().ToList();
-        public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph, Mappings mappings) : base(graph, mappings)
+        public List<string> FoundNodeKeys { get; set; }
+        public List<string> FoundEdgeKeys { get; set; }
+
+        private void update()
         {
-            tinkerGraph = loadedGraph;
+            FoundNodeKeys = tinkerGraph.GetVertices().SelectMany(x => x.GetPropertyKeys()).Distinct().ToList();
+            FoundEdgeKeys = tinkerGraph.GetEdges().SelectMany(x => x.GetPropertyKeys()).Distinct().ToList();
         }
-        public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph) : base(new BasicGraphModel(), new Mappings())
+        public BasicGraphToGraphMlMapping() 
         {
-            tinkerGraph = loadedGraph;
         }
-        public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph) : base(graph, new Mappings())
+        public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph, AttributeMappings mappings)
         {
             tinkerGraph = loadedGraph;
+            BasicGraphModelPoco = new BasicGraphModelPoco(graph);
+            Mappings = mappings;
+            update();
+        }
+        public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph)
+        {
+            tinkerGraph = loadedGraph;
+            update();
+        }
+        public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph)
+        {
+            tinkerGraph = loadedGraph;
+            BasicGraphModelPoco = new BasicGraphModelPoco(graph);
+            update();
         }
 
 
         public void ExecuteMappingOfValues()
         {
             bool isDirected = true;
-            BasicGraph.Nodes = tinkerGraph.GetVertices().Select(x =>
+            BasicGraphModelPoco.Nodes = tinkerGraph.GetVertices().Select(x =>
             {
                 string id;
                 int idFix = 0;
@@ -84,7 +99,7 @@ namespace VisualGraph.Shared.Models
                     Pos = new Vector2(posx, posy)
                 };
             }).ToList();
-            BasicGraph.Edges = tinkerGraph.GetEdges().Select(x =>
+            BasicGraphModelPoco.Edges = tinkerGraph.GetEdges().Select(x =>
             {
                 string id;
                 int idFix = 0;
@@ -116,8 +131,8 @@ namespace VisualGraph.Shared.Models
                 {
                     isDirected = true;
                 }
-                var startnode = BasicGraph.Nodes.FirstOrDefault(n => x.GetVertex(Direction.Out).Id.ToString() == n.Id);
-                var endnode = BasicGraph.Nodes.FirstOrDefault(n => x.GetVertex(Direction.In).Id.ToString() == n.Id);
+                var startnode = BasicGraphModelPoco.Nodes.FirstOrDefault(n => x.GetVertex(Direction.Out).Id.ToString() == n.Id);
+                var endnode = BasicGraphModelPoco.Nodes.FirstOrDefault(n => x.GetVertex(Direction.In).Id.ToString() == n.Id);
                 var edge = new Edge()
                 {
                     Id = id,
@@ -129,23 +144,6 @@ namespace VisualGraph.Shared.Models
                 endnode.Edges.Add(edge);
                 return edge;
             }).ToList();
-        }
-    }
-    public class Mappings : Dictionary<string, Dictionary<string, string>>
-    {
-        public Mappings() : base()
-        {
-            Add("Node", new Dictionary<string, string>() {
-                {"Id","" },
-                {"Name","" },
-                {"Posx","" },
-                {"Posy","" }
-            });
-            Add("Edge", new Dictionary<string, string>() {
-                {"Id","" },
-                {"Weight","" },
-                {"IsDirected","" },
-            });
         }
     }
 }

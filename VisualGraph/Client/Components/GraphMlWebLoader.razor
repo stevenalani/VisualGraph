@@ -1,4 +1,6 @@
-﻿@inject IGraphService graphService
+﻿@using System.Text.RegularExpressions
+@using System.IO
+@inject IGraphService graphService
 @inject HttpClient httpClient
 <div class="card">
     <div class="card-body">
@@ -25,7 +27,7 @@
                 <p class="card-title">Externe Grapheigenschaften an interne Grapheigenschaften binden</p>
             </div>
             <h5>Knoten- Eigenschaften</h5>
-            foreach (var kvp in graphToGraphMlMapping.Mappings["Node"])
+            foreach (var kvp in graphToGraphMlMapping.Mappings?["Node"])
             {
                 <div class="form-group form-inline">
                     <label for="@kvp.Key">@kvp.Key:</label>
@@ -72,12 +74,13 @@
     public EventCallback OnDone { get; set; }
     private async void LoadGraph()
     {
-        var graphmodel = await httpClient.GetFromJsonAsync<BasicGraphToGraphMlMapping>($"api/Graph/loadfromweb?url={graphUrl}&name={graphName}");
+        graphToGraphMlMapping = await httpClient.GetFromJsonAsync<BasicGraphToGraphMlMapping>($"api/Graph/loadfromweb?url={graphUrl}&name={graphName}");
+        StateHasChanged();
     }
     private async void MapGraphProps()
     {
         graphToGraphMlMapping.ExecuteMappingOfValues();
-        graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraph;
+        graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraphModelPoco;
         await graphService.LayoutGraph();
         await OnDone.InvokeAsync(null);
         await graphService.SaveGraph();

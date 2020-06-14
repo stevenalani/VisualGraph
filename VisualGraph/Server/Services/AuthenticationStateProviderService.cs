@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Services
@@ -52,7 +49,7 @@ namespace VisualGraph.Server.Services
             var newstate = new AuthenticationState(user);
             if (lastAuthenticationState == null || lastAuthenticationState.User.Identity?.IsAuthenticated != newstate.User.Identity.IsAuthenticated)
             {
-                
+
                 NotifyAuthenticationStateChanged(Task.FromResult(newstate));
             }
             lastAuthenticationState = newstate;

@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Frontenac.Blueprints;
+using Frontenac.Blueprints.Impls.TG;
+using Frontenac.Blueprints.Util.IO.GraphML;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Frontenac.Blueprints;
-using Frontenac.Blueprints.Impls.TG;
-using Frontenac.Blueprints.Util.IO.GraphML;
-using Frontenac.Gremlinq;
-using VisualGraph.Shared.Models;
 using VisualGraph.Server.Shared;
+using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Providers
 {
@@ -20,6 +19,7 @@ namespace VisualGraph.Server.Providers
         private static string _graphMlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         private static string _graphMlClosingTag = "</graphml>";
         private static string _graphdir = Path.GetFullPath("./Graphs");
+        private static string _tempgraphdir = Path.GetFullPath("./TempGraphs");
 
         internal static Task<string[]> GetGraphFileNames()
         {
@@ -117,7 +117,7 @@ namespace VisualGraph.Server.Providers
         {
             if (!graphname.Contains(".xml"))
                 graphname += ".xml";
-            var tmpgraphpath = Path.Combine(_graphdir, "tmp_" + graphname);
+            var tmpgraphpath = Path.Combine(_tempgraphdir, graphname);
             var graphpath = Path.Combine(_graphdir, graphname);
             using (var client = new WebClient())
             {
@@ -126,17 +126,20 @@ namespace VisualGraph.Server.Providers
                 {
                     client.Proxy = new WebProxy(proxyConfig);
                 }
-                client.DownloadFile(url, tmpgraphpath);
+                try { 
+                    client.DownloadFile(url, tmpgraphpath);
+                }
+                catch{}
             }
-            await IsolateGraphInFile(tmpgraphpath, graphpath);
-            var tinkerGraph = await ReadGraphMl(graphpath);
+            await IsolateGraphInFile(tmpgraphpath);
+            var tinkerGraph = await ReadGraphMl(tmpgraphpath);
             BasicGraphModel graph = new BasicGraphModel();
-            graph.Name = Path.GetFileNameWithoutExtension(graphpath);
+            graph.Name = Path.GetFileNameWithoutExtension(tmpgraphpath);
             BasicGraphToGraphMlMapping graphToGraphMlMapping = new BasicGraphToGraphMlMapping(tinkerGraph, graph);
             File.Delete(tmpgraphpath);
             return graphToGraphMlMapping;
         }
-        private static async Task IsolateGraphInFile(string tmpfilepath, string filepath)
+        private static async Task IsolateGraphInFile(string tmpfilepath)
         {
 
             var fileContent = File.ReadAllText(tmpfilepath);
@@ -151,7 +154,7 @@ namespace VisualGraph.Server.Providers
             fileContent = await ensureEdgedefaultIsDirected(fileContent);
             fileContent = await ensureEndtagsAreSet(fileContent, "edge");
 
-            File.WriteAllText(filepath, fileContent);
+            File.WriteAllText(tmpfilepath, fileContent);
         }
         private static Task<string> ensureEdgeIdsAreSet(string fileContent)
         {

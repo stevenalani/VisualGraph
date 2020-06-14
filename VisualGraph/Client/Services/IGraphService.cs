@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Threading.Tasks;
 using VisualGraph.Client.Components;
 using VisualGraph.Client.Components.Additional;
 using VisualGraph.Client.Shared.Models;
 using VisualGraph.Shared.Models;
-using VisualGraph.Shared.Models.Interfaces;
 
 namespace VisualGraph.Client.Services
 {
@@ -35,7 +34,7 @@ namespace VisualGraph.Client.Services
         public Task Center();
         public Task Crop();
         public Task Resize();
-       
+
         public Task<SvgPanZoomInformation> GetSvgPanZoomInformation();
         public Task<SvgContainerInformation> GetSvgContainerInformation();
         public Task<Point2> GetTranslatedMousePos(double x, double y);
@@ -44,7 +43,7 @@ namespace VisualGraph.Client.Services
         public Task UseGraphModel(BasicGraphModel graphModel, bool withDefaultCallbacks = true);
         public Task<RenderFragment> GetRenderFragment(BasicGraphModel graphModel, bool withDefaultCallbacks = true);
         public Task<RenderFragment> GetRenderFragment(bool withDefaultCallbacks = true);
-        
+
         public Task<RenderFragment> GetCssMarkup();
         public Task<RenderFragment> GetSettingsRenderFragment();
         public Task<RenderFragment> GetEditFormRenderFragment();

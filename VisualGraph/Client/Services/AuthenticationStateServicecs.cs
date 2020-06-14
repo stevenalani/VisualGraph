@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
@@ -26,13 +23,13 @@ namespace VisualGraph.Client.Services
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             ClaimsPrincipal user;
-            
+
             var cookie = await _jSRuntime.InvokeAsync<string>("GetCookie");
-            if(cookie != "")
+            if (cookie != "")
             {
                 _httpClient.DefaultRequestHeaders.Add("Cookie", cookie);
             }
-            var result =  await _httpClient.GetFromJsonAsync<UserModel>("api/Account/user");
+            var result = await _httpClient.GetFromJsonAsync<UserModel>("api/Account/user");
 
 
             if (result.Id != "" && cookie != "")
@@ -44,7 +41,7 @@ namespace VisualGraph.Client.Services
                    new Claim(ClaimTypes.GivenName, "cn=" + result.Firstname),
                     new Claim(ClaimTypes.NameIdentifier, result.Id),
                 }, "VisualGraphCookie");
-                foreach(var role in result.Roles)
+                foreach (var role in result.Roles)
                 {
                     identity.AddClaim(new Claim(ClaimTypes.Role, role));
                 }
@@ -63,6 +60,6 @@ namespace VisualGraph.Client.Services
             }
             return await Task.FromResult(lastAuthenticationState);
         }
-        
+
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 using VisualGraph.Client.Components;
 using VisualGraph.Shared.Models;
 

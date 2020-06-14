@@ -1,5 +1,6 @@
-﻿namespace VisualGraph.Shared.Models { 
-    public struct Point3 
+﻿namespace VisualGraph.Shared.Models
+{
+    public struct Point3
     {
         public double X { get; set; }
         public double Y { get; set; }
