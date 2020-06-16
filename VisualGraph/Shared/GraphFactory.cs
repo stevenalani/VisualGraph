@@ -90,12 +90,14 @@ namespace VisualGraph.Shared
 
             for (int i = 0; i < nodeCount; i++)
             {
-                GraphModel.Nodes.Add(new Node()
+                var node = new Node()
                 {
                     Id = i.ToString(),
                     Name = i.ToString(),
                     Pos = new Vector2((float)(random.NextDouble() * (UpperBound - LowerBound) + LowerBound), (float)(random.NextDouble() * (UpperBound - LowerBound) + LowerBound)),
-                });
+                };
+                GraphModel.Nodes.Add(node);
+                Console.WriteLine($"Added Node: {node.Id}");
             }
             for (int i = 0; i < edgeCount; i++)
             {
@@ -112,7 +114,11 @@ namespace VisualGraph.Shared
                     var index = random.Next(0, nodeCount - 1);
                     node2 = GraphModel.Nodes[index];
                 }
-
+                if(node1 == node2)
+                {
+                    i--;
+                    continue;
+                }
                 Edge edge = new Edge() { StartNode = node1, EndNode = node2, Id = (i + 1).ToString(), Weight = random.NextDouble() * 10 };
                 if (GraphModel.Edges.Any(x => x.StartNode == node1 && x.EndNode == node2))
                 {
@@ -120,9 +126,11 @@ namespace VisualGraph.Shared
                 }
                 else
                 {
+
                     node1.Edges.Add(edge);
                     node2.Edges.Add(edge);
                     GraphModel.Edges.Add(edge);
+                    Console.WriteLine($"Added Edge: ID:{edge.Id} Start:{edge.StartNode.Id} ID:{edge.EndNode.Id}");
                 }
 
             }

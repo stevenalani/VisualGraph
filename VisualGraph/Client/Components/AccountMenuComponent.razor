@@ -8,7 +8,7 @@
                 <span class="oi oi-person"></span> @(authenticationState.Result.User.Identity.Name)
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="/account/manage">Verwalten</a>
+                <a class="dropdown-item" href="/account">Verwalten</a>
                 <a class="dropdown-item" href="/account/logout"><span class="oi oi-account-logout"></span> Abmelden</a>
             </div>
         </div>
@@ -19,7 +19,7 @@
                 <span class="oi oi-person"></span> @("Gast")
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="clientlogin"><span class="oi oi-account-login"></span>Anmelden oder registrieren</a>
+                <a class="dropdown-item" href="/account/login"><span class="oi oi-account-login"></span>Anmelden oder registrieren</a>
             </div>
         </div>
 

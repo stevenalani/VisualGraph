@@ -15,28 +15,28 @@ namespace VisualGraph.Shared.Models
         public string TextColor { get; set; } = "#000000";
         #endregion
         #region Node
-        public double NodeRadius { get; set; } = 1.1;
+        public double NodeRadius { get; set; } = 2.2;
         public string NodeRadiusText => NodeRadius.ToString(CultureInfo.InvariantCulture) + "px";
-        public string NodeStrokeColor { get; set; } = "black";
+        public string NodeStrokeColor { get; set; } = "rgba(0, 79, 224, 0.9)";
         public double NodeStrokeWidth { get; set; } = 0.2;
         public string NodeStrokeWidthText => NodeStrokeWidth.ToString(CultureInfo.InvariantCulture) + "px";
-        public string NodeFill { get; set; } = "#8cd9d9";
+        public string NodeFill { get; set; } = "rgba(16,200, 255)";
 
-        public string NodeActiveFill { get; set; } = "rgba(0, 79, 224, 0.7)";
-        public string NodeStartFill { get; set; } = "rgba(0, 255, 224, 0.7)";
-        public string NodeEndFill { get; set; } = "rgba(79,0,224,0.7)";
+        public string NodeActiveFill { get; set; } = "rgba(0, 79, 224,1)";
+        public string NodeStartFill { get; set; } = "rgba(50, 255, 0, 1)";
+        public string NodeEndFill { get; set; } = "rgba(255,50,0,1)";
 
 
         #endregion
         #region Edge
-        public string EdgeActiveStrokeColor { get; set; } = "rgba(0, 79, 224, 0.7)";
-        public string EdgeStrokeColor { get; set; } = "#d966ff";
+        public string EdgeActiveStrokeColor { get; set; } = "rgba(0, 79, 224, 1)";
+        public string EdgeStrokeColor { get; set; } = "rgba(125,150,125,1)";
         public double EdgeWidth { get; set; } = 0.2;
         public string EdgeWidthText => EdgeWidth.ToString(CultureInfo.InvariantCulture) + "px";
-        public string EdgeRouteColor { get; set; } = "lime";
+        public string EdgeRouteColor { get; set; } = "rgba(125,255,125,1)";
         public double EdgeRouteWidth { get; set; } = 0.4;
         public string EdgeRouteWidthText => EdgeRouteWidth.ToString(CultureInfo.InvariantCulture) + "px";
-        public string EdgeHighlitingColor { get; set; } = "red";
+        public string EdgeHighlitingColor { get; set; } = "rgba(255,100,100,1)";
         public double EdgeHighlitingWidth { get; set; } = 0.4;
         public string EdgeHighlitingWidthText => EdgeHighlitingWidth.ToString(CultureInfo.InvariantCulture) + "px";
 

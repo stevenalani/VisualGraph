@@ -1,5 +1,4 @@
-﻿@inject IGraphService graphService 
-@inject IToastService toastService
+﻿@inject IToastService toastService
 @inject NavigationManager navigationManager
 @inherits GraphInternalUI
 <Modal @ref="ReloadModal" >
@@ -99,9 +98,13 @@
                 <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeHighlitingColor"></div>
             </div>
         </div>
-        <div class="card">
-            <button class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
-        </div>
+        <AuthorizeView Context="saveButtonCtx">
+            <Authorized>
+                <div class="card">
+                    <button class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
     </EditForm>
 
@@ -115,7 +118,6 @@
 
     private void SaveSettings()
     {
-
         graphService.SaveGraphStyleParameters();
         graphService.LoadGraphStyleParameters();
         graphService.Rerender();

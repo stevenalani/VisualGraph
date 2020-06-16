@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,7 @@ namespace VisualGraph.Server.Controllers
             var graphnames = await GraphFileProvider.GetGraphFileNames();
             return graphnames;
         }
+        [Authorize(Policy = "IsVisualGraphMember")]
         [HttpPost("SaveGraph/{filename}")]
         public async Task<bool> SaveGraph([FromRoute] string filename, [FromBody] BasicGraphModelPoco graph)
         {

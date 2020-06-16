@@ -62,9 +62,6 @@ namespace VisualGraph.Server
                 options.JsonSerializerOptions.IgnoreReadOnlyProperties = true;                
             });
             services.AddRazorPages();
-            //services.AddServerSideBlazor();
-            //services.AddControllersWithViews().AddControllersAsServices();
-            //services.AddScoped<AuthenticationStateProvider, AuthenticationStateProviderService>();
             VGAppSettings.BaseAddress = $"https://localhost:{httpsPort}/api/";
             VGAppSettings.RemoteRequestProxy = Configuration["Hosting:RemoteRequestProxy"];
             VGAppSettings.InitFromConfiguration(Configuration);
@@ -109,8 +106,6 @@ namespace VisualGraph.Server
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                //endpoints.MapBlazorHub();
-                //endpoints.MapFallbackToPage("account/{path}","/_Host");
                 endpoints.MapFallbackToFile("index.html");
 
             });

@@ -38,7 +38,7 @@
 
         var result = await HttpClient.PostAsJsonAsync<UserModel>("api/account/register",userModel);
 
-        NavigationManager.NavigateTo("/account/manage");
+        NavigationManager.NavigateTo("/account");
 
     }
 

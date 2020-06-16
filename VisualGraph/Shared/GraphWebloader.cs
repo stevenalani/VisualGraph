@@ -81,7 +81,7 @@ namespace VisualGraph.Shared
             var result = Regex.Replace(fileContent, $"(?<=<{elementName}.*)/>", m => string.Format("{1}", m.Value, $"></{elementName }>"), RegexOptions.IgnoreCase);
             return Task.FromResult(result);
         }
-        internal static async Task<TinkerGrapĥ> ReadGraphMl(string graphstring)
+        internal static Task<TinkerGrapĥ> ReadGraphMl(string graphstring)
         {
             byte[] data = Encoding.UTF8.GetBytes(graphstring);
             using (MemoryStream stream = new MemoryStream(data))
@@ -89,7 +89,7 @@ namespace VisualGraph.Shared
                 TinkerGrapĥ g = new TinkerGrapĥ();
                 
                 GraphMlReader.InputGraph(g, stream);
-                return g;
+                return Task.FromResult(g);
             }
 
         }

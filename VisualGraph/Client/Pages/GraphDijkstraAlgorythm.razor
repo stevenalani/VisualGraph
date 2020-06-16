@@ -4,7 +4,6 @@
 @using Blazored.Toast;
 
 @inherits AlgorithmPage
-@inject IGraphService GraphService
 @inject IJSRuntime JsRuntime
 @inject IToastService toastService
 
@@ -118,7 +117,7 @@
     {
         if (firstRender)
         {
-            GraphService.CurrentGraph.NodeClick += async (sender, args) =>
+            GraphService.CurrentGraph.NodeClick += (sender, args) =>
             {
                 resetPreview();
                 resetUnreachables();

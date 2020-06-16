@@ -172,18 +172,16 @@
                 }
                 <button type="button" class="btn btn-outline-success mt-4" @onclick="@AddEdge">Kante hinzufügen</button>
                 <hr />
-                <button type="button" class="btn btn-outline-info" @onclick="@CheckExistsandOpenSaveGraphModal"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
-                <!--
                 <AuthorizeView Context="saveButtonCtx">
 
                     <Authorized>
-
+                        <button type="button" class="btn btn-outline-info" @onclick="@CheckExistsandOpenSaveGraphModal"><span class="oi oi-data-transfer-download"></span> Graph speichern </button>
                     </Authorized>
                     <NotAuthorized>
-                        <p class="text-danger">Graphen können nur als angemeldeter Benutzer gespeichert werden!<a href="account/login">Zum Login</a></p>
+                        <p class="text-danger">Graphen können nur als angemeldeter Benutzer gespeichert werden!<a href="clientlogin">Zum Login</a></p>
                     </NotAuthorized>
                 </AuthorizeView>
-                -->
+
             </div>
         </div>
     </EditForm>
@@ -192,6 +190,11 @@
     private ClaimsPrincipal User { get; set; }
     private async void SaveGraph()
     {
+        if(GraphService.CurrentGraphModel.Edges.Count == 0 || GraphService.CurrentGraphModel.Nodes.Count == 0)
+        {
+            toastService.ShowError("Der Graph kann nicht gespeichert werden. Es müssen erst Kanten und Knoten erstellt werden");
+            return;
+        }
         var issaved = await GraphService.SaveGraph(GraphService.CurrentGraphModel.Name);
         if (issaved)
         {
