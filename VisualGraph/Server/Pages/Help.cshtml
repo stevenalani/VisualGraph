@@ -1,0 +1,143 @@
+﻿@page "/hilfe/allgemein"
+@model VisualGraph.Server.Pages.HelpModel
+@{Layout = "MainLayout"; }
+<div class="sidebar" style="width:350px; overflow-y:scroll">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <a class="nav-link" href="/">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link" href="/hilfe/dijkstra">
+                <span class="oi oi-question-mark" aria-hidden="true"></span> Dijkstra Hilfe
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:00">
+                1. Intro
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:22">
+                2. Hauptmenü
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="01:14">
+                3. Benutzerverwaltung
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="01:47">
+                4. Anwendungsteuerung
+            </a>
+            <ul>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:10">
+                        4.1. Kontextmenüs
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:17">
+                        4.2. Graph- Kontextmenü
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="03:11">
+                        4.3. Kanten- Kontextmenü
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="03:35">
+                        4.4. Knoten- Kontextmenü
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="03:53">
+                5. Graphen Laden
+            </a>
+            <ul>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="04:00">
+                        5.1. Zufälliger Graph
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="04:17">
+                        5.2 Graph aus Skript
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="04:36">
+                        5.3 Neuer Graph
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="04:48">
+                6. Graph- Editor
+            </a>
+            <ul>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="05:08">
+                        6.1. Knoten bearbeiten
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="05:46">
+                        6.2. Kanten bearbeiten
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="06:05">
+                        6.3. Gerichtet vs. ungerichtet
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="06:20">
+                        6.4. Mehrfachkanten
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="06:31">
+                        6.5. Konvertierung
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery(".video-link").click(function (sender) {
+                var dataval = jQuery(this).data("location");
+                var mins = parseFloat(dataval.split(":")[0]);
+                var secs = parseFloat(dataval.split(":")[1]);
+
+                console.log(mins + secs);
+                jQuery("#Video1")[0].currentTime = (mins * 60) + secs;
+            })
+        });
+    </script>
+</div>
+<div class="main">
+    <div class="content vh-100">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <video id="Video1" controls="controls" style="max-width:100%; margin-top:4em">
+                        <source src="~/videos/VisualGraphTeil_I.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+            <div class="col-1">
+            </div>
+        </div>
+    </div>
+</div>

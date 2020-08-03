@@ -3,12 +3,37 @@
 @using System.Text
 
 @inherits AccountComponent
-<div class="card">
-    <div class="card-header">
-        <p class="card-title">Benutzer Registrieren</p>
+@if (!BodyOnly)
+{
+    <div class="card">
+        <div class="card-header">
+            <p class="card-title">Benutzer Registrieren</p>
+        </div>
+        <div class="card-body">
+            <EditForm Context="RegisterCtx" Model="userModel" OnValidSubmit="Register">
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Vorname:</label><InputText class="form-control" type="text" @bind-Value="userModel.Firstname" />
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Nachname:</label><InputText class="form-control" type="text" @bind-Value="userModel.Name" />
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Benutzername:</label><InputText class="form-control" type="text" @bind-Value="userModel.Username" />
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="userModel.Password" />
+                    <label class="col-form-label">Passwort Wiederholung:</label><input class="form-control" type="password" @bind="passwd" />
+                </div>
+                <p class="text-danger">@userModel.ErrorMessage</p>
+                <button class="btn btn-success" type="submit">Register</button>
+            </EditForm>
+        </div>
     </div>
+}
+else
+{
     <div class="card-body">
-        <EditForm Model="userModel" OnValidSubmit="Register">
+        <EditForm Context="RegisterCtx" Model="userModel" OnValidSubmit="Register">
             <div class="form-group form-inline">
                 <label class="col-form-label">Vorname:</label><InputText class="form-control" type="text" @bind-Value="userModel.Firstname" />
             </div>
@@ -22,11 +47,14 @@
                 <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="userModel.Password" />
                 <label class="col-form-label">Passwort Wiederholung:</label><input class="form-control" type="password" @bind="passwd" />
             </div>
+            <p class="text-danger">@userModel.ErrorMessage</p>
             <button class="btn btn-success" type="submit">Register</button>
         </EditForm>
     </div>
-</div>
+}
 @code{
+    [Parameter]
+    public bool BodyOnly { get; set; } = false;
     private string passwd = "";
     UserModel userModel = new UserModel();
     private async Task Register()
@@ -36,9 +64,11 @@
             return;
         }
 
-        var result = await HttpClient.PostAsJsonAsync<UserModel>("api/account/register",userModel);
-
-        NavigationManager.NavigateTo("/account");
+        var response = await HttpClient.PostAsJsonAsync<UserModel>("api/account/register", userModel);
+        userModel = await response.Content.ReadFromJsonAsync<UserModel>();
+        if (!userModel.HasError) {
+            NavigationManager.NavigateTo("/account", true);
+        }
 
     }
 

@@ -5,7 +5,10 @@ using System.Text.RegularExpressions;
 
 namespace VisualGraph.Client.CommandProcessing
 {
-    public class GraphCommandInterpreter
+    /// <summary>
+    /// Diese Klasse findet definierte Befehle in einem String und setzt im String gefundene Parameter.
+    /// </summary>
+    internal class GraphCommandInterpreter
     {
         private Dictionary<string, Dictionary<string, Type>> BaseKeywords = new Dictionary<string, Dictionary<string, Type>>()
         {
@@ -16,28 +19,39 @@ namespace VisualGraph.Client.CommandProcessing
                     { "edgebynames", typeof(AddEdgeByNamesCommand) },
                 }
             },
-            { "del", new Dictionary<string, Type>()
+            // TODO: Implement and define Remove Commands
+            /*{ "del", new Dictionary<string, Type>()
                 {
                     {"node",typeof(RemoveNodeCommand)},
                     {"edgebyids",typeof(RemoveEdgeCommand)},
                     {"edgebynames",typeof(RemoveEdgeCommand)},
                 }
-            },
+            },*/
         };
-        public GraphCommand InterpretCommand(string inputstring)
+        internal GraphCommand InterpretCommand(string inputstring)
         {
             Regex regex = new Regex(@"(\b[A-z]+\b[^,])");
             var match = regex.Matches(inputstring);
             if (match.Count > 0)
             {
-
                 var commandType = BaseKeywords[match[0].Value.Trim().ToLower()][match[1].Value.Trim().ToLower()];
-                dynamic instance = commandType.Assembly.CreateInstance(commandType.FullName);
-                return instance;
+                Console.WriteLine($"regex 1: {match[0].Value.Trim().ToLower()}");
+                Console.WriteLine($"regex 2: {match[1].Value.Trim().ToLower()}");
+                Console.WriteLine($"Name: {commandType.FullName}");
+                try
+                {
+                    dynamic instance = commandType.Assembly.CreateInstance(commandType.FullName);
+                    return instance;
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                
             }
             return null;
         }
-        public void InterpretAndSetCommandParameters(GraphCommand command, string inputstring)
+        internal void InterpretAndSetCommandParameters(GraphCommand command, string inputstring)
         {
             Regex regex = new Regex(@"(\b[A-z]+\b[^,])");
             var matches = regex.Matches(inputstring);

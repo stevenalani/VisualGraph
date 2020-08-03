@@ -6,22 +6,49 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.Shared.Algorithm
 {
+    /// <summary>
+    /// Dijkstra Algorithmus. 
+    /// </summary>
     public class DijkstraAlgorithm : IGraphAlgorithm
     {
         BasicGraphModel Model;
         List<Node> Q;
         Node currentNode;
+        /// <summary>
+        /// Start Knoten für den der Algorithmus ausgeführt werden soll
+        /// </summary>
         public Node StartNode { get; private set; }
+        /// <summary>
+        /// End- Knoten für die zu berechnende Route
+        /// </summary>
         public Node EndNode { get; set; }
         Dictionary<Node, double> distances;
         Dictionary<Node, Node> Previous;
-
+        /// <summary>
+        /// Anzahl der bereits ausgeführten Iterationen
+        /// </summary>
         public int StepCount;
-        public List<DijkstraResultTuple> Results;
+        /// <summary>
+        /// Ergebnisse des Algorithmus
+        /// </summary>
+        public List<AlgorithmResultTuple> Results { get; private set; }
+        /// <summary>
+        /// Verbleibende Iterationen bis der Algorithmus vollständig ausgeführt wurde 
+        /// </summary>
         public int RemainingSteps => Q.Count;
-
+        /// <summary>
+        /// Name des Algorithmus
+        /// </summary>
         public string Name => "Dijkstra Algorithm";
-
+        /// <summary>
+        /// Der Algorithmus funktioniert für negative Kanten
+        /// </summary>
+        public bool CanHandleNegativeEgdes => false;
+        /// <summary>
+        /// Erstellt eine Instanz des Algorithmus
+        /// </summary>
+        /// <param name="model">Graph Model</param>
+        /// <param name="startNodeId">ID des Startknotens</param>
         public DijkstraAlgorithm(BasicGraphModel model, string startNodeId = "-1")
         {
             Model = model;
@@ -29,10 +56,10 @@ namespace VisualGraph.Client.Shared.Algorithm
         }
         private void Init(string startNodeId = "-1")
         {
-            Results = new List<DijkstraResultTuple>();
+            Results = new List<AlgorithmResultTuple>();
             distances = new Dictionary<Node, double>();
             Previous = new Dictionary<Node, Node>();
-            Results = new List<DijkstraResultTuple>();
+            Results = new List<AlgorithmResultTuple>();
             StepCount = 0;
             Q = Model.Nodes.OrderBy(x => x.Id).ToList();
             StartNode = currentNode = startNodeId != "-1" ? Q.First(x => x.Id == startNodeId) : Q[0];
@@ -58,6 +85,11 @@ namespace VisualGraph.Client.Shared.Algorithm
                 Previous[neighbour] = currentNode;
             }
         }
+        /// <summary>
+        /// Führt den Algorithmus aus
+        /// </summary>
+        /// <param name="auto">Wenn wahr, wird der Algorithmus vollständig ausgeführt. Sonst nur eine Iteration</param>
+        /// <returns>Anzahl der übrigen Iterationen</returns>
         public int Iterate(bool auto = false)
         {
             while (Q.Count > 0)
@@ -74,12 +106,18 @@ namespace VisualGraph.Client.Shared.Algorithm
                         Update(neighbour);
                     }
                 }
-                Results.Add(new DijkstraResultTuple(currentNode, new Dictionary<Node, Node>(Previous), new Dictionary<Node, double>(distances)));
+                Results.Add(new AlgorithmResultTuple(currentNode, new Dictionary<Node, Node>(Previous), new Dictionary<Node, double>(distances)));
                 if (!auto)
                     break;
             }
             return Q.Count;
         }
+        /// <summary>
+        /// Bereichnet die günstigste Route vom Startknoten zum Endknoten
+        /// </summary>
+        /// <param name="startId">ID des Startknotens</param>
+        /// <param name="endId">ID des Endknotens</param>
+        /// <returns>Route als Liste mit Knoten und Kosten Paaren</returns>
         public List<Tuple<Node, double>> GetShortestRoute(string startId = "-1", string endId = "-1")
         {
             if (startId == "-1" || endId == "-1") return null;

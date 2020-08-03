@@ -4,6 +4,20 @@
     <div class="card">
         <div class="card-header">
             <span class="card-title"><span class="oi oi-person"></span> <span>Benutzerverwaltung</span></span>
+            @if (LoggedInAsAdmin)
+            {
+                <div class="form-group form-inline">
+                    <label class="col-form-label" for="roles">Zu Bearbeitender Benutzer:</label>
+                    <select class="form-control" @bind="@UserToEditName">
+                        <option>Benutzer wählen</option>
+                        @foreach (var username in Usernames)
+                        {
+                            <option>@username</option>
+                        }
+                    </select>
+                    <button class="btn btn-primary" type="button" @onclick="SwitchUser">Wechseln</button>
+                </div>
+            }
         </div>
         <div class="card-body">
             <AuthorizeView Context="manage_user">
@@ -12,6 +26,10 @@
                         <div class="form-group form-inline">
                             <label class="col-form-label">Benutzer ID:</label>
                             <span class="form-control">@UserUpdateModel.Id</span>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="col-form-label">Rollen:</label>
+                            <span class="form-control">@string.Join(',', Roles.Where(x => UserUpdateModel.Roles.Contains(x[1])).Select(x => x[0]))</span>
                         </div>
                         <div class="form-group form-inline">
                             <label class="col-form-label">Benutzername:</label>
@@ -25,12 +43,12 @@
                             <label class="col-form-label" for="name">Name:</label>
                             <InputText class="form-control" id="name" @bind-Value="@UserUpdateModel.Name" />
                         </div>
-                        @if (AuthTask.Result.User.IsInRole("Administrator")|| AuthTask.Result.User.IsInRole("SuperUser"))
+                        @if (LoggedInAsAdmin)
                         {
-                        <div class="form-group form-inline">
-                            <label class="col-form-label" for="roles">Ist Administrator</label>
-                            <input class="form-control" type="checkbox" @bind="@isAdmin" />
-                        </div>
+                            <div class="form-group form-inline">
+                                <label class="col-form-label" for="roles">Ist Administrator</label>
+                                <input class="form-control" type="checkbox" disabled="@(UserUpdateModel.Roles.Contains(Roles.First(x => x[0] == "SuperUser")[1]))" checked="@(UserUpdateModel.Roles.Contains(Roles.First(x => x[0] == "Admin")[1]))" @onchange="AddToAdminRole" />
+                            </div>
                         }
                         <div class="form-group form-inline">
                             <label class="col-form-label" for="newpasswd">Neues Passwort:</label>
@@ -56,41 +74,94 @@
                     <LoginComponent />
                 </NotAuthorized>
             </AuthorizeView>
-
-
         </div>
     </div>
 
 
 
 @code {
-
+    List<string[]> Roles = new List<string[]>();
+    List<string> Usernames = new List<string>();
     UserUpdateModel UserUpdateModel { get; set; } = new UserUpdateModel();
-    private bool isAdmin = false;
+    private string UserToEditName { get; set; }
+    private string UserToEdit { get; set; }
+    private bool LoggedInAsAdmin = false;
+    /// <summary>
+    /// Prüft ob der Angemeldete Benutzer ein Administrator is
+    /// </summary>
+    /// <returns>true, wenn Administraot oder SuperUser oder false, wenn Mitglied</returns>
+    private async Task<bool> isAdmin(){
 
+        var user = (await AuthTask).User;
+        return (user.IsInRole(Roles.First(x => x[0] == "Admin")[1]) || user.IsInRole(Roles.First(x => x[0] == "SuperUser")[1]));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Roles.Count == 0)
+        {
+            Roles = await HttpClient.GetFromJsonAsync<List<string[]>>("api/account/roles");
+        }
+        if (await isAdmin())
+        {
+            LoggedInAsAdmin = true;
+            Usernames = await HttpClient.GetFromJsonAsync<List<string>>("api/account/usernames");
+        }
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var _UserUpdateModel = UserUpdateModel.FromUserModel(UserModel);
         await base.OnAfterRenderAsync(firstRender);
-
+        var _UserUpdateModel = UserUpdateModel.FromUserModel(UserModel);
         if (_UserUpdateModel.Id != UserUpdateModel.Id)
         {
-            UserUpdateModel = UserUpdateModel.FromUserModel(UserModel);
-            StateHasChanged();
+            if (!LoggedInAsAdmin || UserUpdateModel.Id == "")
+            {
+                UserUpdateModel = UserUpdateModel.FromUserModel(UserModel);
+                StateHasChanged();
+            }
         }
     }
     async Task saveMember()
     {
-        if (isAdmin && !(await AuthTask).User.IsInRole("Administrator"))
+        UserUpdateModel.ErrorMessage = string.Empty;
+        if (!await isAdmin())
         {
-            /*Todo: Move roles to settings */
-            UserUpdateModel.Roles.Add("Administrator");
+            UserUpdateModel.Roles.Remove(Roles.First(x => x[0] == "Admin")[1]);
         }
         if (UserUpdateModel.Password == "" && (UserUpdateModel.NewPassword != "" && UserUpdateModel.NewPassword != UserUpdateModel.RetypedPassword))
         {
             UserUpdateModel.ErrorMessage = "Die eingegebenen Passwörter stimmen nicht überein";
+            return;
         }
 
-        var response = await HttpClient.PostJsonAsync<UserUpdateModel>("api/account/update", UserUpdateModel);
+        var response = await HttpClient.PostAsJsonAsync<UserUpdateModel>("api/account/update", UserUpdateModel);
+        UserUpdateModel = await response.Content.ReadFromJsonAsync<UserUpdateModel>();
+        if (!UserUpdateModel.HasError)
+        {
+            ToastService.ShowSuccess("Das Benutzerprofil wurde aktualisiert!");
+        }
+        else
+        {
+            ToastService.ShowError("Das Benutzerprofil konnte nicht aktualisiert werden!");
+        }
+    }
+    private void AddToAdminRole(ChangeEventArgs args)
+    {
+        bool isChecked = (bool)args.Value;
+        if (isChecked)
+        {
+            UserUpdateModel.Roles.Add(Roles.First(x => x[0] == "Admin")[1]);
+        }
+        else
+        {
+            UserUpdateModel.Roles.Remove(Roles.First(x => x[0] == "Admin")[1]);
+        }
+    }
+    private async void SwitchUser()
+    {
+        if (UserToEditName != null || UserToEditName != "Benutzer wählen") {
+            UserUpdateModel = UserUpdateModel.FromUserModel(await HttpClient.GetFromJsonAsync<UserModel>($"api/account/userbyname/{UserToEditName}"));
+            StateHasChanged();
+        }
     }
 }

@@ -30,24 +30,59 @@
     public bool HasReversedEdge => graphService.CurrentGraphModel.Edges.Any(x => x.StartNode == Edge.EndNode && x.EndNode == Edge.StartNode);
     [Parameter]
     public bool IsDirected { get; set; } = false;
-
+    /// <summary>
+    /// Berechnet die Textposition
+    /// </summary>
     private Vector2 textpos => rotatedDirection * (0.5f * lengthOfLot) + Edge.Edgemiddle;
+    /// <summary>
+    /// Berechnet die Position des Startknotens
+    /// </summary>
     private Vector2 startPos => Edge.StartNode.Pos + Edge.Direction * ((float)graphService.GraphStyleParameters.NodeRadius - (float)graphService.GraphStyleParameters.NodeStrokeWidth);
+    /// <summary>
+    /// Berechnet die Position des Endknotens
+    /// </summary>
     private Vector2 endPos => Edge.EndNode.Pos - Edge.Direction * ((float)graphService.GraphStyleParameters.NodeRadius + (float)graphService.GraphStyleParameters.NodeStrokeWidth);
+    /// <summary>
+    /// Berechnet Kurvenpunkt
+    /// </summary>
     private Vector2 disiredPoint => rotatedDirection * lengthOfLot + Edge.Edgemiddle;
+    /// <summary>
+    /// Berechnet die um 90° gedrehte Richtung der Kante
+    /// </summary>
     private Vector2 rotatedDirection => Vector2.Transform(Edge.Direction, Matrix3x2.CreateRotation(MathF.PI / 2));
+    /// <summary>
+    /// Berechnet wie stark die Kurve nach außen gehen soll
+    /// </summary>
     private float lengthOfLot => (Edge.Edgemiddle - startPos).Length() * Edge.curveScale;
 
+    /// <summary>
+    /// Knoten Klick Callback. Was soll bei Klick geschehen
+    /// </summary>
     [Parameter]
     public EventCallback<MouseEventArgs> onclick { get; set; }
+    /// <summary>
+    /// Knoten Maustaste gedrückt Callback. Was soll geschehen, wenn die Maustaste gedrückt ist
+    /// </summary>
     [Parameter]
     public EventCallback<MouseEventArgs> onmousedown { get; set; }
+    /// <summary>
+    /// Knoten Maustaste losgelassen Callback. Was soll geschehen, wenn die Maustaste losgelassen wurde
+    /// </summary>
     [Parameter]
-    public EventCallback<MouseEventArgs> onmouseup { get; set; }
+    public EventCallback<MouseEventArgs> onmouseup { get; set; }    
+    /// <summary>
+    /// Knoten Touch Callback. Was soll geschehen, wenn ein Knoten per Touch berührt wird
+    /// </summary>
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchstart { get; set; }
+    /// <summary>
+    /// Knoten Touch Callback. Was soll geschehen, wenn über einen Knoten gewischt wird
+    /// </summary>
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchenter { get; set; }
+    /// <summary>
+    /// Knoten Touch Callback. Was soll geschehen, wenn der Touch endet
+    /// </summary>
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchend { get; set; }
 

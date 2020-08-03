@@ -8,31 +8,32 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.Services
 {
+    /// <summary>
+    /// Dieser Service frägt vom Server den angemeldeten User ab und authentifiziert Anwender.
+    /// </summary>
     public class AuthenticationStateService : AuthenticationStateProvider
     {
         private readonly HttpClient _httpClient;
         private AuthenticationState lastAuthenticationState;
-        private readonly IJSRuntime _jSRuntime;
-
-
-        public AuthenticationStateService(HttpClient httpClient, IJSRuntime iJSRuntime)
+        /// <summary>
+        /// Erstellt eine Instanz der Klasse
+        /// </summary>
+        /// <param name="httpClient">Dependency Injection des ASP .Net HttpClient</param>
+        public AuthenticationStateService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _jSRuntime = iJSRuntime;
         }
+        /// <summary>
+        /// Frägt den Aktuellen Benutzer vom Server ab
+        /// </summary>
+        /// <returns>AuthenticationState welcher angibt ob der Benutzer anthentifiziert wurde</returns>
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             ClaimsPrincipal user;
-
-            var cookie = await _jSRuntime.InvokeAsync<string>("GetCookie");
-            if (cookie != "")
-            {
-                _httpClient.DefaultRequestHeaders.Add("Cookie", cookie);
-            }
             var result = await _httpClient.GetFromJsonAsync<UserModel>("api/Account/user");
 
 
-            if (result.Id != "" && cookie != "")
+            if (result.Id != "")
             {
                 // Create a ClaimsPrincipal for the user
                 var identity = new ClaimsIdentity(new[]

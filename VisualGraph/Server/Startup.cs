@@ -16,16 +16,10 @@ namespace VisualGraph.Server
     {
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
-            _env = env;
             Configuration = configuration;
-            httpsPort = configuration.GetValue<int>("HTTPS_PORT");
-
         }
 
         public IConfiguration Configuration { get; }
-        private readonly IWebHostEnvironment _env;
-        private readonly int httpPort;
-        private readonly int httpsPort;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -56,18 +50,23 @@ namespace VisualGraph.Server
                         .RequireClaim(ClaimTypes.NameIdentifier)
                         .Build();
                 });
+                options.AddPolicy("IsVisualGraphAdmin", policyBuilder =>
+                {
+                    policyBuilder
+                        .RequireAuthenticatedUser()
+                        .RequireRole(new[] { VGAppSettings.AdminRole, VGAppSettings.SuperUserRole })
+                        .Build();
+                });
             });
             services.AddBlazoredToast();
             services.AddControllers().AddJsonOptions(options => {
                 options.JsonSerializerOptions.IgnoreReadOnlyProperties = true;                
             });
             services.AddRazorPages();
-            VGAppSettings.BaseAddress = $"https://localhost:{httpsPort}/api/";
-            VGAppSettings.RemoteRequestProxy = Configuration["Hosting:RemoteRequestProxy"];
-            VGAppSettings.InitFromConfiguration(Configuration);
+
             services.AddHttpClient("api", options =>
             {
-                options.BaseAddress = new Uri(VGAppSettings.BaseAddress);
+                options.BaseAddress = new Uri(VGAppSettings.BaseAddress + ":" + VGAppSettings.HttpsPort);
             });
             
         }
@@ -105,9 +104,9 @@ namespace VisualGraph.Server
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
-
             });
         }
     }

@@ -98,7 +98,7 @@
                 <div class="colorpreview" style="background-color:@graphService.GraphStyleParameters.EdgeHighlitingColor"></div>
             </div>
         </div>
-        <AuthorizeView Context="saveButtonCtx">
+        <AuthorizeView Roles="Administrator, SuperUser" Context="saveButtonCtx">
             <Authorized>
                 <div class="card">
                     <button class="btn btn-outline-success"><span class="oi oi-data-transfer-download"></span> Speichern</button>
@@ -119,7 +119,6 @@
     private void SaveSettings()
     {
         graphService.SaveGraphStyleParameters();
-        graphService.LoadGraphStyleParameters();
         graphService.Rerender();
     }
 }

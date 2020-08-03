@@ -5,22 +5,25 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.CommandProcessing
 {
+    /// <summary>
+    /// Dieser Befehl für Skripte und die Console weist den CommandProcessor an, eine Kante über Knoten IDs zum Graphen hinzuzufügen
+    /// </summary>
     internal class AddEdgeCommand : GraphCommand
     {
-        public Action<string, string, double, BasicGraphModel> Action = new Action<string, string, double, BasicGraphModel>((n0, n1, w, g) =>
+        internal Action<string, string, double, BasicGraphModel> Action = new Action<string, string, double, BasicGraphModel>((nodeId1, nodeId2, weight, graph) =>
         {
-            Node node = g.Nodes.FirstOrDefault(n => n.Id == n0);
-            Node node1 = g.Nodes.FirstOrDefault(n => n.Id == n1);
+            Node node = graph.Nodes.FirstOrDefault(n => n.Id == nodeId1);
+            Node node1 = graph.Nodes.FirstOrDefault(n => n.Id == nodeId2);
             var edge = new Edge
             {
                 StartNode = node,
                 EndNode = node1,
-                Id = g.Edges.Count.ToString(),
-                Weight = w,
+                Id = graph.Edges.Count.ToString(),
+                Weight = weight,
             };
             node.Edges.Add(edge);
             node1.Edges.Add(edge);
-            g.Edges.Add(edge);
+            graph.Edges.Add(edge);
         });
         public AddEdgeCommand()
         {
@@ -31,12 +34,12 @@ namespace VisualGraph.Client.CommandProcessing
             };
         }
 
-        public override void Invoke(BasicGraphModel g)
+        internal override void Invoke(BasicGraphModel graph)
         {
             string n0id = (string)Parameters[typeof(string)][0];
             string n1id = (string)Parameters[typeof(string)][1];
             double weight = (double)Parameters[typeof(double)][0];
-            Action.Invoke(n0id, n1id, weight, g);
+            Action.Invoke(n0id, n1id, weight, graph);
         }
     }
 }

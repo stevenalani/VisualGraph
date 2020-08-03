@@ -3,11 +3,13 @@
 @inject IGraphService graphService
 @inject NavigationManager NavigationManager
 
-    <div id="introslider" style="width:@(ContainerInformation.ParentWidth + "px");height:@(ContainerInformation.ParentHeight + "px")" class="carousel slide"  data-ride="carousel">
+<div id="introslider" style="width:@(ContainerInformation.ParentWidth + "px");height:@(ContainerInformation.ParentHeight + "px")" class="carousel slide" data-ride="carousel">
+    <h1 class="logo"><span class="bannerhighlight">V</span>isual<span class="bannerhighlight">G</span>raph</h1>
+    <!--
         <div class="carousel-inner">
             <div class="carousel-item active">
                 <div class="d-flex h-100 w-100">
-                    <h1 class="introslider-banner"><span class="bannerhighlight">V</span>isual<span class="bannerhighlight">G</span>raph</h1>
+
                 </div>
             </div>
             <div class="carousel-item">
@@ -53,7 +55,6 @@
                     </p>
                 </div>
             </div>
-
             <a class="carousel-control-prev" href="#introslider" role="button" data-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="sr-only">Previous</span>
@@ -63,73 +64,74 @@
                 <span class="sr-only">Next</span>
             </a>
         </div>
+    -->
     </div>
-        @(graphService.GetRenderFragment(withDefaultCallbacks: false).Result)
+@(graphService.GetRenderFragment(withDefaultCallbacks: false).Result)
 
 
-        @code {
-            BasicGraphModel GraphModel;
-            static Random random = new Random();
-            System.Timers.Timer Animation = new System.Timers.Timer();
-            Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
-            SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
-            Vector2 Magnet = new Vector2(15, -1);
+@code {
+    BasicGraphModel GraphModel;
+    static Random random = new Random();
+    System.Timers.Timer Animation = new System.Timers.Timer();
+    Dictionary<Node, Vector2> directions = new Dictionary<Node, Vector2>();
+    SvgContainerInformation ContainerInformation = new SvgContainerInformation() { ParentHeight = 1, ParentWidth = 1 };
+    Vector2 Magnet = new Vector2(15, -1);
 
-            private async void animation(object sender,System.Timers.ElapsedEventArgs args)
+    private async void animation(object sender, System.Timers.ElapsedEventArgs args)
+    {
+        var nodes = GraphModel.Nodes;
+        var edges = GraphModel.Edges;
+
+        try
+        {
+            for (var i = 0; i < nodes.Count; i++)
             {
-                var nodes = GraphModel.Nodes;
-                var edges = GraphModel.Edges;
 
-                try
+                if (nodes[i].Pos.Length() > 75)
                 {
-                    for (var i = 0; i < nodes.Count; i++)
-                    {
-
-                        if (nodes[i].Pos.Length() > 75)
-                        {
-                            directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
-                        }
-                        nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
-                        await graphService.Rerender(nodes[i]);
-                    }
-
-                    for (var i = 0; i < edges.Count; i++)
-                    {
-                        await graphService.Rerender(edges[i]);
-                    }
-                    await graphService.Rerender<AxisComponent>();
-
+                    directions[nodes[i]] = Vector2.Normalize(Vector2.Reflect(directions[nodes[i]], Vector2.Normalize(-nodes[i].Pos)));
                 }
-                catch { };
-
-            }
-            protected override async Task OnAfterRenderAsync(bool firstRender)
-            {
-                if (firstRender)
-                {
-                    NavigationManager.LocationChanged += endAnimation;
-                    GraphModel = graphService.CurrentGraphModel;
-                    GraphModel.Nodes.ForEach(node => directions.Add(node, Vector2.Normalize(Magnet += node.Neighbours(false).Last().Pos - node.Pos)));
-                    Animation.Interval = 14;
-                    Animation.AutoReset = true;
-                    Animation.Elapsed += animation;
-
-                    Animation.Start();
-                }
-                if (ContainerInformation.ParentWidth == 1 || ContainerInformation.ParentHeight == 1)
-                {
-                    ContainerInformation = await graphService.GetSvgContainerInformation();
-                    StateHasChanged();
-                }
+                nodes[i].Pos += directions[nodes[i]] * (75 / nodes[i].Pos.Length()) / 5;
+                await graphService.Rerender(nodes[i]);
             }
 
-            private void endAnimation(object sender, LocationChangedEventArgs args)
+            for (var i = 0; i < edges.Count; i++)
             {
-                if (!args.Location.EndsWith("/"))
-                {
-                    Animation.Stop();
-                    NavigationManager.LocationChanged -= endAnimation;
-                }
+                await graphService.Rerender(edges[i]);
             }
+            await graphService.Rerender<AxisComponent>();
 
         }
+        catch { };
+
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            NavigationManager.LocationChanged += endAnimation;
+            GraphModel = graphService.CurrentGraphModel;
+            GraphModel.Nodes.ForEach(node => directions.Add(node, Vector2.Normalize(Magnet += node.Neighbours(false).Last().Pos - node.Pos)));
+            Animation.Interval = 14;
+            Animation.AutoReset = true;
+            Animation.Elapsed += animation;
+
+            Animation.Start();
+        }
+        if (ContainerInformation.ParentWidth == 1 || ContainerInformation.ParentHeight == 1)
+        {
+            ContainerInformation = await graphService.GetSvgContainerInformation();
+            StateHasChanged();
+        }
+    }
+
+    private void endAnimation(object sender, LocationChangedEventArgs args)
+    {
+        if (!args.Location.EndsWith("/") && !args.Location.EndsWith("/#"))
+        {
+            Animation.Stop();
+            NavigationManager.LocationChanged -= endAnimation;
+        }
+    }
+
+}

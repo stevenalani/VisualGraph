@@ -7,9 +7,16 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Shared
 {
+    /// <summary>
+    /// Konvertiert und Generiert Graphen 
+    /// </summary>
     public static class GraphFactory
     {
-
+        /// <summary>
+        /// Erstellt BasicGraphModel aus Blueprints IGraph
+        /// </summary>
+        /// <param name="iGraph">Blueprints Graph</param>
+        /// <returns>BasicGraphModel von IGraph</returns>
         public static BasicGraphModel ConvertToBasicGraph(IGraph iGraph)
         {
             var nodeCnt = 0;
@@ -60,6 +67,10 @@ namespace VisualGraph.Shared
 
             return graph;
         }
+        /// <summary>
+        /// Erstellt neues Graphmodel mit 2 Knoten
+        /// </summary>
+        /// <returns>Neuer Graph</returns>
         public static BasicGraphModel CreateNewGraphModel()
         {
             var nodes = new List<Node>{
@@ -83,6 +94,15 @@ namespace VisualGraph.Shared
             };
             return graphmodel;
         }
+        /// <summary>
+        /// Erstellt einen Zufallsgraph
+        /// </summary>
+        /// <param name="Graphname">Name des neuen Graphen</param>
+        /// <param name="nodeCount">Anzahl der Knoten</param>
+        /// <param name="edgeCount">Anzahl der Kanten</param>
+        /// <param name="UpperBound">Max Position Wert</param>
+        /// <param name="LowerBound">Min Position Wert</param>
+        /// <returns>Zufallsgraph</returns>
         public static BasicGraphModel CreateRandomGraph(string Graphname, int nodeCount, int edgeCount = 35, double UpperBound = 50, double LowerBound = -50)
         {
             Random random = new Random();

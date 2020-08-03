@@ -19,8 +19,6 @@
             <div class="form-group form-inline">
                 <label for="curvescale">Kurven Weite: </label>
                 <input type="range" min="@(Edge.curveScaleLowerBound*100)" max="@(Edge.curveScaleUpperBound*100)" class="form-control-range" @onchange="calcDecimalStep" @oninput="calcDecimalStep" />
-                <span @onchange="graphService.Rerender" class="form-control">@Edge.curveScale</span>
-                <span class="form-control">@inputval</span>
             </div>
             <button type="button" class="btn btn-outline-danger" @onclick="ModalDelete.Show">entfernen</button>
         </EditForm> 
@@ -42,7 +40,6 @@
     private async void calcDecimalStep(ChangeEventArgs args)
     {
         Edge.curveScale = Convert.ToInt32(args.Value) / 100f;
-        Console.WriteLine(Edge.curveScale);
         await graphService.Rerender();
     }
 

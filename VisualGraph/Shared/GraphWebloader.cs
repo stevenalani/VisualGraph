@@ -12,10 +12,19 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Shared
 {
+    /// <summary>
+    /// Lädt Graphen aus dem Internet
+    /// </summary>
     public static class GraphWebloader
     {
-        private static string _graphMlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+        private static string _graphMlHeader = "<?xml version=\"1.0\"";
         private static string _graphMlClosingTag = "</graphml>";
+        /// <summary>
+        /// Extrahiert wichtige Daten aus einer Zeichenkette und erstellt ein Graph Model daraus
+        /// </summary>
+        /// <param name="graphstring">Graph als Zeichenkette</param>
+        /// <param name="graphname">Name für das neue Model</param>
+        /// <returns></returns>
         public static async Task<BasicGraphToGraphMlMapping> LoadBasicGraphFromUrl(string graphstring, string graphname)
         {
             if (!graphname.Contains(".xml"))
@@ -23,10 +32,7 @@ namespace VisualGraph.Shared
                        
             graphstring = await IsolateGraphInFile(graphstring);
             var tinkerGraph = await ReadGraphMl(graphstring);
-            //BasicGraphModel graph = new BasicGraphModel();
-            //graph.Name = Path.GetFileNameWithoutExtension(tmpgraphpath);
             BasicGraphToGraphMlMapping graphToGraphMlMapping = new BasicGraphToGraphMlMapping(tinkerGraph);
-            //File.Delete(tmpgraphpath);
             return graphToGraphMlMapping;
         }
         private static async Task<string> IsolateGraphInFile(string graphstring)
@@ -35,7 +41,10 @@ namespace VisualGraph.Shared
             var graphbeginning = graphstring.IndexOf(_graphMlHeader);
             graphstring = graphstring.Remove(0, graphbeginning);
             var graphend = graphstring.IndexOf(_graphMlClosingTag);
-            graphstring = graphstring.Remove(graphend + _graphMlClosingTag.Length);
+            if (graphstring.Length > graphend + _graphMlClosingTag.Length)
+            {
+                graphstring = graphstring.Remove(graphend + _graphMlClosingTag.Length);
+            }
             graphstring = await ensureEdgeIdsAreSet(graphstring);
             graphstring = await ensureEdgeLabelsAreSet(graphstring);
             graphstring = await ensureEdgedefaultIsDirected(graphstring);
@@ -84,13 +93,12 @@ namespace VisualGraph.Shared
         internal static Task<TinkerGrapĥ> ReadGraphMl(string graphstring)
         {
             byte[] data = Encoding.UTF8.GetBytes(graphstring);
-            using (MemoryStream stream = new MemoryStream(data))
-            {
-                TinkerGrapĥ g = new TinkerGrapĥ();
-                
+            TinkerGrapĥ g = new TinkerGrapĥ();
+            using (Stream stream = new MemoryStream(data)) {
                 GraphMlReader.InputGraph(g, stream);
-                return Task.FromResult(g);
             }
+            return Task.FromResult(g);
+            
 
         }
     }

@@ -1,6 +1,6 @@
 ﻿@inject IGraphService graphService
 @inherits ContextMenu
-<Modal @ref="ModalAutoLayout">
+<Modal @ref="ModalAutoLayout" Title="Automatisches Layout">
     <AutoLayoutForm OnSubmit="async () => { 
                                   this.Show();
                                   ModalAutoLayout.Show();
@@ -12,7 +12,7 @@
 
     <div class="card contextMenu" style="position:absolute; left:@(PosX - 5)px; top:@(PosY - 5)px" onmouseover="window.reposctxmenu(this)">
         <div class="card-header">
-            <h6>Graph Context Menü<button type="button" @onclick="() => { visible = false; }" class="close">x</button></h6>
+            <h6>Graph- Kontextmenü<button type="button" @onclick="() => { visible = false; }" class="close">x</button></h6>
         </div>
         <div class="card-body">
             <button type="button" class="btn btn-primary w-100" @onclick="ModalAutoLayout.Show">Automatisches Layout</button>

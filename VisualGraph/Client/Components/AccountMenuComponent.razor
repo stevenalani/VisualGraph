@@ -1,31 +1,47 @@
 ﻿@using Newtonsoft.Json
 
-
+<div class="dropdown d-inline-flex">
+    <button class="btn btn-dark dropdown-toggle" type="button" id="helpDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="oi oi-question-mark"></span> Hilfe
+    </button>
+    <div class="dropdown-menu" aria-labelledby="helpDropdownMenuButton">
+        <a class="dropdown-item" href="hilfe/allgemein">Allgemein</a>
+        <a class="dropdown-item" href="hilfe/dijkstra">Dijkstra Algorithmus</a>
+    </div>
+</div>
 <AuthorizeView>
     <Authorized>
-        <div class="dropdown">
+        <div class="dropdown d-inline-flex">
             <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="oi oi-person"></span> @(authenticationState.Result.User.Identity.Name)
             </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <div class="dropdown-menu" style="right:0;left:auto;" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="/account">Verwalten</a>
                 <a class="dropdown-item" href="/account/logout"><span class="oi oi-account-logout"></span> Abmelden</a>
             </div>
         </div>
     </Authorized>
     <NotAuthorized>
-        <div class="dropdown">
+        <Modal @ref="LoginModal" Title="Anmeldung">
+            <VisualGraph.Client.Pages.LoginComponent BodyOnly="true"/>
+        </Modal>
+        <div class="dropdown d-inline-flex">
             <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="oi oi-person"></span> @("Gast")
             </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="/account/login"><span class="oi oi-account-login"></span>Anmelden oder registrieren</a>
+            <div class="dropdown-menu" style="right: 0; left: auto;" aria-labelledby="dropdownMenuButton">
+                <button class="dropdown-item" @onclick="@((args) => LoginModal.Show())"><span class="oi oi-account-login"></span> Anmelden oder Registrieren</button>
             </div>
         </div>
-
     </NotAuthorized>
 </AuthorizeView>
 @code {
+    /// <summary>
+    /// Diese Componente authentifiziert den Anwender. 
+    /// Wenn der Anwender eingeloggt ist, wird ein Benutzer- Menu angezeigt.
+    /// Sonst wird ein Button zum Login dargestellt, welcher ein Dialogfenster öffnet
+    /// </summary>
+    Modal LoginModal;
     UserModel UserModel = new UserModel();
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }

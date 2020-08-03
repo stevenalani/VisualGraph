@@ -13,7 +13,7 @@
     private async void processScript(IFileListEntry[] files)
     {
         if (files.Length == 0) return;
-        file = files.First();
+        file = files.FirstOrDefault();
         graphService.CurrentGraphModel.Nodes = new List<Node>();
         graphService.CurrentGraphModel.Edges = new List<Edge>();
         var graphCP = new GraphCommandProcessor(graphService.CurrentGraphModel);

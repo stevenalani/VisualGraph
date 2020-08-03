@@ -11,6 +11,7 @@ using VisualGraph.Client.Services;
 
 namespace VisualGraph.Client
 {
+
     public class Program
     {
         public static async Task Main(string[] args)
@@ -22,22 +23,6 @@ namespace VisualGraph.Client
                 {
                     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
                 });
-            //builder.Configuration.JsonSerializerOptions.Converters.Add(new Vector2Converter());
-
-            /*AddAuthentication(o => {
-            o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        })
-            AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions => {
-            configureOptions.Cookie.Name = "VisualGraphCookie";
-            configureOptions.Cookie.Path = "/";
-            configureOptions.Cookie.HttpOnly = false;
-            configureOptions.Cookie.SameSite = SameSiteMode.None;
-            configureOptions.SlidingExpiration = true;
-            configureOptions.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            configureOptions.LoginPath = "/account/login";
-        });*/
             builder.Services.AddAuthorizationCore(options =>
             {
                 options.AddPolicy("IsVisualGraphMember", policyBuilder =>
@@ -53,7 +38,6 @@ namespace VisualGraph.Client
             builder.Services.AddSingleton<AuthenticationStateProvider, AuthenticationStateService>();
             builder.Services.AddBlazoredToast();
             builder.Services.AddSingleton<IGraphService, GraphService>();
-            builder.Services.AddSingleton<IAccountService, AccountService>();
             var host = builder.Build();
             await host.RunAsync();
         }

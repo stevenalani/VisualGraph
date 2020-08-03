@@ -1,5 +1,8 @@
 ﻿namespace VisualGraph.Shared.Models
 {
+    /// <summary>
+    /// POCO Klasse für GraphStyleParameters. Kopie der GraphStyleParameters ohne Lambda- Ausdrücke
+    /// </summary>
     public class GraphStyleParametersPOCO
     {
         #region SVG
@@ -27,6 +30,10 @@
         public string EdgeHighlitingColor { get; set; }
         public double EdgeHighlitingWidth { get; set; }
         #endregion
+        /// <summary>
+        /// Initialisiert die Werte aus Ergebnissen vor API- Antworten
+        /// </summary>
+        /// <param name="GraphStyleParameters"></param>
         public void Initialize(GraphStyleParameters GraphStyleParameters)
         {
             Padding = GraphStyleParameters.Padding;

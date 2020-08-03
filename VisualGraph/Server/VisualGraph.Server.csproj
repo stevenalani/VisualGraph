@@ -5,12 +5,32 @@
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <DisableImplicitComponentsAnalyzers>true</DisableImplicitComponentsAnalyzers>
     <Platforms>AnyCPU;x86</Platforms>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\videos\VisualGraphTeil_I.mp4" />
+    <Content Remove="wwwroot\videos\VisualGraphTeil_II.mp4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Shared\Visual Graph Teil I.mp4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\videos\VisualGraphTeil_I.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\videos\VisualGraphTeil_II.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazored.Toast" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.0" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0-preview.5.20278.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="0.7.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,34 +7,68 @@
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Authorization
 
-
-<div class="card">
-    <div class="card-header">
-        <p class="card-title">Login</p>
-    </div>
-    <div class="card-body">
-        <div class="form-group form-inline">
-            <label class="col-form-label">Benutzername:</label><input class="form-control" type="text" @bind="username" />
+@if (!BodyOnly)
+{
+    <div class="card">
+        <div class="card-header">
+            <p class="card-title">@(!Register ? "Login" : "Registrierung")</p>
         </div>
-        <div class="form-group form-inline">
-            <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="passwd" />
+        @if (!Register)
+        {
+            <div class="card-body">
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Benutzername:</label><input class="form-control" type="text" @bind="username" />
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="passwd" />
+                </div>
+                <p class="text-danger">@UserModel.ErrorMessage</p>
+                <button class="btn btn-success" @onclick="Login">Login</button>
+            </div>
+        }
+        else
+        {
+            <RegisterComponent BodyOnly="true" />
+        }
+        <div class="card-footer">
+            <p class="card-text">@(!Register ? "Kein Account? " : "Bereits Mitglied? ") <a href="#" @onclick="@(() => { Register = !Register; })">@(!Register ? "Hier registrieren" : "Hier einloggen")</a></p>
         </div>
-        <p class="alert">@userModel.ErrorMessage</p>
-        <button class="btn btn-success" @onclick="Login">Login</button>
     </div>
-    <div class="card-footer">
-        <p class="card-text">Kein Account? <a href="account/register">Hier registrieren</a></p>
+}
+else
+{
+    <div class="card">
+        @if (!Register)
+        {
+            <div class="card-body">
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Benutzername:</label><input class="form-control" type="text" @bind="username" />
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-form-label">Passwort:</label><input class="form-control" type="password" @bind="passwd" />
+                </div>
+                <p class="text-danger">@UserModel.ErrorMessage</p>
+                <button class="btn btn-success" @onclick="Login">Login</button>
+            </div>
+        }
+        else
+        {
+            <RegisterComponent BodyOnly="true" />
+        }
+        <div class="card-footer">
+            <p class="card-text">@(!Register ? "Kein Account? " : "Bereits Mitglied? ") <a href="#" @onclick="@(() => { Register = !Register; })">@(!Register ? "Hier registrieren" : "Hier einloggen")</a></p>
+        </div>
     </div>
-</div>
-@ChildContent
-
+}
 
 
 @code {
-
+    [Parameter]
+    public bool Register { get; set; } = false;
+    [Parameter]
+    public bool BodyOnly { get; set; } = false;
     public string username = "";
     private string passwd = "";
-    UserModel userModel = new UserModel();
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
@@ -42,29 +76,25 @@
     {
         await base.OnInitializedAsync();
         var isAuth = (await AuthTask).User?.Identity.IsAuthenticated;
-        if (isAuth??false)
+        if (isAuth ?? false)
         {
-            NavigationManager.NavigateTo("/account/manage");
+            NavigationManager.NavigateTo("/account");
         }
     }
 
     private async Task Login()
     {
 
-        userModel = new UserModel()
+        UserModel = new UserModel()
         {
             Username = username,
             Password = passwd,
         };
-        var response = await HttpClient.PostAsJsonAsync<UserModel>("api/account/login",userModel);
-        IEnumerable<string> vals;
-        response.Headers.TryGetValues("set-cookie", out vals);
-        if (vals != null)
+        var response = await HttpClient.PostAsJsonAsync<UserModel>("api/account/login", UserModel);
+        UserModel = await response.Content.ReadFromJsonAsync<UserModel>();
+        if (!UserModel.HasError)
         {
-            await JSRuntime.InvokeVoidAsync("SetCookie", vals?.LastOrDefault() ?? "");
-            NavigationManager.NavigateTo(NavigationManager.Uri, true);
-            userModel.IsAuth = true;
+            NavigationManager.NavigateTo("/account", true);
         }
-        NavigationManager.NavigateTo("/account/manage",true);
     }
 }

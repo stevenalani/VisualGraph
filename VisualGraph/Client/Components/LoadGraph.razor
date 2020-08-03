@@ -1,5 +1,8 @@
 ﻿@inject IGraphService GraphService
 @inject NavigationManager NavigationManager
+<!--<Modal [at]ref="loadGraphWebModal" Title="Graph aus Web laden">
+    <GraphMlWebLoader [at]ref="WebLoader" OnDone="\[at](async ()=> { loadGraphWebModal.Show();})" />
+</Modal> -->
 <Modal @ref="loadGraphModal" Title="Graph von Skript laden">
     <Skriptloader />
 </Modal>
@@ -12,13 +15,14 @@
             <label class="col-form-label">Anzahl Kanten:</label><input class="form-control" type="number" @bind="kanten" />
         </div>
     }
-    <button  type="button" class="btn btn-outline-primary" @onclick="@(async ()=> { GraphService.CurrentGraphModel = GraphFactory.CreateRandomGraph("ZufallsGraph", knoten, kanten); loadGraphRandomModal.Show(); await GraphService.Rerender(); })">Erzeugen</button>
+    <button type="button" class="btn btn-outline-primary" @onclick="@(async ()=> { GraphService.CurrentGraphModel = GraphFactory.CreateRandomGraph("ZufallsGraph", knoten, kanten); loadGraphRandomModal.Show(); await GraphService.Rerender(); })">Erzeugen</button>
 </Modal>
 <div class="form-group form-inline">
     <select class="form-control col mr-4" @bind="@FileToRead" @onclick="@( async () => { FileNames = await GraphService.GetGraphFilenames();})">
         <option style="background-color:lightgreen" value="" default>Neuer Graph</option>
         <option style="background-color:greenyellow" value="">Zufälliger Graph</option>
         <option style="background-color:lightseagreen" value="">Graph von Skript laden</option>
+        <!--<option style="background-color:lightskyblue" value="">Graph aus Web laden</option>-->
         @foreach (var file in FileNames)
         {
             <option value="@file">@file</option>
@@ -27,12 +31,14 @@
     <button type="button" class="btn btn-outline-primary" @onclick="@OpenFile"><span class="oi oi-data-transfer-upload"></span> Graph laden</button>
 </div>
 @code {
+    // TODO: Komentare in dieser Klasse Unkommentieren, um Fehler des Webloaders zu finden und zu fixen
     private string FileToRead { get; set; }
     private string[] FileNames { get; set; } = new string[] { };
     private Modal loadGraphModal;
-    private Modal loadGraphWebModal;
+
+    //private Modal loadGraphWebModal;
     private Modal loadGraphRandomModal;
-    private GraphMlWebLoader WebLoader;
+    //private GraphMlWebLoader WebLoader;
     int knoten = 10;
     int kanten = 15;
     protected override async Task OnInitializedAsync()
@@ -45,10 +51,11 @@
         {
             loadGraphModal.Show();
         }
-        else if (FileToRead == "Graph aus Web laden")
-        {
-            loadGraphWebModal.Show();
-        }else if(FileToRead == "Zufälliger Graph")
+        //else if (FileToRead == "Graph aus Web laden")
+        //{
+        //    loadGraphWebModal.Show();
+        //}
+        else if (FileToRead == "Zufälliger Graph")
         {
             loadGraphRandomModal.Show();
         }

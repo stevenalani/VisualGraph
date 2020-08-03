@@ -4,7 +4,7 @@
 {
 
     var activenode = graphService.CurrentGraphModel.ActiveNode;
-    <svg id="@(graphService.CurrentGraphModel.Name)" class="vssvg img-fluid" viewBox="@(SvgDisplay.ViewBox)"
+    <svg id="@(graphService.CurrentGraphModel.Name)" class="vssvg" viewBox="@(SvgDisplay.ViewBox)"
          @onclick="@OnSvgClick" @onclick:stopPropagation="true"
          @onmousemove="@OnSvgMouseMove" @onmousemove:stopPropagation="false"
          @onmouseup="@OnSvgMouseUp" @onmouseup:stopPropagation="true"
@@ -48,7 +48,7 @@
             </marker>
         </defs>
         <AxisComponent @ref="@CoordinateSystemComponent"/>
-        <!--CoordinateAxis.GenerateForGraphRange(graphService.CurrentGraphModel.ConvexHull[0].X, graphService.CurrentGraphModel.ConvexHull[0].Y, graphService.CurrentGraphModel.ConvexHull[1].X, graphService.CurrentGraphModel.ConvexHull[1].Y)-->
+       
         @if (activenode != null)
         {
             <line x1="@activenode.PosXText" y1="@activenode.PosYText" x2="0" y2="@activenode.PosYText" stroke="rgba(0,0,0,0.5)" stroke-width="0.1"></line>
@@ -110,10 +110,10 @@ else
 
 
 @code {
-        GraphContextMenu graphContextMenu;
-        EdgeContextMenu edgeContextMenu;
-        NodeContextMenu nodeContextMenu;
-    public SvgDisplay SvgDisplay;
+    GraphContextMenu graphContextMenu;
+    EdgeContextMenu edgeContextMenu;
+    NodeContextMenu nodeContextMenu;
+    SvgDisplay SvgDisplay;
     public List<EdgeComponent> EdgeComponents { get; set; } = new List<EdgeComponent>();
     public List<NodeComponent> NodeComponents { get; set; } = new List<NodeComponent>();
     public AxisComponent CoordinateSystemComponent { get; set; }
@@ -157,6 +157,11 @@ else
             return;
         }
     }
+    /// <summary>
+    /// Erstellt renderbare Instanz der NodeComponent
+    /// </summary>
+    /// <param name="node">Knoten</param>
+    /// <returns>renderbare Instanz</returns>
     RenderFragment RenderFragmentNode(Node node) => builder =>
     {
         builder.OpenComponent(0,typeof(NodeComponent));
@@ -176,35 +181,46 @@ else
 
         builder.CloseComponent();
     };
-
+    /// <summary>
+    /// Erstellt renderbare Instanz der EdgeComponent
+    /// </summary>
+    /// <param name="edge">Kante</param>
+    /// <param name="hasReversedEdge">hat zweite, entgegengesetzte Kante mit Knoten</param>
+    /// <param name="isDirected">ist eine gerichtete Kante</param>
+    /// <returns>renderbare Instanz</returns>
     RenderFragment RenderFragmentEdge(Edge edge, bool hasReversedEdge, bool isDirected) =>
-        builder =>
+builder =>
+{
+    builder.OpenComponent(0,typeof(EdgeComponent));
+    builder.AddAttribute(1, "Edge", edge);
+    builder.AddAttribute(2, "IsDirected", isDirected);
+    builder.AddAttribute(3, "onclick", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeClick(args, edge)));
+    builder.AddAttribute(4, "onmousedown", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseDown(args, edge)));
+    builder.AddAttribute(5, "onmouseup", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseUp(args, edge)));
+    builder.AddAttribute(6, "ontouchstart", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchStart(args, edge)));
+    builder.AddAttribute(7, "ontouchenter", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnter(args, edge)));
+    builder.AddAttribute(8, "ontouchend", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnd(args, edge)));
+
+    builder.AddComponentReferenceCapture(8,
+        inst =>
         {
-            builder.OpenComponent(0,typeof(EdgeComponent));
-            builder.AddAttribute(1, "Edge", edge);
-            builder.AddAttribute(2, "IsDirected", isDirected);
-            builder.AddAttribute(3, "onclick", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeClick(args, edge)));
-            builder.AddAttribute(4, "onmousedown", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseDown(args, edge)));
-            builder.AddAttribute(5, "onmouseup", new EventCallbackFactory().Create<MouseEventArgs>(this, args => OnEdgeMouseUp(args, edge)));
-            builder.AddAttribute(6, "ontouchstart", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchStart(args, edge)));
-            builder.AddAttribute(7, "ontouchenter", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnter(args, edge)));
-            builder.AddAttribute(8, "ontouchend", new EventCallbackFactory().Create<TouchEventArgs>(this, args => OnEdgeTouchEnd(args, edge)));
+            EdgeComponents.Add((EdgeComponent)inst);
+        }
+    );
 
-            builder.AddComponentReferenceCapture(8,
-                inst =>
-                {
-                    EdgeComponents.Add((EdgeComponent)inst);
-                }
-            );
+    builder.CloseComponent();
+};
 
-            builder.CloseComponent();
-        };
-
-
+    /// <summary>
+    /// Deaktiviert die Pan funktion
+    /// </summary>
     public async void DisablePan()
     {
         await graphService.DisablePan();
     }
+    /// <summary>
+    /// Aktiviert die Pan funktion
+    /// </summary>
     public async void EnablePan()
     {
         await graphService.EnablePan();
@@ -445,14 +461,21 @@ else
         }
     }
     #endregion
-
+    /// <summary>
+    /// Frägt die Position des Ereignises vom GraphService ab
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public async Task<Point2> RequestTransformedEventPosition(double x, double y)
     {
-        return await graphService.GetTranslatedMousePos(x, y);
+        return await graphService.GetTranslatedCoordinate(x, y);
     }
 
     #region Defaut Callbacks
-
+    /// <summary>
+    /// Registriert alle standard Callbacks (NodeMouseDown,NodeMouseUp,SvgMouseUp,NodeClick,EdgeClick )
+    /// </summary>
     public void RegisterDefaultCallbacks()
     {
 
@@ -467,6 +490,9 @@ else
         RegisterContextMenus();
 
     }
+    /// <summary>
+    /// Registriert alle Callbacks für ContextMenüs (NodeMouseDown,NodeMouseUp,SvgMouseUp,NodeClick,EdgeClick )
+    /// </summary>
     public void RegisterContextMenus()
     {
         this.EdgeMouseDown += async (sender, args) =>
@@ -522,6 +548,11 @@ else
         };
     }
     #endregion
+    /// <summary>
+    /// Blendet alle Rechtsklick- Menüs außer dem zu öffnenden aus
+    /// </summary>
+    /// <param name="activatedMenu"></param>
+    /// <returns></returns>
     private async Task hideOtherContextMenus(ContextMenu activatedMenu = null)
     {
         if (activatedMenu == null) {

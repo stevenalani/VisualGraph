@@ -1,0 +1,132 @@
+﻿@page "/hilfe/dijkstra"
+@model VisualGraph.Server.Pages.HilfeDijkstraModel
+@{Layout = "MainLayout"; }
+<div class="sidebar" style="width:350px; overflow-y:scroll">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <a class="nav-link" href="/">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link" href="/hilfe/allgemein">
+                <span class="oi oi-question-mark" aria-hidden="true"></span> Allgemeine Hilfe
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:00">
+                1. Intro
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:11">
+                2. Erreichbare Knoten
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:27">
+                3. Temporäre Bearbeitung
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:50">
+                4. Ausführungs- Modi
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="00:55">
+                5. Startkonten wählen
+            </a>
+            <ul>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="01:02">
+                        5.1. Einzelschritt
+                    </a>
+                    <ul>
+                        <li class="nav-item px-3">
+                            <a class="nav-link video-link" data-location="01:04">
+                                5.1.1 Visualisierung
+                            </a>
+                        </li>
+                        <li class="nav-item px-3">
+                            <a class="nav-link video-link" data-location="01:37">
+                                5.1.2 Ergebnistabelle
+                            </a>
+                        </li>
+                        <li class="nav-item px-3">
+                            <a class="nav-link video-link" data-location="01:54">
+                                5.1.3 Algorithmusende
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:02">
+                        5.2. Automatische Ausführung
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="02:06">
+                6. Günstigste Route
+            </a>
+            <ul>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:15">
+                        6.1 Endknoten Wählen
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:17">
+                        6.2 Route ermitteln
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:30">
+                        6.3 Ergebnis
+                    </a>
+                </li>
+                <li class="nav-item px-3">
+                    <a class="nav-link video-link" data-location="02:37">
+                        6.3 Ergebnis als Tabelle
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link video-link" data-location="03:00">
+                7. Negative Kantengewichte
+            </a>
+        </li>
+    </ul>
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery(".video-link").click(function (sender) {
+                var dataval = jQuery(this).data("location");
+                var mins = parseFloat(dataval.split(":")[0]);
+                var secs = parseFloat(dataval.split(":")[1]);
+
+                console.log(mins + secs);
+                jQuery("#Video1")[0].currentTime = (mins * 60) + secs;
+            })
+        });
+    </script>
+</div>
+<div class="main">
+    <div class="content vh-100">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <video id="Video1" controls="controls" style="max-width:100%; margin-top:4em">
+                        <source src="~/videos/VisualGraphTeil_II.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+            <div class="col-1">
+            </div>
+        </div>
+    </div>
+</div>

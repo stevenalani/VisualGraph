@@ -2,6 +2,9 @@
 
 namespace VisualGraph.Shared.Models.Interfaces
 {
+    /// <summary>
+    /// Interface für Elemente mit Css- Klassen und einer Id
+    /// </summary>
     public interface ICSSProperties
     {
         public string ClassesProppertie => string.Join(' ', Classes);

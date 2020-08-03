@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace VisualGraph.Shared.Models
 {
+    /// <summary>
+    /// Model Klasse für API- Aufrufe/Antworten
+    /// </summary>
     public class BasicGraphModelPoco : BasicGraphModel
     {
         public BasicGraphModelPoco()
@@ -15,7 +18,6 @@ namespace VisualGraph.Shared.Models
             this.Edges = x.Edges;
             this.Name = x.Name;
             this.IsDirected = x.IsDirected;
-
         }
 
         public List<NodePoco> NodesPoco { get; set; } = new List<NodePoco>();

@@ -1,0 +1,48 @@
+﻿<h3>Ergebnistabelle für den Algorithmus @Algorithm.Name</h3>
+@if (Algorithm.Results != null)
+{
+    var headerEntries = Algorithm.Results[0];
+    <h6>Startknoten: ID=@(headerEntries.CurrentNode.Id); Name=@(headerEntries.CurrentNode.Name)</h6>
+    <table class="table table-bordered table-hover algorithm-resulttable">
+        <thead>
+            <tr>
+                <th>Iteration</th>
+                <th>Betrachteter<br>Knoten</th>
+                @foreach (var resultEntries in headerEntries.Previous)
+                {
+                    <th>Kosten<br>@(resultEntries.Key.Name!=""? resultEntries.Key.Name: resultEntries.Key.Id.ToString())</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{ int StepCount = 0; }
+            @foreach (var resultEntry in Algorithm.Results)
+            {
+                <tr>
+                    <td>@(StepCount == 0?"initial":$"{StepCount}")</td>
+                    @{ StepCount++; }
+                    <td>@(resultEntry.CurrentNode.Name!=""? resultEntry.CurrentNode.Name: resultEntry.CurrentNode.Id.ToString())</td>
+                    @foreach (var prev in resultEntry.Previous)
+                    {
+                        if (resultEntry.Distances[prev.Key] != double.PositiveInfinity)
+                        {
+                            <td>@(String.Format("{0,0:0.00}", resultEntry.Distances[prev.Key]))</td>
+                        }
+                        else
+                        {
+                            <td> &infin;</td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    /// <summary>
+    /// Tabellarisch darzustellender Ergebnisse des Algorithmus.
+    /// </summary>
+    [Parameter]
+    public IGraphAlgorithm Algorithm { get; set; }
+
+}

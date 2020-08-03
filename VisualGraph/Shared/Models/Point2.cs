@@ -2,6 +2,10 @@
 
 namespace VisualGraph.Shared.Models
 {
+    /// <summary>
+    /// Vector2 Alternative 
+    /// Dokumentation siehe System.Numerics.Vector2
+    /// </summary>
     public class Point2
     {
         public Point2()

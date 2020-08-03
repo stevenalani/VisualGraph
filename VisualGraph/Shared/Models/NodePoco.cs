@@ -1,8 +1,11 @@
 ﻿namespace VisualGraph.Shared.Models
 {
+    /// <summary>
+    /// POCO Klasse für die JSON- Serialisierung von Nodes/Graphen
+    /// </summary>
     public class NodePoco : Node
     {
-
+        
         public NodePoco() { }
         public NodePoco(Node node)
         {

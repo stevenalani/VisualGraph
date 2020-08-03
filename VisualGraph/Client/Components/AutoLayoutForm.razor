@@ -9,8 +9,12 @@
 <button class="btn btn-success" @onclick="@(async () => { await GraphService.LayoutGraph(scalex, scaley); await OnSubmit.InvokeAsync(null); })">Ausführen</button>
 
 @code {
-    double scalex = 2.2;
-    double scaley = 2.2;
+
+    double scalex = 2;
+    double scaley = 2;
+    /// <summary>
+    /// Callback welches ausgeführt werden soll, wenn das Layout bereczhnet wurde.
+    /// </summary>
     [Parameter]
     public EventCallback OnSubmit { get; set; }
 }

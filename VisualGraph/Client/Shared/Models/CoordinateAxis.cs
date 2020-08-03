@@ -4,15 +4,42 @@ using System.Numerics;
 using VisualGraph.Shared;
 namespace VisualGraph.Client.Shared.Models
 {
+    /// <summary>
+    /// Erstellt ein Koordinatensystem als HTML- Markup
+    /// </summary>
     public static class CoordinateAxis
     {
+        /// <summary>
+        /// Farbe in der das Koordinatensystem dargestellt werden soll.
+        /// </summary>
         public static string CoordinateSystemColor { get; set; } = "rgba(0,0,0,0.2)";
+        /// <summary>
+        /// Höhe der Markierungen entlang der Achsen
+        /// </summary>
         public static double CoordinateAxisMarkerHeight { get; set; } = 0.5;
+        /// <summary>
+        /// Schriftgröße für Achsenbeschriftungen
+        /// </summary>
         public static double CoordinateAxisFontSize { get; set; } = 1;
+        /// <summary>
+        /// Schritte für Achsenbeschriftung. Marker alle x Einheiten
+        /// </summary>
         public static Vector2 CoordinateSystemStepsize = new Vector2(5);
+        /// <summary>
+        /// Verlängert die Achsen über die Knovexehülle des Graphen hinaus
+        /// </summary>
         public static double CoordinateSystemPadding = 10.5;
-        public static MarkupString GenerateForGraphRange(double minX = 0, double minY = 0, double maxX = 0, double maxY = 0, double padding = 10.5)
+        /// <summary>
+        /// Erstellt die HTML- Struktur des Koordinatensystems
+        /// </summary>
+        /// <param name="minX">Kleinster X- Wert des Graphen</param>
+        /// <param name="minY">Kleinster Y- Wert des Graphen</param>
+        /// <param name="maxX">Größter X- Wert des Graphen</param>
+        /// <param name="maxY">Größter Y- Wert des Graphen</param>
+        /// <returns></returns>
+        public static MarkupString GenerateForGraphRange(double minX = 0, double minY = 0, double maxX = 0, double maxY = 0)
         {
+            var padding = CoordinateSystemPadding;
             minX = minX > 0 ? -padding : minX - padding;
             minY = minY > 0 ? -padding : minY - padding;
             maxX = maxX + padding;
@@ -44,47 +71,5 @@ namespace VisualGraph.Client.Shared.Models
             linemarkup += $"marker-end: url(#axisarrow);\"/>";
             return new MarkupString(linemarkup + textmarkup);
         }
-        public static MarkupString GenerateForGraphRange2(double minX = 0, double minY = 0, double maxX = 0, double maxY = 0, double padding = 10.5)
-        {
-
-
-            minX = minX > 0 ? -padding : minX - padding;
-            minY = minY > 0 ? -padding : minY - padding;
-            maxX = maxX + padding;
-            maxY = maxY + padding;
-
-            string markup = "";
-            markup += "<line ";
-            markup += $"x1=\"{minX.ToString(CultureInfo.InvariantCulture)}\" ";
-            markup += $"y1=\"{0}\" ";
-            markup += $"x2=\"{maxX.ToString(CultureInfo.InvariantCulture)}\" ";
-            markup += $"y2=\"{0}\" ";
-            markup += $"style=\"{$"stroke:{CoordinateSystemColor}; stroke-width:0.1;"}\" ";
-            markup += $" marker-start=\"url(#axisarrow)\" marker-end=\"url(#axisarrow)\"/>";
-            markup += "<line ";
-            markup += $"x1=\"{0}\" ";
-            markup += $"y1=\"{minY.ToString(CultureInfo.InvariantCulture)}\" ";
-            markup += $"x2=\"{0}\" ";
-            markup += $"y2=\"{maxY.ToString(CultureInfo.InvariantCulture)}\" ";
-            markup += $"style=\"{$"stroke:{CoordinateSystemColor}; stroke-width:0.1;"}\" ";
-            markup += $" marker-start=\"url(#axisarrow)\" marker-end=\"url(#axisarrow)\"/>";
-            var stepSizeX = 5;
-            var stepSizeY = 5;
-            var text = ((int)(minX / 10)) * 10;
-            for (var xstep = text; xstep < maxX; xstep += stepSizeX)
-            {
-                markup += SVGHelper.Line(xstep, -CoordinateAxisMarkerHeight, xstep, CoordinateAxisMarkerHeight, CoordinateSystemColor);
-                markup += SVGHelper.Text(xstep - 0.75, -CoordinateAxisFontSize, xstep.ToString(CultureInfo.InvariantCulture), 1, CoordinateSystemColor);
-            }
-            text = (int)(minY / 10) * 10;
-            for (var ystep = text; ystep < maxY; ystep += stepSizeY)
-            {
-                markup += SVGHelper.Line(-CoordinateAxisMarkerHeight, ystep, CoordinateAxisMarkerHeight, ystep, CoordinateSystemColor);
-                markup += SVGHelper.Text(-CoordinateAxisFontSize * 2, ystep + 0.5, ystep.ToString(CultureInfo.InvariantCulture), CoordinateAxisFontSize, CoordinateSystemColor);
-            }
-            MarkupString markupString = new MarkupString(markup);
-            return markupString;
-        }
-
     }
 }

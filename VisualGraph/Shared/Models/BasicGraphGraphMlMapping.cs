@@ -7,24 +7,47 @@ using System.Numerics;
 
 namespace VisualGraph.Shared.Models
 {
+    /// <summary>
+    /// Führt Attribute von Online- Graphen mit BasicGraphModels zusammen
+    /// </summary>
     public class BasicGraphToGraphMlMapping
     {
+        /// <summary>
+        /// Ergebnis Graph
+        /// </summary>
         public BasicGraphModel BasicGraphModel { get; set; }
+        /// <summary>
+        /// Zuweisung der Fremden Attribute an BasicGraphModel- Attribute
+        /// </summary>
         public AttributeMappings Mappings { get; set; } = new AttributeMappings();
-
+        /// <summary>
+        /// Heruntergeladener Graph
+        /// </summary>
         public TinkerGrapĥ tinkerGraph { get; set; }
-
+        /// <summary>
+        /// Gefundene Knoten- Attribute
+        /// </summary>
         public List<string> FoundNodeKeys { get; set; }
+        /// <summary>
+        /// Gefundene Kanten- Attribute
+        /// </summary>
         public List<string> FoundEdgeKeys { get; set; }
-
+        /// <summary>
+        /// Findet alle Attribut- Schlüssel für Kanten und Knoten
+        /// </summary>
         private void update()
         {
             FoundNodeKeys = tinkerGraph.GetVertices().SelectMany(x => x.GetPropertyKeys()).Distinct().ToList();
             FoundEdgeKeys = tinkerGraph.GetEdges().SelectMany(x => x.GetPropertyKeys()).Distinct().ToList();
         }
-        public BasicGraphToGraphMlMapping() 
-        {
-        }
+        /// <summary>
+        /// Erstellt eine neue Instanz der Klasse.
+        /// Wichtig für die JSON- Serialisierung
+        /// </summary>
+        public BasicGraphToGraphMlMapping(){}
+        /// <summary>
+        /// Erstellt eine neue Instanz der Klasse
+        /// </summary>
         public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph, AttributeMappings mappings)
         {
             tinkerGraph = loadedGraph;
@@ -32,12 +55,18 @@ namespace VisualGraph.Shared.Models
             Mappings = mappings;
             update();
         }
+        /// <summary>
+        /// Erstellt eine neue, initialisierte Instanz der Klasse
+        /// </summary>
         public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph)
         {
             tinkerGraph = loadedGraph;
-            BasicGraphModel = new BasicGraphModel();
+            BasicGraphModel = new BasicGraphModel() { Name = "From-Web" };
             update();
         }
+        /// <summary>
+        /// Erstellt eine neue initialisierte Instanz der Klasse
+        /// </summary>
         public BasicGraphToGraphMlMapping(TinkerGrapĥ loadedGraph, BasicGraphModel graph)
         {
             tinkerGraph = loadedGraph;
@@ -45,7 +74,10 @@ namespace VisualGraph.Shared.Models
             update();
         }
 
-
+        /// <summary>
+        /// Führt das Mapping aus, nachdem den Beutzer alle fremden Attribute an die
+        /// anwendungsinternen Attribute gebunden hat
+        /// </summary>
         public void ExecuteMappingOfValues()
         {
             bool isDirected = true;

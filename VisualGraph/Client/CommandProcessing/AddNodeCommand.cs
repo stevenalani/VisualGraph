@@ -5,17 +5,20 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.CommandProcessing
 {
+    /// <summary>
+    /// Dieser Befehl fügt dem Graph einen Knoten hinzu.
+    /// </summary>
     internal class AddNodeCommand : GraphCommand
     {
-        public Action<string, double, double, BasicGraphModel> Action = new Action<string, double, double, BasicGraphModel>((n, x, y, g) =>
+        internal Action<string, double, double, BasicGraphModel> Action = new Action<string, double, double, BasicGraphModel>((name, posX, posY, graph) =>
         {
             Node newnode = new Node
             {
-                Name = n,
-                Pos = new Vector2((float)x, (float)y),
-                Id = g.Nodes.Count.ToString(),
+                Name = name,
+                Pos = new Vector2((float)posX, (float)posY),
+                Id = graph.Nodes.Count.ToString(),
             };
-            g.Nodes.Add(newnode);
+            graph.Nodes.Add(newnode);
         });
         public AddNodeCommand()
         {
@@ -26,7 +29,7 @@ namespace VisualGraph.Client.CommandProcessing
             };
         }
 
-        public override void Invoke(BasicGraphModel g)
+        internal override void Invoke(BasicGraphModel g)
         {
             string n = (string)Parameters[typeof(string)][0];
             double x = (double)Parameters[typeof(double)][0];

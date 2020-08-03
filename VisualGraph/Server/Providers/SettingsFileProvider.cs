@@ -5,10 +5,18 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Providers
 {
+    /// <summary>
+    /// Verwaltet Settings- Dateinen 
+    /// </summary>
     public static class SettingsFileProvider
     {
 
         private static string _settingsdir = Path.GetFullPath("./Settings");
+        /// <summary>
+        /// Sucht nach Beutzereinstellungen
+        /// </summary>
+        /// <param name="user">Benutzername</param>
+        /// <returns>gibt benuterdefinierte oder globale Einstellungen aus</returns>
         public static Task<GraphStyleParametersPOCO> GetGraphStyleParameters(string user = "")
         {
             var settingsDir = user != "" ? Path.Combine(_settingsdir, user) : _settingsdir;

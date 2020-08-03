@@ -78,7 +78,7 @@ html, body {
     }
 
     .nav-item a {
-        color: #d7d7d7;
+        color: #d7d7d7 !important;
         border-radius: 4px;
         height: 3rem;
         display: flex;
@@ -105,6 +105,10 @@ html, body {
         display: inline-block;
         width:100%;
         padding: 0;
+    }
+    li ul{
+        padding:0;
+        list-style-type:none;
     }
     .main .top-row {
         z-index:10;
@@ -193,8 +197,12 @@ html, body {
         top:0;
         background-color:white;
     }
-    .edge.vgpathpreview{
-        stroke: rgba(0, 241, 145,0.5)!important;
+    .vssvg {
+        width: intrinsic;
+        width: max-content;
+    }
+    .edge.vgpathpreview {
+        stroke: rgba(0, 241, 145,0.5) !important;
     }
     .node.vgiteration {
         -webkit-animation: glowiteration 1s ease-in-out infinite alternate;
@@ -226,6 +234,12 @@ html, body {
         stroke: rgba(255, 0, 55, 0.86) !important;
     }
     #introslider {
+        display:flex;
+        position: absolute;
+        padding: 5%;
+    }
+    #introslider {
+        display: flex;
         position: absolute;
         padding: 5%;
     }
@@ -245,21 +259,24 @@ html, body {
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .introslider-banner {
+    .logo {
         display:inline-flex;
         color: white;
         font-weight: 800;
         font-size:5em;
         letter-spacing:-0.1em;
-        text-shadow: 20px 12px 20px rgba(0, 0, 0, 0.3);
+        text-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
         margin:0 auto;
         line-height:1em;
         align-self:center;
     }
+    .navbar-brand.logo {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.55);
+    }
     .introslider-title {
         color: white;
         text-shadow: 20px 12px 20px rgba(0, 0, 0, 0.3);
-        font-size:4em;
+        font-size: 4em;
     }
     .modal{
         color:black;

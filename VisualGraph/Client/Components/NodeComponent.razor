@@ -18,21 +18,42 @@
         @ontouchend="ontouchend" @ontouchend:stopPropagation="true">
 </circle>
 @code {
+    /// <summary>
+    /// Der Knoten, welcher dieser Komponente zugeordnet ist
+    /// </summary>
     [Parameter]
     public Node Node { get; set; }
+    /// <summary>
+    /// Knoten Klick Callback. Was soll bei Klick geschehen
+    /// </summary>
     [Parameter]
     public EventCallback<MouseEventArgs> onclick { get; set; }
+    /// <summary>
+    /// Knoten Maustaste gedrückt Callback. Was soll geschehen, wenn die Maustaste gedrückt ist
+    /// </summary>
     [Parameter]
     public EventCallback<MouseEventArgs> onmousedown { get; set; }
+    /// <summary>
+    /// Knoten Maustaste losgelassen Callback. Was soll geschehen, wenn die Maustaste losgelassen wurde
+    /// </summary>
     [Parameter]
     public EventCallback<MouseEventArgs> onmouseup { get; set; }
+    /// <summary>
+    /// Knoten Touch Callback. Was soll geschehen, wenn ein Knoten per Touch berührt wird
+    /// </summary>
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchstart { get; set; }
+    /// <summary>
+    /// Knoten Touch Callback. Was soll geschehen, wenn über einen Knoten gewischt wird
+    /// </summary>
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchenter { get; set; }
+    /// <summary>
+    /// Knoten Touch Callback. Was soll geschehen, wenn der Touch endet
+    /// </summary>
     [Parameter]
     public EventCallback<TouchEventArgs> ontouchend { get; set; }
 
-    
+
 
 }

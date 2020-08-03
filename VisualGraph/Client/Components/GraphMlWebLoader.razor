@@ -69,7 +69,14 @@
 @code {
     private string graphUrl { get; set; }
     private string graphName { get; set; }
+    /// <summary>
+    /// Graphen die aus dem Web geladen werden, haben häufig andere Attribute oder andere Namen für die gleichen Attribute.
+    /// Diese Eigenschaft ermöglicht es dem Anwender, Attribute von Web- Graphen auf die BasicGraph- Klasse zu übertragen. 
+    /// </summary>
     public BasicGraphToGraphMlMapping graphToGraphMlMapping { get; set; }
+    /// <summary>
+    /// Event Callback Methode die ausgeführt werden soll, wenn der Graph geladen wurde.
+    /// </summary>
     [Parameter]
     public EventCallback OnDone { get; set; }
     private async void LoadGraph()
@@ -82,7 +89,8 @@
     {
         graphToGraphMlMapping.ExecuteMappingOfValues();
         graphService.CurrentGraphModel = graphToGraphMlMapping.BasicGraphModel;
-        await graphService.LayoutGraph();        
-        //await OnDone.InvokeAsync(null);
+        await graphService.LayoutGraph();
+        await graphService.Rerender();
+        await OnDone.InvokeAsync(null);
     }
 }

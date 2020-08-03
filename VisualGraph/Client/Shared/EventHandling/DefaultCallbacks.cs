@@ -7,13 +7,26 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Client.Shared.EventHandling
 {
+    /// <summary>
+    /// Standard Callbacks für Graph- Events
+    /// </summary>
     public static class DefaultCallbacks
     {
+        /// <summary>
+        /// Aktiviert den Modus zum Verschieben eines Knotens
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (MouseEvent + Node)</param>
         public static void ActivateDragNode(object sender, GraphMouseEventArgs<Node> args)
         {
 
             activateDragNode((BasicGraph)sender, args.Target);
         }
+        /// <summary>
+        /// Aktiviert den Modus zum Verschieben einer Knotens
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (TouchEvent + Node)</param>
         public static void ActivateDragNode(object sender, GraphTouchEventArgs<Node> args)
         {
 
@@ -28,14 +41,29 @@ namespace VisualGraph.Client.Shared.EventHandling
                 sender.DisablePan();
             }
         }
+        /// <summary>
+        /// Deaktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben deaktiviert werden soll</param>
+        /// <param name="args">Argumente (MouseEvent)</param>
         public static void DeactivateDragNode(object sender, MouseEventArgs args)
         {
             deactivateDragNode((BasicGraph)sender, null);
         }
+        /// <summary>
+        /// Deaktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben deaktiviert werden soll</param>
+        /// <param name="args">Argumente (MouseEvent + Node)</param>
         public static void DeactivateDragNode(object sender, GraphMouseEventArgs<Node> args)
         {
             deactivateDragNode((BasicGraph)sender, args.Target);
         }
+        /// <summary>
+        /// Deaktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben deaktiviert werden soll</param>
+        /// <param name="args">Argumente (TouchEvent + Node)</param>
         public static void DeactivateDragNode(object sender, GraphTouchEventArgs<Node> args)
         {
             deactivateDragNode((BasicGraph)sender, args.Target);
@@ -46,10 +74,20 @@ namespace VisualGraph.Client.Shared.EventHandling
             sender.NodeDragStarted = false;
             sender.EnablePan();
         }
+        /// <summary>
+        /// Aktiviert den in den Argumenten angegebenen Knoten
+        /// </summary>
+        /// <param name="sender">Graph Model</param>
+        /// <param name="args">Argumente (MausEvent + Node)</param>
         public static void ToggleActiveStateNode(object sender, GraphMouseEventArgs<Node> args)
         {
             toggleActiveStateNode((BasicGraph)sender, args.Target);
         }
+        /// <summary>
+        /// Aktiviert den in den Argumenten angegebenen Knoten
+        /// </summary>
+        /// <param name="sender">Graph Model</param>
+        /// <param name="args">Argumente(TouchEvent + Node)</param>
         public static void ToggleActiveStateNode(object sender, GraphTouchEventArgs<Node> args)
         {
             toggleActiveStateNode((BasicGraph)sender, args.Target);
@@ -76,10 +114,20 @@ namespace VisualGraph.Client.Shared.EventHandling
                 node.IsActive = true;
             }
         }
+        /// <summary>
+        /// Aktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (MouseEvent + Node)</param>
         public static void ActivateDragEdge(object sender, GraphMouseEventArgs<Edge> args)
         {
             activateDragEdge((BasicGraph)sender, args.Target);
         }
+        /// <summary>
+        /// Aktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (TouchEvent + Node)</param>
         public static void ActivateDragEdge(object sender, GraphTouchEventArgs<Edge> args)
         {
             activateDragEdge((BasicGraph)sender, args.Target);
@@ -92,14 +140,29 @@ namespace VisualGraph.Client.Shared.EventHandling
                 sender.DisablePan();
             }
         }
+        /// <summary>
+        /// Deaktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (MouseEvent)</param>
         public static void DeactivateDragEdge(object sender, MouseEventArgs args)
         {
             deactivateDragEdge((BasicGraph)sender, null);
         }
+        /// <summary>
+        /// Deaktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (MouseEvent + Node)</param>
         public static void DeactivateDragEdge(object sender, GraphMouseEventArgs<Edge> args)
         {
             deactivateDragEdge((BasicGraph)sender, args.Target);
         }
+        /// <summary>
+        /// Deaktiviert den Modus zum Verschieben einer Kante
+        /// </summary>
+        /// <param name="sender">Graph Model für welches das Verschieben aktiviert werden soll</param>
+        /// <param name="args">Argumente (TouchEvent + Node)</param>
         public static void DeactivateDragEdge(object sender, GraphTouchEventArgs<Edge> args)
         {
             deactivateDragEdge((BasicGraph)sender, args.Target);
@@ -109,10 +172,20 @@ namespace VisualGraph.Client.Shared.EventHandling
             sender.EdgeDragStarted = false;
             sender.EnablePan();
         }
+        /// <summary>
+        /// Aktiviert und Deaktiviert die in den Argumenten angegebenen Knoten
+        /// </summary>
+        /// <param name="sender">Graph Model</param>
+        /// <param name="args">Argumente(MouseEvent + Node)</param>
         public static void ToggleActiveStateEdge(object sender, GraphMouseEventArgs<Edge> args)
         {
             toggleActiveStateEdge((BasicGraph)sender, args.Target);
         }
+        /// <summary>
+        /// Aktiviert und Deaktiviert die in den Argumenten angegebenen Knoten
+        /// </summary>
+        /// <param name="sender">Graph Model</param>
+        /// <param name="args">Argumente(TouchEvent + Node)</param>
         public static void ToggleActiveStateEdge(object sender, GraphTouchEventArgs<Edge> args)
         {
             toggleActiveStateEdge((BasicGraph)sender, args.Target);
@@ -139,6 +212,11 @@ namespace VisualGraph.Client.Shared.EventHandling
                 edge.IsActive = true;
             }
         }
+        /// <summary>
+        /// Verschiebt eine aktivierte Kante oder einen aktivierten Knoten
+        /// </summary>
+        /// <param name="sender">Graph Model Objekt</param>
+        /// <param name="args">Mouse Event</param>
         public static void MoveNodeOrEdge(object sender, MouseEventArgs args)
         {
             var _sender = (BasicGraph)sender;
@@ -150,6 +228,11 @@ namespace VisualGraph.Client.Shared.EventHandling
                     moveEdge((BasicGraph)sender, args.ClientX, args.ClientY);
             }
         }
+        /// <summary>
+        /// Verschiebt eine aktivierte Kante oder einen aktivierten Knoten
+        /// </summary>
+        /// <param name="sender">Graph Model Objekt</param>
+        /// <param name="args">Mouse Event</param>
         public static void MoveNodeOrEdge(object sender, TouchEventArgs args)
         {
             var _sender = (BasicGraph)sender;
@@ -163,7 +246,6 @@ namespace VisualGraph.Client.Shared.EventHandling
         }
         private static async void moveNode(BasicGraph sender, double x, double y)
         {
-
             try
             {
                 Point2 coords = await sender.RequestTransformedEventPosition(x, y);

@@ -16,20 +16,30 @@ using VisualGraph.Shared.Models;
 
 namespace VisualGraph.Server.Controllers
 {
+    /// <summary>
+    /// Steuert Benutzer Accounts
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "IsVisualGraphMember")]
     public class AccountController : ControllerBase
     {
         private readonly UserProvider userProvider;
         private IConfiguration _config;
-        private readonly IJSRuntime _JsRuntime;
-        public AccountController(IConfiguration config, IJSRuntime jSRuntime)
+        /// <summary>
+        /// Erstellt Instanz der Klasse
+        /// </summary>
+        /// <param name="config">Dependency Injection Configuration</param>
+        public AccountController(IConfiguration config)
         {
-            _JsRuntime = jSRuntime;
             _config = config;
             userProvider = new UserProvider(_config.GetValue<string>("UserDir", "_users"));
         }
-
+        /// <summary>
+        /// Frägt den aktuellen Benutzer ab
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>User, wenn eingeloggt. Sonst Gast Account</returns>
         // GET: api/<controller>
         [AllowAnonymous]
         [HttpGet("user/{username?}")]
@@ -42,13 +52,65 @@ namespace VisualGraph.Server.Controllers
             if (User != null && User.Identity.IsAuthenticated)
             {
                 user = await userProvider.FindUser(User.Identity.Name);
+                if(user == null)
+                {
+                    return new UserModel
+                    {
+                        Username = "Gast",
+                    };
+                }
+                user.ErrorMessage = "";
                 user.Password = "";
                 user.IsAuth = true;
             }
             return user;
         }
+        /// <summary>
+        /// Sucht nach dem angegebenen Username und gibt den Benutzer zurück
+        /// </summary>
+        /// <param name="username">zu suchender User</param>
+        /// <returns>gefundenen Benutzer</returns>
+        [Authorize(Policy = "IsVisualGraphAdmin")]
+        [HttpGet("userbyname/{username}")]
+        public async Task<UserModel> GetUserByName([FromRoute] string username)
+        {
+            var user = await userProvider.FindUser(username);
+            user.ErrorMessage = "";
+            user.Password = "";
+            return user;
+        }
+        /// <summary>
+        /// Sucht nach allen registrierten Benutzern 
+        /// </summary>
+        /// <returns>Liste mit Benutzernamen</returns>
+        [Authorize(Policy = "IsVisualGraphAdmin")]
+        [HttpGet("usernames")]
+        public async Task<List<string>> GetUsernames()
+        {
+            var usernames = await userProvider.GetUsernames();
+            return usernames;
+        }
+        /// <summary>
+        /// Gibt alle bekannten Rollen und die entsprechenden Rollennamen zurück
+        /// </summary>
+        /// <returns>Liste mit string array aus Rollen und Rollennamen</returns>
+        [HttpGet("roles")]
+        [AllowAnonymous]
+        public Task<List<string[]>> GetRoles()
+        {
+
+            return Task.FromResult( new List<string[]>{
+                new []{ "Admin", VGAppSettings.AdminRole },
+                new []{ "Member",VGAppSettings.MemberRole },
+                new []{ "SuperUser",VGAppSettings.SuperUserRole }
+            });
+            
+        }
+        /// <summary>
+        /// Meldet den aktuellen Benutzer ab
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("logout")]
-        [Authorize(Policy = "IsVisualGraphMember")]
         public async Task<IActionResult> Logout()
         {
 
@@ -62,6 +124,11 @@ namespace VisualGraph.Server.Controllers
                 return Ok("ausgeloggt!");
             }
         }
+        /// <summary>
+        /// Meldet den Benutzer an, wenn die Benutzerdaten übereinstimmen
+        /// </summary>
+        /// <param name="userModel">UserModel des anzumeldenden Benutzers</param>
+        /// <returns>Das übermittelte Usermodel. Bei Fehlern mit Fehlermeldung</returns>
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<UserModel> Login([FromBody] UserModel userModel)
@@ -95,23 +162,14 @@ namespace VisualGraph.Server.Controllers
                 userModel = await signIn(foundUser);
                 userModel.Password = "";
             }
+            else
+            {
+                userModel.ErrorMessage = "Falsches Passwort";
+            }
             return userModel;
 
         }
-        [HttpPost("verifieduser")]
-        [AllowAnonymous]
-        public async Task<ActionResult<bool>> verifieduser([FromBody] string userModel)
-        {
-            if (User.Identity.IsAuthenticated || userModel == null)
-                return Ok(false);
-            var foundUser = await userProvider.FindUser(userModel);
-            if (foundUser == null)
-                return Ok(false);
-
-            await signIn(foundUser);
-            return Ok(true);
-        }
-
+        
         private async Task<UserModel> signIn(UserModel foundUser)
         {
 
@@ -141,60 +199,86 @@ namespace VisualGraph.Server.Controllers
             foundUser.IsAuth = true;
             return foundUser;
         }
+        /// <summary>
+        /// Registriert einen Anwender
+        /// </summary>
+        /// <param name="userModel">Usermodel mit Benutzerdaten</param>
+        /// <returns>Das übermittelte Usermodel. Bei Fehlern mit Fehlermeldung</returns>
         [HttpPost("register")]
         [Produces("application/json")]
-        public async Task<UserModel> Register([FromBody] UserModel usrModel)
+        [AllowAnonymous]
+        public async Task<UserModel> Register([FromBody] UserModel userModel)
         {
-            if (usrModel == null)
+            if (userModel == null)
                 return new UserModel()
                 {
                     ErrorMessage = "Keine Benutzerdaten erhalten!"
                 };
-            var _usrModel = await userProvider.FindUser(usrModel.Username);
+            var _userModel = await userProvider.FindUser(userModel.Username);
 
-            if (_usrModel == null)
+            if (_userModel == null)
             {
                 PasswordHasher<UserModel> passwordHasher = new PasswordHasher<UserModel>();
-                usrModel.Password = passwordHasher.HashPassword(usrModel, usrModel.Password);
-                _usrModel = await userProvider.RegisterUser(usrModel);
-                await signIn(_usrModel);
+                userModel.Password = passwordHasher.HashPassword(userModel, userModel.Password);
+                _userModel = await userProvider.RegisterUser(userModel);
+                await signIn(_userModel);
+                userModel = _userModel;
             }
-            return usrModel;
+            else
+            {
+                return new UserModel()
+                {
+                    ErrorMessage = "Der Benutzername ist bereits vergeben"
+                };
+            }
+            return userModel;
         }
+        /// <summary>
+        /// Ändert die Benutzerdaten 
+        /// </summary>
+        /// <param name="userModel">geänderter Benutzer</param>
+        /// <returns>Das übermittelte Usermodel. Bei Fehlern mit Fehlermeldung</returns>
         [HttpPost("update")]
         [Produces("application/json")]
-        public async Task<UserModel> UpdateUser([FromBody] UserUpdateModel usrModel)
+        public async Task<UserModel> UpdateUser([FromBody] UserUpdateModel userModel)
         {
-            if (usrModel == null)
+            if (userModel == null)
             {
                 return new UserModel()
                 {
                     ErrorMessage = "Keine Benutzerdaten erhalten!"
                 };
             }
-            var _usrModel = await userProvider.FindUser(usrModel.Username);
-            if (_usrModel != null && _usrModel.Id == usrModel.Id)
+            
+            if (!User.IsInRole(VGAppSettings.AdminRole) || !User.IsInRole(VGAppSettings.SuperUserRole))
             {
-                if (usrModel.NewPassword != "")
+                userModel.Roles.Remove(VGAppSettings.AdminRole);
+                userModel.Roles.Remove(VGAppSettings.SuperUserRole); 
+            }
+            var _userModel = await userProvider.FindUser(userModel.Username);
+            if (_userModel != null && _userModel.Id == userModel.Id)
+            {
+                if (userModel.NewPassword != "")
                 {
-                    if (verifyUser(_usrModel, usrModel.Password) == PasswordVerificationResult.Success)
+                    if (nopasswordneeded(userModel) || verifyUser(_userModel, userModel.Password) == PasswordVerificationResult.Success)
                     {
-                        usrModel.Password = new PasswordHasher<UserModel>().HashPassword(usrModel, usrModel.NewPassword);
+                        userModel.Password = new PasswordHasher<UserModel>().HashPassword(userModel, userModel.NewPassword);
                     }
                     else
                     {
-                        usrModel.ErrorMessage = "Der das eingegebene Passwort ist stimmt nicht!";
-                        return usrModel;
+                        userModel.ErrorMessage = "Das eingegebene Passwort stimmt nicht!";
+                        return userModel;
                     }
                 }
                 else
                 {
-                    usrModel.Password = _usrModel.Password;
+                    userModel.Password = _userModel.Password;
                 }
-                await userProvider.UpdateUser(usrModel);
+                await userProvider.UpdateUser(userModel);
 
             }
-            return usrModel;
+            userModel.RetypedPassword = userModel.NewPassword = userModel.Password = "";
+            return userModel;
         }
 
         private PasswordVerificationResult verifyUser(UserModel user, string password)
@@ -202,6 +286,16 @@ namespace VisualGraph.Server.Controllers
             PasswordHasher<UserModel> pwHasher = new PasswordHasher<UserModel>();
             var result = pwHasher.VerifyHashedPassword(user, user.Password, password);
             return result;
+        }
+        private bool nopasswordneeded(UserUpdateModel editmodel)
+        {
+            if (User.Identity.IsAuthenticated 
+                && (User.IsInRole(VGAppSettings.AdminRole) || User.IsInRole(VGAppSettings.SuperUserRole)) && 
+                editmodel.Username != User.Identity.Name )
+            {
+                return true;
+            }
+            return false;
         }
 
     }

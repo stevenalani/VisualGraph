@@ -1,4 +1,5 @@
-﻿@if (AsAnchor) {
+﻿@inject NavigationManager navigationManager
+@if (AsAnchor) {
     <a class="btn @Classes" data-toggle="collapse" href="#" data-target="#@Target" @onclick="@(() => { IsToggled = !IsToggled; })">
         <span><span class="@IconClass" aria-hidden="true"></span> @Title @(!IsToggled ? OpenText : CloseText) </span>
     </a>
@@ -10,21 +11,49 @@ else
 </button>
 }
 @code {
+    /// <summary>
+    /// Text der im Button dargestellt werden soll
+    /// </summary>
     [Parameter]
     public string Title { get; set; } = "";
+    /// <summary>
+    /// ID des Ziels. 
+    /// </summary>
     [Parameter]
     public string Target { get; set; } = "";
+    /// <summary>
+    /// CSS- Klassen für diesen Button
+    /// </summary>
     [Parameter]
     public string Classes { get; set; } = "";
+    /// <summary>
+    /// Icon CSS Klassen (openiconic, fontsawesome etc.)
+    /// </summary>
     [Parameter]
     public string IconClass { get; set; } = "";
+    /// <summary>
+    /// Text der dargestellt wird wenn, das Menü geschlossen ist
+    /// </summary>
     [Parameter]
     public string OpenText { get; set; } = "";
+    /// <summary>
+    /// Text der dargestellt wird, wenn das Menü geöffnet ist
+    /// </summary>
     [Parameter]
     public string CloseText { get; set; } = "";
+    /// <summary>
+    /// Geöffnet starten
+    /// </summary>
     [Parameter]
     public bool IsToggled { get; set; } = false;
+    /// <summary>
+    /// Ein A- Tag wird anstelle eines Buttons erstellt
+    /// </summary>
     [Parameter]
     public bool AsAnchor { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+    }
 
 }
