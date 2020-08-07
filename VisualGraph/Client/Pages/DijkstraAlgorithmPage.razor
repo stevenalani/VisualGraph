@@ -101,8 +101,7 @@
     }
 
 </div>
-@code {
-
+@code {      
     int expanded = 1;
     protected override void OnAfterRender(bool firstRender)
     {
@@ -130,7 +129,7 @@
     protected override async void RunAlgorithm(bool autostep = false)
     {
         resetPreview();
-        CheckNegativeAndShowModal();
+
         if (Algorithm == null)
         {
 
@@ -139,7 +138,7 @@
             {
 
                 Algorithm = new DijkstraAlgorithm(GraphService.CurrentGraphModel, startNodeId);
-
+                CheckNegativeAndShowModal();
             }
             else
             {
